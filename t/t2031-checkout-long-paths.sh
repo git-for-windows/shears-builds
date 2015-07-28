@@ -107,5 +107,4 @@ test_expect_success SYMLINKS_WINDOWS 'leave drive-less, short paths intact' '
 	cmd //c dir >actual &&
 	grep "<SYMLINKD\\?> *PF *\\[\\\\Program Files\\]" actual
 '
-
 test_done
