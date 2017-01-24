@@ -592,6 +592,7 @@ void fscache_flush(void)
 	if (cache && cache->enabled) {
 		fscache_clear(cache);
 	}
+
 }
 
 /*
