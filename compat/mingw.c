@@ -3788,7 +3788,6 @@ static void setup_windows_environment(void)
 		setenv("PATH", buf, 1);
 	}
 #endif
-
 	if (!getenv("LC_ALL") && !getenv("LC_CTYPE") && !getenv("LANG"))
 		setenv("LC_CTYPE", "C.UTF-8", 1);
 
