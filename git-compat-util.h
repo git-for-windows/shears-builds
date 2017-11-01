@@ -1116,6 +1116,10 @@ static inline int is_missing_file_error(int errno_)
 static inline void flush_fscache(void) {}
 #endif
 
+#ifndef is_fscache_enabled
+#define is_fscache_enabled() (0)
+#endif
+
 int cmd_main(int, const char **);
 
 /*
