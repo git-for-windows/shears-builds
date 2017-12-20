@@ -20,7 +20,6 @@ int fscache_enabled(const char *path);
 void fscache_flush(void);
 #define flush_fscache() fscache_flush()
 
-int fscache_is_enabled(void);
 
 DIR *fscache_opendir(const char *dir);
 int fscache_lstat(const char *file_name, struct stat *buf);
