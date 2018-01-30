@@ -1120,6 +1120,10 @@ static inline void flush_fscache(void) {}
 #define is_fscache_enabled(path) (0)
 #endif
 
+#ifndef flush_fscache
+#define flush_fscache() /* noop */
+#endif
+
 int cmd_main(int, const char **);
 
 /*
