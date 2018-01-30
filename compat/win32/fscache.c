@@ -596,6 +596,18 @@ void fscache_flush(void)
 }
 
 /*
+ * Flush cached stats result when fscache is enabled.
+ */
+void fscache_flush(void)
+{
+	if (enabled) {
+		EnterCriticalSection(&mutex);
+		fscache_clear();
+		LeaveCriticalSection(&mutex);
+	}
+}
+
+/*
  * Lstat replacement, uses the cache if enabled, otherwise redirects to
  * mingw_lstat.
  */
