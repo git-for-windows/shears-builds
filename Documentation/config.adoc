@@ -573,6 +573,8 @@ include::config/safe.adoc[]
 
 include::config/sendemail.adoc[]
 
+include::config/sendpack.adoc[]
+
 include::config/sequencer.adoc[]
 
 include::config/showbranch.adoc[]
@@ -590,6 +592,8 @@ include::config/stash.adoc[]
 include::config/status.adoc[]
 
 include::config/submodule.adoc[]
+
+include::config/survey.adoc[]
 
 include::config/tag.adoc[]
 
@@ -612,5 +616,7 @@ include::config/user.adoc[]
 include::config/versionsort.adoc[]
 
 include::config/web.adoc[]
+
+include::config/windows.adoc[]
 
 include::config/worktree.adoc[]
