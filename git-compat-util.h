@@ -1112,6 +1112,10 @@ static inline int is_missing_file_error(int errno_)
 #define enable_fscache(x) /* noop */
 #endif
 
+#ifndef disable_fscache
+#define disable_fscache() /* noop */
+#endif
+
 #ifndef FSCACHE_H
 static inline void flush_fscache(void) {}
 #endif
