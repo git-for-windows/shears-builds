@@ -1316,6 +1316,7 @@ elif host_machine.system() == 'windows'
     'lib/compat/winansi.c',
     'lib/compat/win32/dirent.c',
     'lib/compat/win32/flush.c',
+    'lib/compat/win32/fscache.c',
     'lib/compat/win32/path-utils.c',
     'lib/compat/win32/pthread.c',
     'lib/compat/win32/syslog.c',
