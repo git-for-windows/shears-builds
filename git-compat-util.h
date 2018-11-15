@@ -1112,6 +1112,7 @@ struct fscache;
 #define merge_fscache(dest) /* noop */
 #endif
 
+
 int cmd_main(int, const char **);
 
 /*

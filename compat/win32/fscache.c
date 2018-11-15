@@ -592,6 +592,19 @@ void fscache_flush(void)
 	if (cache && cache->enabled) {
 		fscache_clear(cache);
 	}
+
+}
+
+/*
+ * Flush cached stats result when fscache is enabled.
+ */
+void fscache_flush(void)
+{
+	if (enabled) {
+		EnterCriticalSection(&mutex);
+		fscache_clear();
+		LeaveCriticalSection(&mutex);
+	}
 }
 
 /*
