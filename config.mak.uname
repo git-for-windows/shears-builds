@@ -731,6 +731,7 @@ ifeq ($(uname_S),MINGW)
 	HAVE_PLATFORM_PROCINFO = YesPlease
 	CSPRNG_METHOD = rtlgenrandom
 	BASIC_LDFLAGS += -municode -Wl,--tsaware
+	LAZYLOAD_LIBCURL = YesDoThatPlease
 	COMPAT_CFLAGS += -DNOGDI -Ilib/compat -Ilib/compat/win32
 	COMPAT_CFLAGS += -DSTRIP_EXTENSION=\".exe\"
 	COMPAT_OBJS += lib/compat/mingw.o lib/compat/winansi.o \
