@@ -534,7 +534,7 @@ endif
 		lib/compat/win32/path-utils.o \
 		lib/compat/win32/pthread.o lib/compat/win32/syslog.o \
 		lib/compat/win32/trace2_win32_process_info.o \
-		lib/compat/win32/dirent.o
+		lib/compat/win32/dirent.o lib/compat/win32/wsl.o
 	COMPAT_CFLAGS = -D__USE_MINGW_ACCESS -DDETECT_MSYS_TTY \
 		-DENSURE_MSYSTEM_IS_SET="\"$(MSYSTEM)\"" -DMINGW_PREFIX="\"$(patsubst /%,%,$(MINGW_PREFIX))\"" \
 		-DNOGDI -DHAVE_STRING_H -Ilib/compat -Ilib/compat/regex -Ilib/compat/win32 -DSTRIP_EXTENSION=\".exe\"
@@ -738,7 +738,7 @@ ifeq ($(uname_S),MINGW)
 		lib/compat/win32/flush.o \
 		lib/compat/win32/path-utils.o \
 		lib/compat/win32/pthread.o lib/compat/win32/syslog.o \
-		lib/compat/win32/dirent.o
+		lib/compat/win32/dirent.o lib/compat/win32/wsl.o
 	BASIC_CFLAGS += -DWIN32
 	EXTLIBS += -lws2_32
 	GITLIBS += git.res
