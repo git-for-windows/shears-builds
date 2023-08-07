@@ -1302,6 +1302,7 @@ elif host_machine.system() == 'windows'
     'lib/compat/win32/path-utils.c',
     'lib/compat/win32/pthread.c',
     'lib/compat/win32/syslog.c',
+    'lib/compat/win32/wsl.c',
     'lib/compat/win32mmap.c',
   ]
 
