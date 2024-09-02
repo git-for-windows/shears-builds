@@ -795,6 +795,9 @@ static int survey_objects_path_walk_fn(const char *path,
 	ctx->progress_nr += oids->nr;
 	display_progress(ctx->progress, ctx->progress_nr);
 
+	ctx->progress_nr += oids->nr;
+	display_progress(ctx->progress, ctx->progress_nr);
+
 	return 0;
 }
 
