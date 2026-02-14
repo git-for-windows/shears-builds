@@ -2192,16 +2192,21 @@ int ref_store_create_on_disk(struct ref_store *refs, int flags, struct strbuf *e
 {
 	int ret = refs->be->create_on_disk(refs, flags, err);
 
-	if (!ret &&
-	    ref_storage_format_by_name(refs->be->name) != REF_STORAGE_FORMAT_FILES) {
-		struct strbuf msg = STRBUF_INIT;
-
-		strbuf_addf(&msg, "this repository uses the %s format", refs->be->name);
-		refs_create_refdir_stubs(refs->repo, refs->gitdir, msg.buf);
-		strbuf_release(&msg);
+	if (!ret) {
+		/* Creation of stubs for linked worktrees are handled in the worktree code. */
+		if (!(flags & REF_STORE_CREATE_ON_DISK_IS_WORKTREE) && refs->repo->ref_storage_payload) {
+			refs_create_refdir_stubs(refs->repo, refs->repo->gitdir,
+						 "repository uses alternate refs storage");
+		} else if (ref_storage_format_by_name(refs->be->name) != REF_STORAGE_FORMAT_FILES) {
+			struct strbuf msg = STRBUF_INIT;
+			strbuf_addf(&msg, "this repository uses the %s format", refs->be->name);
+			refs_create_refdir_stubs(refs->repo, refs->gitdir, msg.buf);
+			strbuf_release(&msg);
+		}
 	}
 
 	return ret;
+
 }
 
 int ref_store_remove_on_disk(struct ref_store *refs, struct strbuf *err)
@@ -2214,6 +2219,10 @@ int ref_store_remove_on_disk(struct ref_store *refs, struct strbuf *err)
 
 		/* Backends apart from the files backend create stubs. */
 		if (format == REF_STORAGE_FORMAT_FILES)
+			return ret;
+
+		/* Alternate refs backend require stubs in the gitdir. */
+		if (refs->repo->ref_storage_payload)
 			return ret;
 
 		strbuf_addf(&sb, "%s/HEAD", refs->gitdir);
