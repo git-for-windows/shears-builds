@@ -3,9 +3,6 @@
 
 struct string_list;
 
-extern char *git_mailmap_file;
-extern char *git_mailmap_blob;
-
 /* Flags for read_mailmap_file() */
 #define MAILMAP_NOFOLLOW (1<<0)
 
