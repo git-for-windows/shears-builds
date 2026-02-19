@@ -11,9 +11,10 @@ extern char *git_mailmap_blob;
 
 int read_mailmap_file(struct string_list *map, const char *filename,
 		      unsigned flags);
-int read_mailmap_blob(struct string_list *map, const char *name);
+int read_mailmap_blob(struct repository *repo, struct string_list *map,
+                      const char *name);
 
-int read_mailmap(struct string_list *map);
+int read_mailmap(struct repository *repo, struct string_list *map);
 void clear_mailmap(struct string_list *map);
 
 int map_user(struct string_list *map,
