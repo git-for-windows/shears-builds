@@ -2,6 +2,7 @@
 #define MAILMAP_H
 
 struct string_list;
+struct repository;
 
 /* Flags for read_mailmap_file() */
 #define MAILMAP_NOFOLLOW (1<<0)
