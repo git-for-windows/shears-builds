@@ -2413,7 +2413,7 @@ void absorb_git_dir_into_superproject(const char *path,
 		const struct submodule *sub;
 		struct strbuf sub_gitdir = STRBUF_INIT;
 
-		if (err_code == READ_GITFILE_ERR_STAT_ENOENT) {
+		if (err_code == READ_GITFILE_ERR_STAT_MISSING) {
 			/* unpopulated as expected */
 			strbuf_release(&gitdir);
 			return;

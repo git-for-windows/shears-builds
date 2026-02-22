@@ -895,7 +895,7 @@ int verify_repository_format(const struct repository_format *format,
 void read_gitfile_error_die(int error_code, const char *path, const char *dir)
 {
 	switch (error_code) {
-	case READ_GITFILE_ERR_STAT_ENOENT:
+	case READ_GITFILE_ERR_STAT_MISSING:
 	case READ_GITFILE_ERR_IS_A_DIR:
 		/* non-fatal; follow return path */
 		break;
@@ -943,8 +943,8 @@ const char *read_gitfile_gently(const char *path, int *return_error_code)
 	static struct strbuf realpath = STRBUF_INIT;
 
 	if (stat(path, &st)) {
-		if (errno == ENOENT)
-			error_code = READ_GITFILE_ERR_STAT_ENOENT;
+		if (errno == ENOENT || errno == ENOTDIR)
+			error_code = READ_GITFILE_ERR_STAT_MISSING;
 		else
 			error_code = READ_GITFILE_ERR_STAT_FAILED;
 		goto cleanup_return;
@@ -1589,7 +1589,7 @@ static enum discovery_result setup_git_directory_gently_1(struct strbuf *dir,
 		gitdirenv = read_gitfile_gently(dir->buf, &error_code);
 		if (!gitdirenv) {
 			switch (error_code) {
-			case READ_GITFILE_ERR_STAT_ENOENT:
+			case READ_GITFILE_ERR_STAT_MISSING:
 				/* no .git in this directory, move on */
 				break;
 			case READ_GITFILE_ERR_IS_A_DIR:
