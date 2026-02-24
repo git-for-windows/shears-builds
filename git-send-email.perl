@@ -23,6 +23,7 @@ use Getopt::Long;
 use Git::LoadCPAN::Error qw(:try);
 use Git;
 use Git::I18N;
+use Encode qw(find_encoding);
 
 Getopt::Long::Configure qw/ pass_through /;
 
@@ -987,6 +988,7 @@ EOT3
 sub ask {
 	my ($prompt, %arg) = @_;
 	my $valid_re = $arg{valid_re};
+	my $warn_invalid = $arg{warn_invalid};
 	my $default = $arg{default};
 	my $confirm_only = $arg{confirm_only};
 	my $resp;
@@ -1005,7 +1007,15 @@ sub ask {
 			return $default;
 		}
 		if (!defined $valid_re or $resp =~ /$valid_re/) {
-			return $resp;
+			if ($warn_invalid) {
+				if (find_encoding($resp)) {
+					return $resp;
+				} else {
+					printf STDERR __("warning: '%s' does not appear to be a valid charset name.\n"), $resp;
+				}
+			} else {
+				return $resp;
+			}
 		}
 		if ($confirm_only) {
 			my $yesno = $term->readline(
@@ -1044,8 +1054,9 @@ if (!defined $auto_8bit_encoding && scalar %broken_encoding) {
 	foreach my $f (sort keys %broken_encoding) {
 		print "    $f\n";
 	}
-	$auto_8bit_encoding = ask(__("Which 8bit encoding should I declare [UTF-8]? "),
-				  valid_re => qr/.{4}/, confirm_only => 1,
+	$auto_8bit_encoding = ask(__("Declare which 8bit encoding to use [default: UTF-8]? "),
+				  valid_re => qr/^\S+$/, confirm_only => 1,
+				  warn_invalid => 1,
 				  default => "UTF-8");
 }
 
