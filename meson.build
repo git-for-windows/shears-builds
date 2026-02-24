@@ -1333,6 +1333,9 @@ endif
 fsmonitor_backend = ''
 if host_machine.system() == 'windows'
   fsmonitor_backend = 'win32'
+elif host_machine.system() == 'linux' and threads.found() and compiler.has_header('linux/magic.h')
+  fsmonitor_backend = 'linux'
+  libgit_c_args += '-DHAVE_LINUX_MAGIC_H'
 elif host_machine.system() == 'darwin'
   fsmonitor_backend = 'darwin'
   libgit_dependencies += dependency('CoreServices')
