@@ -1333,6 +1333,9 @@ endif
 fsmonitor_backend = ''
 if host_machine.system() == 'windows'
   fsmonitor_backend = 'win32'
+elif host_machine.system() == 'linux' and threads.found() and compiler.has_header('linux/magic.h')
+  fsmonitor_backend = 'linux'
+  libgit_c_args += '-DHAVE_LINUX_MAGIC_H'
 elif host_machine.system() == 'darwin'
   fsmonitor_backend = 'darwin'
   libgit_dependencies += dependency('CoreServices')
@@ -1343,11 +1346,21 @@ if fsmonitor_backend != ''
 
   libgit_sources += [
     'compat/fsmonitor/fsm-health-' + fsmonitor_backend + '.c',
-    'compat/fsmonitor/fsm-ipc-' + fsmonitor_backend + '.c',
     'compat/fsmonitor/fsm-listen-' + fsmonitor_backend + '.c',
     'compat/fsmonitor/fsm-path-utils-' + fsmonitor_backend + '.c',
-    'compat/fsmonitor/fsm-settings-' + fsmonitor_backend + '.c',
   ]
+
+  if fsmonitor_backend == 'win32'
+    libgit_sources += [
+      'compat/fsmonitor/fsm-ipc-win32.c',
+      'compat/fsmonitor/fsm-settings-win32.c',
+    ]
+  else
+    libgit_sources += [
+      'compat/fsmonitor/fsm-ipc-unix.c',
+      'compat/fsmonitor/fsm-settings-unix.c',
+    ]
+  endif
 endif
 build_options_config.set_quoted('FSMONITOR_DAEMON_BACKEND', fsmonitor_backend)
 build_options_config.set_quoted('FSMONITOR_OS_SETTINGS', fsmonitor_backend)
