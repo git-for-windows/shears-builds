@@ -23,6 +23,27 @@ test_expect_success setup '
 	rmdir süb
 '
 
+test_expect_success 'git apply -p 1 patch' '
+	test_when_finished "rm -rf t" &&
+	git apply -p 1 $TEST_DIRECTORY/t4120/patch &&
+	test_path_is_dir t
+'
+
+test_expect_success 'apply fails due to non-num -p' '
+	test_when_finished "rm -rf t test" &&
+	test_must_fail git apply -p malformed $TEST_DIRECTORY/t4120/patch
+'
+
+test_expect_success 'apply fails due to trailing non-digit in -p' '
+	test_when_finished "rm -rf t test" &&
+	test_must_fail git apply -p 2q $TEST_DIRECTORY/t4120/patch
+'
+
+test_expect_success 'apply fails due to negative number in -p' '
+	test_when_finished "rm -rf t test" &&
+	test_must_fail git apply -p -1 $TEST_DIRECTORY/t4120/patch
+'
+
 test_expect_success 'apply git diff with -p2' '
 	cp file1.saved file1 &&
 	git apply -p2 patch.file
