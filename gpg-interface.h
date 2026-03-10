@@ -83,6 +83,13 @@ size_t parse_signed_buffer(const char *buf, size_t size);
 int sign_buffer(struct strbuf *buffer, struct strbuf *signature,
 		const char *signing_key);
 
+/*
+ * Similar to `sign_buffer()`, but uses the default configured signing key as
+ * returned by `get_signing_key()` when the provided "signing_key" is NULL or
+ * empty. Returns 0 on success, non-zero on failure.
+ */
+int sign_buffer_with_key(struct strbuf *buffer, struct strbuf *signature,
+			 const char *signing_key);
 
 /*
  * Returns corresponding string in lowercase for a given member of

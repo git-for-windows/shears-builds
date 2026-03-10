@@ -981,6 +981,19 @@ int sign_buffer(struct strbuf *buffer, struct strbuf *signature, const char *sig
 	return use_format->sign_buffer(buffer, signature, signing_key);
 }
 
+int sign_buffer_with_key(struct strbuf *buffer, struct strbuf *signature,
+			 const char *signing_key)
+{
+	char *keyid_to_free = NULL;
+	int ret = 0;
+	if (!signing_key || !*signing_key)
+		signing_key = keyid_to_free = get_signing_key();
+	if (sign_buffer(buffer, signature, signing_key))
+		ret = -1;
+	free(keyid_to_free);
+	return ret;
+}
+
 /*
  * Strip CR from the line endings, in case we are on Windows.
  * NEEDSWORK: make it trim only CRs before LFs and rename
