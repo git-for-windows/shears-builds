@@ -543,6 +543,7 @@ static int git_push_config(const char *k, const char *v,
 
 	return git_default_config(k, v, ctx, NULL);
 }
+
 int cmd_push(int argc,
 	     const char **argv,
 	     const char *prefix,
@@ -687,7 +688,7 @@ int cmd_push(int argc,
 	 * same group.
 	 */
 	base_flags = flags;
-	for (int i = 0; i < remote_group.nr; i++) {
+	for (size_t i = 0; i < remote_group.nr; i++) {
 		int iter_flags = base_flags;
 		struct remote *r = pushremote_get(remote_group.items[i].string);
 		if (!r)
