@@ -1932,10 +1932,6 @@ static int handle_curl_result(struct slot_results *results)
 	else if (results->http_code == 401) {
 		http_auth.ntlm_suppressed = (results->auth_avail & CURLAUTH_NTLM) &&
 					    !(http_auth_any & CURLAUTH_NTLM);
-		if (http_auth.ntlm_suppressed && http_auth.ntlm_allow) {
-			http_auth_methods |= CURLAUTH_NTLM;
-			return HTTP_REAUTH;
-		}
 		if ((http_auth.username && http_auth.password) ||\
 		    (http_auth.authtype && http_auth.credential)) {
 			if (http_auth.multistage) {
@@ -2467,6 +2463,13 @@ static int http_request_recoverable(const char *url,
 		} else if (ret == HTTP_REAUTH) {
 			credential_fill(the_repository, &http_auth, 1);
 		}
+
+		/*
+		 * Re-enable NTLM auth if the helper allows it and we would
+		 * otherwise suppress authentication via NTLM.
+		 */
+		if (http_auth.ntlm_suppressed && http_auth.ntlm_allow)
+			http_auth_methods |= CURLAUTH_NTLM;
 
 		ret = http_request(url, result, target, options);
 	}
