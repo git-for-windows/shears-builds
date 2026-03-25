@@ -11,6 +11,7 @@
 #include "list-objects.h"
 #include "object.h"
 #include "oid-array.h"
+#include "path.h"
 #include "prio-queue.h"
 #include "repository.h"
 #include "revision.h"
@@ -62,6 +63,8 @@ struct path_walk_context {
 	 */
 	struct prio_queue path_stack;
 	struct strset path_stack_pushed;
+
+	unsigned exact_pathspecs:1;
 };
 
 static int compare_by_type(const void *one, const void *two, void *cb_data)
@@ -206,6 +209,34 @@ static int add_tree_entries(struct path_walk_context *ctx,
 				 match != MATCHED)
 				continue;
 		}
+		if (ctx->revs->prune_data.nr && ctx->exact_pathspecs) {
+			struct pathspec *pd = &ctx->revs->prune_data;
+			bool found = false;
+
+			/* remove '/' for these checks. */
+			path.buf[path.len - 1] = 0;
+
+			for (int i = 0; i < pd->nr; i++) {
+				struct pathspec_item *item = &pd->items[i];
+
+				/*
+				 * Continue if either is a directory prefix
+				 * of the other.
+				 */
+				if (dir_prefix(path.buf, item->match) ||
+				    dir_prefix(item->match, path.buf)) {
+					found = true;
+					break;
+				}
+			}
+
+			/* return '/' after these checks. */
+			path.buf[path.len - 1] = '/';
+
+			/* Skip paths that do not match the prefix. */
+			if (!found)
+				continue;
+		}
 
 		add_path_to_list(ctx, path.buf, type, &entry.oid,
 				 !(o->flags & UNINTERESTING));
@@ -273,6 +304,13 @@ static int walk_path(struct path_walk_context *ctx,
 		if (!list->maybe_interesting)
 			return 0;
 	}
+
+	if (list->type == OBJ_BLOB &&
+	    ctx->revs->prune_data.nr &&
+	    !match_pathspec(ctx->repo->index, &ctx->revs->prune_data,
+			   path, strlen(path), 0,
+			   NULL, 0))
+		return 0;
 
 	/* Evaluate function pointer on this data, if requested. */
 	if ((list->type == OBJ_TREE && ctx->info->trees) ||
@@ -480,6 +518,12 @@ int walk_objects_by_path(struct path_walk_info *info)
 
 	if (info->tags)
 		info->revs->tag_objects = 1;
+
+	if (ctx.revs->prune_data.nr) {
+		if (!ctx.revs->prune_data.has_wildcard &&
+		    !ctx.revs->prune_data.magic)
+			ctx.exact_pathspecs = 1;
+	}
 
 	/* Insert a single list for the root tree into the paths. */
 	CALLOC_ARRAY(root_tree_list, 1);
