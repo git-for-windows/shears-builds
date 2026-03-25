@@ -822,6 +822,9 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 			die(_("encountered signed commit %s; use "
 			      "--signed-commits=<mode> to handle it"),
 			    oid_to_hex(&commit->object.oid));
+		case SIGN_ABORT_IF_INVALID:
+			die(_("'abort-if-invalid' is not a valid mode for "
+			      "git fast-export with --signed-commits=<mode>"));
 		case SIGN_STRIP_IF_INVALID:
 			die(_("'strip-if-invalid' is not a valid mode for "
 			      "git fast-export with --signed-commits=<mode>"));
@@ -970,6 +973,9 @@ static void handle_tag(const char *name, struct tag *tag)
 				die(_("encountered signed tag %s; use "
 				      "--signed-tags=<mode> to handle it"),
 				    oid_to_hex(&tag->object.oid));
+			case SIGN_ABORT_IF_INVALID:
+				die(_("'abort-if-invalid' is not a valid mode for "
+				      "git fast-export with --signed-tags=<mode>"));
 			case SIGN_STRIP_IF_INVALID:
 				die(_("'strip-if-invalid' is not a valid mode for "
 				      "git fast-export with --signed-tags=<mode>"));
