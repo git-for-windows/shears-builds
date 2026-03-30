@@ -54,6 +54,7 @@ static const char *force_path;
 
 static struct string_list mailmap = STRING_LIST_INIT_NODUP;
 static int use_mailmap;
+static int mailmap_loaded;
 
 static char *replace_idents_using_mailmap(char *, size_t *);
 
@@ -692,6 +693,24 @@ static void parse_cmd_info(struct batch_options *opt,
 	batch_one_object(line, output, opt, data);
 }
 
+static void parse_cmd_mailmap(struct batch_options *opt UNUSED,
+			      const char *line,
+			      struct strbuf *output UNUSED,
+			      struct expand_data *data UNUSED)
+{
+	if (!strcmp(line, "yes")) {
+		if (!mailmap_loaded) {
+			read_mailmap(the_repository, &mailmap);
+			mailmap_loaded = 1;
+		}
+		use_mailmap = 1;
+	} else if (!strcmp(line, "no")) {
+		use_mailmap = 0;
+	} else {
+		die(_("mailmap: unknown argument '%s', expected 'yes' or 'no'"), line);
+	}
+}
+
 static void dispatch_calls(struct batch_options *opt,
 		struct strbuf *output,
 		struct expand_data *data,
@@ -725,9 +744,10 @@ static const struct parse_cmd {
 	parse_cmd_fn_t fn;
 	unsigned takes_args;
 } commands[] = {
-	{ "contents", parse_cmd_contents, 1},
-	{ "info", parse_cmd_info, 1},
-	{ "flush", NULL, 0},
+	{ "contents", parse_cmd_contents, 1 },
+	{ "info", parse_cmd_info, 1 },
+	{ "flush", NULL, 0 },
+	{ "mailmap", parse_cmd_mailmap, 1 },
 };
 
 static void batch_objects_command(struct batch_options *opt,
@@ -1130,8 +1150,10 @@ int cmd_cat_file(int argc,
 	opt_cw = (opt == 'c' || opt == 'w');
 	opt_epts = (opt == 'e' || opt == 'p' || opt == 't' || opt == 's');
 
-	if (use_mailmap)
+	if (use_mailmap) {
 		read_mailmap(the_repository, &mailmap);
+		mailmap_loaded = 1;
+	}
 
 	switch (batch.objects_filter.choice) {
 	case LOFC_DISABLED:
