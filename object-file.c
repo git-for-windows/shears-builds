@@ -1433,18 +1433,18 @@ static int hash_blob_stream(const struct git_hash_algo *hash_algo,
 }
 
 /*
- * Read the contents from fd for size bytes, streaming it to the
+ * Read the contents from the stream provided, streaming it to the
  * packfile in state while updating the hash in ctx.
  */
 static void stream_blob_to_pack(struct transaction_packfile *state,
-				struct git_hash_ctx *ctx, int fd, size_t size,
-				const char *path)
+				struct git_hash_ctx *ctx, size_t size,
+				struct odb_write_stream *stream)
 {
 	git_zstream s;
-	unsigned char ibuf[16384];
 	unsigned char obuf[16384];
 	unsigned hdrlen;
 	int status = Z_OK;
+	size_t total = 0;
 
 	git_deflate_init(&s, pack_compression_level);
 
@@ -1453,24 +1453,19 @@ static void stream_blob_to_pack(struct transaction_packfile *state,
 	s.avail_out = sizeof(obuf) - hdrlen;
 
 	while (status != Z_STREAM_END) {
-		if (size && !s.avail_in) {
-			size_t rsize = size < sizeof(ibuf) ? size : sizeof(ibuf);
-			ssize_t read_result = read_in_full(fd, ibuf, rsize);
-			if (read_result < 0)
-				die_errno("failed to read from '%s'", path);
-			if ((size_t)read_result != rsize)
-				die("failed to read %u bytes from '%s'",
-				    (unsigned)rsize, path);
+		if (!stream->is_finished && !s.avail_in) {
+			unsigned long rsize;
+			unsigned const char *buf = stream->read(stream, &rsize);
 
 			if (rsize)
-				git_hash_update(ctx, ibuf, rsize);
+				git_hash_update(ctx, buf, rsize);
 
-			s.next_in = ibuf;
+			s.next_in = (unsigned char *)buf;
 			s.avail_in = rsize;
-			size -= rsize;
+			total += rsize;
 		}
 
-		status = git_deflate(&s, size ? 0 : Z_FINISH);
+		status = git_deflate(&s, stream->is_finished ? Z_FINISH : 0);
 
 		if (!s.avail_out || status == Z_STREAM_END) {
 			size_t written = s.next_out - obuf;
@@ -1490,6 +1485,10 @@ static void stream_blob_to_pack(struct transaction_packfile *state,
 			die("unexpected deflate failure: %d", status);
 		}
 	}
+
+	if (total != size)
+		die("unexpected number of bytes read");
+
 	git_deflate_end(&s);
 }
 
@@ -1543,6 +1542,40 @@ clear_exit:
 	odb_reprepare(repo->objects);
 }
 
+struct read_object_fd_data {
+	int fd;
+	size_t size;
+	unsigned char buf[16384];
+};
+
+static const void *read_object_fd(struct odb_write_stream *stream,
+				  unsigned long *len)
+{
+	struct read_object_fd_data *data = stream->data;
+	ssize_t read_result;
+	size_t rsize;
+
+	if (stream->is_finished) {
+		*len = 0;
+		return NULL;
+	}
+
+	rsize = data->size < sizeof(data->buf) ? data->size : sizeof(data->buf);
+	read_result = read_in_full(data->fd, data->buf, rsize);
+	if (read_result < 0)
+		die_errno("failed to read blob data");
+	if ((size_t)read_result != rsize)
+		die("failed to read %u bytes of blob data", (unsigned)rsize);
+
+	data->size -= rsize;
+	if (!data->size)
+		stream->is_finished = 1;
+
+	*len = rsize;
+
+	return data->buf;
+}
+
 /*
  * This writes the specified object to a packfile. Objects written here
  * during the same transaction are written to the same packfile. The
@@ -1561,10 +1594,13 @@ clear_exit:
  * binary blobs, they generally do not want to get any conversion, and
  * callers should avoid this code path when filters are requested.
  */
-static int index_blob_packfile_transaction(struct odb_transaction_files *transaction,
-					   struct object_id *result_oid, int fd,
-					   size_t size, const char *path)
+static int index_blob_packfile_transaction(struct odb_transaction *base,
+					   struct odb_write_stream *stream,
+					   size_t size, struct object_id *result_oid)
 {
+	struct odb_transaction_files *transaction = container_of(base,
+								 struct odb_transaction_files,
+								 base);
 	struct transaction_packfile *state = &transaction->packfile;
 	struct git_hash_ctx ctx;
 	unsigned char obuf[16384];
@@ -1593,7 +1629,7 @@ static int index_blob_packfile_transaction(struct odb_transaction_files *transac
 	hashfile_checkpoint(state->f, &checkpoint);
 	idx->offset = state->offset;
 	crc32_begin(state->f);
-	stream_blob_to_pack(state, &ctx, fd, size, path);
+	stream_blob_to_pack(state, &ctx, size, stream);
 	git_hash_final_oid(result_oid, &ctx);
 
 	idx->crc32 = crc32_end(state->f);
@@ -1634,15 +1670,20 @@ int index_fd(struct index_state *istate, struct object_id *oid,
 	} else {
 		if (flags & INDEX_WRITE_OBJECT) {
 			struct object_database *odb = the_repository->objects;
-			struct odb_transaction_files *files_transaction;
-			struct odb_transaction *transaction;
+			struct odb_transaction *transaction = odb_transaction_begin(odb);
+			struct read_object_fd_data data = {
+				.fd = fd,
+				.size = xsize_t(st->st_size),
+			};
+			struct odb_write_stream in_stream = {
+				.read = read_object_fd,
+				.data = &data,
+			};
 
-			transaction = odb_transaction_begin(odb);
-			files_transaction = container_of(odb->transaction,
-							 struct odb_transaction_files,
-							 base);
-			ret = index_blob_packfile_transaction(files_transaction, oid, fd,
-						      xsize_t(st->st_size), path);
+			ret = index_blob_packfile_transaction(odb->transaction,
+							      &in_stream,
+							      xsize_t(st->st_size),
+							      oid);
 			odb_transaction_commit(transaction);
 		} else {
 			if (hash_blob_stream(the_repository->hash_algo, oid, fd,
