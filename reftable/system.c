@@ -4,6 +4,7 @@
 #include "basics.h"
 #include "reftable-error.h"
 #include "../lockfile.h"
+#include "../trace.h"
 #include "../tempfile.h"
 
 uint32_t reftable_rand(void)
@@ -130,4 +131,9 @@ int flock_commit(struct reftable_flock *l)
 		return REFTABLE_IO_ERROR;
 
 	return 0;
+}
+
+uint64_t reftable_time_ms(void)
+{
+	return getnanotime() / 1000000;
 }
