@@ -15,6 +15,8 @@
 #include "compat/posix.h"
 #include "compat/zlib-compat.h"
 
+#define REFTABLE_INLINE(type) static inline type
+
 /*
  * Return a random 32 bit integer. This function is expected to return
  * pre-seeded data.
