@@ -492,6 +492,23 @@ static inline bool skip_prefix(const char *str, const char *prefix,
 }
 
 /*
+ * Check that an out-parameter that is "at least as const as" a matching
+ * in-parameter. For example, skip_prefix() will return "out" that is a subset
+ * of "str". So:
+ *
+ *  const str, const out: ok
+ *  non-const str, const out: ok
+ *  non-const str, non-const out: ok
+ *  const str, non-const out: compile error
+ *
+ *  See the skip_prefix macro below for an example of use.
+ */
+#define CONST_OUTPARAM(in, out) \
+    ((const char **)(0 ? ((*(out) = (in)),(out)) : (out)))
+#define skip_prefix(str, prefix, out) \
+	skip_prefix((str), (prefix), CONST_OUTPARAM((str), (out)))
+
+/*
  * Like skip_prefix, but promises never to read past "len" bytes of the input
  * buffer, and returns the remaining number of bytes in "out" via "outlen".
  */
