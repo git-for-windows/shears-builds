@@ -11,8 +11,7 @@
 
 /* This header glues the reftable library to the rest of Git */
 
-#define MINGW_DONT_HANDLE_IN_USE_ERROR
-#include "compat/posix.h"
+#include "reftable-system.h"
 #include "compat/zlib-compat.h"
 
 #define REFTABLE_INLINE(type) static inline type
