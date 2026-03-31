@@ -1680,10 +1680,10 @@ int index_fd(struct index_state *istate, struct object_id *oid,
 				.data = &data,
 			};
 
-			ret = index_blob_packfile_transaction(odb->transaction,
-							      &in_stream,
-							      xsize_t(st->st_size),
-							      oid);
+			ret = odb_transaction_write_object_stream(odb->transaction,
+								  &in_stream,
+								  xsize_t(st->st_size),
+								  oid);
 			odb_transaction_commit(transaction);
 		} else {
 			if (hash_blob_stream(the_repository->hash_algo, oid, fd,
@@ -2146,6 +2146,7 @@ struct odb_transaction *odb_transaction_files_begin(struct odb_source *source)
 	transaction = xcalloc(1, sizeof(*transaction));
 	transaction->base.source = source;
 	transaction->base.commit = odb_transaction_files_commit;
+	transaction->base.write_object_stream = index_blob_packfile_transaction;
 
 	return &transaction->base;
 }
