@@ -914,6 +914,9 @@ static inline bool skip_iprefix(const char *str, const char *prefix,
 	return false;
 }
 
+#define skip_iprefix(str, prefix, out) \
+	skip_iprefix((str), (prefix), CONST_OUTPARAM((str), (out)))
+
 /*
  * Like skip_prefix_mem, but compare case-insensitively. Note that the
  * comparison is done via tolower(), so it is strictly ASCII (no multi-byte
