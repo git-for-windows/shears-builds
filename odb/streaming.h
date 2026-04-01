@@ -5,6 +5,7 @@
 #define STREAMING_H 1
 
 #include "object.h"
+#include "odb.h"
 
 struct object_database;
 struct odb_read_stream;
@@ -63,5 +64,12 @@ int odb_stream_blob_to_fd(struct object_database *odb,
 			  const struct object_id *oid,
 			  struct stream_filter *filter,
 			  int can_seek);
+
+/*
+ * Sets up an ODB write stream that reads from an fd. The caller is expected to
+ * free the underlying stream data.
+ */
+void odb_write_stream_from_fd(struct odb_write_stream *stream, int fd,
+			      size_t size);
 
 #endif /* STREAMING_H */
