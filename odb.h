@@ -530,7 +530,7 @@ static inline int odb_write_object(struct object_database *odb,
 }
 
 struct odb_write_stream {
-	const void *(*read)(struct odb_write_stream *, unsigned long *len);
+	ssize_t (*read)(struct odb_write_stream *, unsigned char *, size_t len);
 	void *data;
 	int is_finished;
 };
