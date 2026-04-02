@@ -11,9 +11,10 @@
 
 /* This header glues the reftable library to the rest of Git */
 
-#define MINGW_DONT_HANDLE_IN_USE_ERROR
-#include "compat/posix.h"
+#include "reftable-system.h"
 #include "compat/zlib-compat.h"
+
+#define REFTABLE_INLINE(type) static inline type
 
 /*
  * Return a random 32 bit integer. This function is expected to return
@@ -107,5 +108,26 @@ int flock_release(struct reftable_flock *l);
  * reftable error code on error.
  */
 int flock_commit(struct reftable_flock *l);
+
+/* Report the time in milliseconds. */
+uint64_t reftable_time_ms(void);
+
+struct reftable_mmap {
+       void *data;
+       size_t size;
+       void *priv;
+};
+
+/*
+ * Map the file into memory. Returns 0 on success, a reftable error code on
+ * error.
+ */
+int reftable_mmap(struct reftable_mmap *out, int fd, size_t len);
+
+/*
+ * Unmap the file from memory. Returns 0 on success, a reftable error code on
+ * error.
+ */
+int reftable_munmap(struct reftable_mmap *mmap);
 
 #endif
