@@ -335,11 +335,7 @@ static inline int is_path_owned_by_current_uid(const char *path,
 #endif
 
 #ifndef find_last_dir_sep
-static inline char *git_find_last_dir_sep(const char *path)
-{
-	return strrchr(path, '/');
-}
-#define find_last_dir_sep git_find_last_dir_sep
+#define find_last_dir_sep(path) strrchr((path), '/')
 #endif
 
 #ifndef has_dir_sep
@@ -494,6 +490,23 @@ static inline bool skip_prefix(const char *str, const char *prefix,
 	} while (*str++ == *prefix++);
 	return false;
 }
+
+/*
+ * Check that an out-parameter that is "at least as const as" a matching
+ * in-parameter. For example, skip_prefix() will return "out" that is a subset
+ * of "str". So:
+ *
+ *  const str, const out: ok
+ *  non-const str, const out: ok
+ *  non-const str, non-const out: ok
+ *  const str, non-const out: compile error
+ *
+ *  See the skip_prefix macro below for an example of use.
+ */
+#define CONST_OUTPARAM(in, out) \
+    ((const char **)(0 ? ((*(out) = (in)),(out)) : (out)))
+#define skip_prefix(str, prefix, out) \
+	skip_prefix((str), (prefix), CONST_OUTPARAM((str), (out)))
 
 /*
  * Like skip_prefix, but promises never to read past "len" bytes of the input
@@ -900,6 +913,9 @@ static inline bool skip_iprefix(const char *str, const char *prefix,
 	} while (tolower(*str++) == tolower(*prefix++));
 	return false;
 }
+
+#define skip_iprefix(str, prefix, out) \
+	skip_iprefix((str), (prefix), CONST_OUTPARAM((str), (out)))
 
 /*
  * Like skip_prefix_mem, but compare case-insensitively. Note that the
