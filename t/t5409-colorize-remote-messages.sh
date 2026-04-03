@@ -190,4 +190,5 @@ test_expect_success 'allow all control sequences for a specific URL' '
 	test_grep ! "\\^\\[\\[K" decoded
 '
 
+
 test_done
