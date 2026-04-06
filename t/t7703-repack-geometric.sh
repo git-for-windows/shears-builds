@@ -541,4 +541,46 @@ test_expect_success 'geometric repack works with promisor packs' '
 	)
 '
 
+test_expect_success 'check .promisor file content after geometric repack' '
+	test_when_finished rm -rf prom_test &&
+	git init prom_test &&
+	path=prom_test/.git/objects/pack &&
+
+	(
+		# Create 2 packs with 3 objs each, and manually create .promisor files
+		test_commit_bulk -C prom_test --start=1 1 &&  # 3 objects
+		prom=$(ls $path/*.pack | sed "s/\.pack/.promisor/") &&
+		oid=$(git -C prom_test rev-parse HEAD) &&
+		echo "$oid ref" >$prom &&
+		prom_before_repack1=$(cat $prom) &&
+		test_commit_bulk -C prom_test --start=2 1 &&  # 3 objects
+		prom=$(ls -t $path/*.pack | head -n 1 | sed "s/\.pack/.promisor/") &&
+		oid=$(git -C prom_test rev-parse HEAD) &&
+		echo "$oid ref" >$prom &&
+		prom_before_repack2=$(cat $prom) &&
+
+		# Create 2 packs with 12 and 24 objs, and manually create .promisor files
+		test_commit_bulk -C prom_test --start=3 4 &&  # 12 objects
+		prom=$(ls -t $path/*.pack | head -n 1 | sed "s/\.pack/.promisor/") &&
+		oid=$(git -C prom_test rev-parse HEAD) &&
+		echo "$oid ref" >$prom &&
+		prom_before_repack3=$(cat $prom) &&
+		test_commit_bulk -C prom_test --start=7 8 &&  # 24 objects
+		prom=$(ls -t $path/*.pack | head -n 1 | sed "s/\.pack/.promisor/") &&
+		oid=$(git -C prom_test rev-parse HEAD) &&
+		echo "$oid ref" >$prom &&
+		prom_before_repack4=$(cat $prom) &&
+
+		# Geometric repack, and check if correct compared to previous saved .promisor content
+		git -C prom_test repack --geometric 2 -d &&
+		prom=$(ls -t $path/*.pack | head -n 1 | sed "s/\.pack/.promisor/") &&
+		# $prom should have repacked only the first 2 small packs, so it should only contain
+		# the following: "$prom_before_repack1 <date>" & "$prom_before_repack2 <date>"
+		test_grep "$prom_before_repack1 " $prom &&
+		test_grep "$prom_before_repack2 " $prom &&
+		test_grep ! $prom_before_repack3 $prom &&
+		test_grep ! $prom_before_repack4 $prom
+	)
+'
+
 test_done
