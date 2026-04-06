@@ -162,6 +162,7 @@ static long http_retry_after = 0;
 static long http_max_retries = 0;
 static long http_max_retry_time = 300;
 
+
 /*
  * With the backend being set to `schannel`, setting sslCAinfo would override
  * the Certificate Store in cURL v7.60.0 and later, which is not what we want
