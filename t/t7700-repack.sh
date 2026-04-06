@@ -904,4 +904,67 @@ test_expect_success 'pending objects are repacked appropriately' '
 	)
 '
 
+test_expect_success 'check one .promisor file content after repack' '
+	test_when_finished rm -rf prom_test &&
+	git init prom_test &&
+	path=prom_test/.git/objects/pack &&
+
+	(
+		test_commit_bulk -C prom_test --start=1 1 &&
+
+		# Simulate .promisor file by creating it manually
+		prom=$(ls $path/*.pack | sed "s/\.pack/.promisor/") &&
+		oid=$(git -C prom_test rev-parse HEAD) &&
+		echo "$oid ref" >$prom &&
+
+		# Save the current .promisor content, repack, and check if correct
+		prom_before_repack=$(cat $prom) &&
+		git -C prom_test repack -a -d &&
+		prom=$(ls $path/*.pack | sed "s/\.pack/.promisor/") &&
+		# $prom should contain "$prom_before_repack <date>"
+		test_grep "$prom_before_repack " $prom &&
+
+		# Save the current .promisor content, repack, and check if correct
+		cat $prom >prom_before_repack &&
+		git -C prom_test repack -a -d &&
+		prom=$(ls $path/*.pack | sed "s/\.pack/.promisor/") &&
+		# $prom should be exactly the same as prom_before_repack
+		test_cmp prom_before_repack $prom
+	)
+'
+
+test_expect_success 'check multiple .promisor file content after repack' '
+	test_when_finished rm -rf prom_test &&
+	git init prom_test &&
+	path=prom_test/.git/objects/pack &&
+
+	(
+		# Create 2 packs and simulate .promisor files by creating them manually
+		test_commit_bulk -C prom_test --start=1 1 &&
+		prom=$(ls $path/*.pack | sed "s/\.pack/.promisor/") &&
+		oid=$(git -C prom_test rev-parse HEAD) &&
+		echo "$oid ref" >$prom &&
+		prom_before_repack1=$(cat $prom) &&
+		test_commit_bulk -C prom_test --start=1 1 &&
+		prom=$(ls -t $path/*.pack | head -n 1 | sed "s/\.pack/.promisor/") &&
+		oid=$(git -C prom_test rev-parse HEAD) &&
+		echo "$oid ref" >$prom &&
+		prom_before_repack2=$(cat $prom) &&
+
+		# Repack, and check if correct compared to previous saved .promisor content
+		git -C prom_test repack -a -d &&
+		prom=$(ls $path/*.pack | sed "s/\.pack/.promisor/") &&
+		# $prom should contain "$prom_before_repack1 <date>" & "$prom_before_repack2 <date>"
+		test_grep "$prom_before_repack1 " $prom &&
+		test_grep "$prom_before_repack2 " $prom &&
+
+		# Save the current .promisor content, repack, and check if correct
+		cat $prom >prom_before_repack &&
+		git -C prom_test repack -a -d &&
+		prom=$(ls $path/*.pack | sed "s/\.pack/.promisor/") &&
+		# $prom should be exactly the same as prom_before_repack
+		test_cmp prom_before_repack $prom
+	)
+'
+
 test_done
