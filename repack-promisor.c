@@ -107,12 +107,9 @@ static void copy_promisor_content(struct repository *repo,
 				continue;
 
 			/* If <time> doesn't exist, retrieve it and add it to line */
-			if (!parts[2]) {
-				struct tm tm;
-				localtime_r(&source_stat.st_mtim.tv_sec, &tm),
-				strbuf_addch(&line, ' ');
-				strbuf_addftime(&line, "%Y/%m/%d-%H:%M:%S", &tm, 0, 0);
-			}
+			if (!parts[2])
+				strbuf_addf(&line, " %" PRIuMAX,
+					    (uintmax_t)source_stat.st_mtime);
 
 			/*
 			 * Add the finalized line to dest_to_write and dest_content if it
