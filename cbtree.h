@@ -23,18 +23,19 @@ struct cb_node {
 	 */
 	uint32_t byte;
 	uint8_t otherbits;
-	uint8_t k[FLEX_ARRAY]; /* arbitrary data, unaligned */
 };
 
 struct cb_tree {
 	struct cb_node *root;
+	ptrdiff_t key_offset;
 };
 
-#define CBTREE_INIT { 0 }
-
-static inline void cb_init(struct cb_tree *t)
+static inline void cb_init(struct cb_tree *t,
+			   ptrdiff_t key_offset)
 {
-	struct cb_tree blank = CBTREE_INIT;
+	struct cb_tree blank = {
+		.key_offset = key_offset,
+	};
 	memcpy(t, &blank, sizeof(*t));
 }
 
