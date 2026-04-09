@@ -1,4 +1,5 @@
 #include "git-compat-util.h"
+#include "object-file.h"
 #include "odb.h"
 #include "odb/source-inmemory.h"
 #include "odb/streaming.h"
@@ -111,6 +112,8 @@ static int odb_source_inmemory_write_object(struct odb_source *source,
 {
 	struct odb_source_inmemory *inmemory = odb_source_inmemory_downcast(source);
 	struct cached_object_entry *object;
+
+	hash_object_file(source->odb->repo->hash_algo, buf, len, type, oid);
 
 	ALLOC_GROW(inmemory->objects, inmemory->objects_nr + 1,
 		   inmemory->objects_alloc);
