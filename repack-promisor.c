@@ -109,7 +109,8 @@ static void copy_promisor_content(struct repository *repo,
 
 			/* If <time> doesn't exist, retrieve it and add it to line */
 			if (line_sections.nr < 3)
-				strbuf_addf(&line, " %lld", (long long int)source_stat.st_mtim.tv_sec);
+				strbuf_addf(&line, " %" PRItime,
+					    (timestamp_t)source_stat.st_mtime);
 
 			/*
 			 * Add the finalized line to dest_to_write and dest_content if it
