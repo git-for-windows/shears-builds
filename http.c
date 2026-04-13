@@ -695,6 +695,7 @@ void http_reauth_prepare(int all_capabilities)
 		return;
 
 
+
 	credential_fill(the_repository, &http_auth, all_capabilities);
 }
 
