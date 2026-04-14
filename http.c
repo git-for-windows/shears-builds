@@ -718,6 +718,8 @@ void http_reauth_prepare(int all_capabilities)
 	    (http_auth_methods & CURLAUTH_GSSNEGOTIATE))
 		return;
 
+
+
 	credential_fill(the_repository, &http_auth, all_capabilities);
 }
 
