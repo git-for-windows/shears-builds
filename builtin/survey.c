@@ -17,7 +17,6 @@
 #include "strvec.h"
 #include "tag.h"
 #include "trace2.h"
-#include "color.h"
 
 static const char * const survey_usage[] = {
 	N_("(EXPERIMENTAL!) git survey <options>"),
@@ -41,7 +40,6 @@ static struct survey_refs_wanted default_ref_options = {
 struct survey_opts {
 	int verbose;
 	int show_progress;
-	int top_nr;
 	struct survey_refs_wanted refs;
 };
 
@@ -77,6 +75,7 @@ struct survey_report_object_size_summary {
 
 typedef int (*survey_top_cmp)(void *v1, void *v2);
 
+MAYBE_UNUSED
 static int cmp_by_nr(void *v1, void *v2)
 {
 	struct survey_report_object_size_summary *s1 = v1;
@@ -89,6 +88,7 @@ static int cmp_by_nr(void *v1, void *v2)
 	return 0;
 }
 
+MAYBE_UNUSED
 static int cmp_by_disk_size(void *v1, void *v2)
 {
 	struct survey_report_object_size_summary *s1 = v1;
@@ -101,6 +101,7 @@ static int cmp_by_disk_size(void *v1, void *v2)
 	return 0;
 }
 
+MAYBE_UNUSED
 static int cmp_by_inflated_size(void *v1, void *v2)
 {
 	struct survey_report_object_size_summary *s1 = v1;
@@ -131,6 +132,7 @@ struct survey_report_top_table {
 	void *data;
 };
 
+MAYBE_UNUSED
 static void init_top_sizes(struct survey_report_top_table *top,
 			   size_t limit, const char *name,
 			   survey_top_cmp cmp)
@@ -156,6 +158,7 @@ static void clear_top_sizes(struct survey_report_top_table *top)
 	free(sz_array);
 }
 
+MAYBE_UNUSED
 static void maybe_insert_into_top_size(struct survey_report_top_table *top,
 				       struct survey_report_object_size_summary *summary)
 {
@@ -192,10 +195,6 @@ struct survey_report {
 	struct survey_report_object_summary reachable_objects;
 
 	struct survey_report_object_size_summary *by_type;
-
-	struct survey_report_top_table *top_paths_by_count;
-	struct survey_report_top_table *top_paths_by_disk;
-	struct survey_report_top_table *top_paths_by_inflate;
 };
 
 #define REPORT_TYPE_COMMIT 0
@@ -447,13 +446,6 @@ static void survey_report_object_sizes(const char *title,
 	clear_table(&table);
 }
 
-static void survey_report_plaintext_sorted_size(
-		struct survey_report_top_table *top)
-{
-	survey_report_object_sizes(top->name,  _("Path"),
-				   top->data, top->nr);
-}
-
 static void survey_report_plaintext(struct survey_context *ctx)
 {
 	printf("GIT SURVEY for \"%s\"\n", ctx->repo->worktree);
@@ -464,21 +456,6 @@ static void survey_report_plaintext(struct survey_context *ctx)
 				   _("Object Type"),
 				   ctx->report.by_type,
 				   REPORT_TYPE_COUNT);
-
-	survey_report_plaintext_sorted_size(
-		&ctx->report.top_paths_by_count[REPORT_TYPE_TREE]);
-	survey_report_plaintext_sorted_size(
-		&ctx->report.top_paths_by_count[REPORT_TYPE_BLOB]);
-
-	survey_report_plaintext_sorted_size(
-		&ctx->report.top_paths_by_disk[REPORT_TYPE_TREE]);
-	survey_report_plaintext_sorted_size(
-		&ctx->report.top_paths_by_disk[REPORT_TYPE_BLOB]);
-
-	survey_report_plaintext_sorted_size(
-		&ctx->report.top_paths_by_inflate[REPORT_TYPE_TREE]);
-	survey_report_plaintext_sorted_size(
-		&ctx->report.top_paths_by_inflate[REPORT_TYPE_BLOB]);
 }
 
 /*
@@ -548,10 +525,6 @@ static int survey_load_config_cb(const char *var, const char *value,
 	}
 	if (!strcmp(var, "survey.progress")) {
 		ctx->opts.show_progress = git_config_bool(var, value);
-		return 0;
-	}
-	if (!strcmp(var, "survey.top")) {
-		ctx->opts.top_nr = git_config_bool(var, value);
 		return 0;
 	}
 
@@ -725,8 +698,7 @@ static void increment_totals(struct survey_context *ctx,
 
 static void increment_object_totals(struct survey_context *ctx,
 				    struct oid_array *oids,
-				    enum object_type type,
-				    const char *path)
+				    enum object_type type)
 {
 	struct survey_report_object_size_summary *total;
 	struct survey_report_object_size_summary summary = { 0 };
@@ -758,30 +730,9 @@ static void increment_object_totals(struct survey_context *ctx,
 	total->disk_size += summary.disk_size;
 	total->inflated_size += summary.inflated_size;
 	total->num_missing += summary.num_missing;
-
-	if (type == OBJ_TREE || type == OBJ_BLOB) {
-		int index = type == OBJ_TREE ?
-			    REPORT_TYPE_TREE : REPORT_TYPE_BLOB;
-		struct survey_report_top_table *top;
-
-		/*
-		 * Temporarily store (const char *) here, but it will
-		 * be duped if inserted and will not be freed.
-		 */
-		summary.label = (char *)path;
-
-		top = ctx->report.top_paths_by_count;
-		maybe_insert_into_top_size(&top[index], &summary);
-
-		top = ctx->report.top_paths_by_disk;
-		maybe_insert_into_top_size(&top[index], &summary);
-
-		top = ctx->report.top_paths_by_inflate;
-		maybe_insert_into_top_size(&top[index], &summary);
-	}
 }
 
-static int survey_objects_path_walk_fn(const char *path,
+static int survey_objects_path_walk_fn(const char *path UNUSED,
 				       struct oid_array *oids,
 				       enum object_type type,
 				       void *data)
@@ -790,10 +741,7 @@ static int survey_objects_path_walk_fn(const char *path,
 
 	increment_object_counts(&ctx->report.reachable_objects,
 				type, oids->nr);
-	increment_object_totals(ctx, oids, type, path);
-
-	ctx->progress_nr += oids->nr;
-	display_progress(ctx->progress, ctx->progress_nr);
+	increment_object_totals(ctx, oids, type);
 
 	ctx->progress_nr += oids->nr;
 	display_progress(ctx->progress, ctx->progress_nr);
@@ -808,24 +756,6 @@ static void initialize_report(struct survey_context *ctx)
 	ctx->report.by_type[REPORT_TYPE_TREE].label = xstrdup(_("Trees"));
 	ctx->report.by_type[REPORT_TYPE_BLOB].label = xstrdup(_("Blobs"));
 	ctx->report.by_type[REPORT_TYPE_TAG].label = xstrdup(_("Tags"));
-
-	CALLOC_ARRAY(ctx->report.top_paths_by_count, REPORT_TYPE_COUNT);
-	init_top_sizes(&ctx->report.top_paths_by_count[REPORT_TYPE_TREE],
-		       ctx->opts.top_nr, _("TOP DIRECTORIES BY COUNT"), cmp_by_nr);
-	init_top_sizes(&ctx->report.top_paths_by_count[REPORT_TYPE_BLOB],
-		       ctx->opts.top_nr, _("TOP FILES BY COUNT"), cmp_by_nr);
-
-	CALLOC_ARRAY(ctx->report.top_paths_by_disk, REPORT_TYPE_COUNT);
-	init_top_sizes(&ctx->report.top_paths_by_disk[REPORT_TYPE_TREE],
-		       ctx->opts.top_nr, _("TOP DIRECTORIES BY DISK SIZE"), cmp_by_disk_size);
-	init_top_sizes(&ctx->report.top_paths_by_disk[REPORT_TYPE_BLOB],
-		       ctx->opts.top_nr, _("TOP FILES BY DISK SIZE"), cmp_by_disk_size);
-
-	CALLOC_ARRAY(ctx->report.top_paths_by_inflate, REPORT_TYPE_COUNT);
-	init_top_sizes(&ctx->report.top_paths_by_inflate[REPORT_TYPE_TREE],
-		       ctx->opts.top_nr, _("TOP DIRECTORIES BY INFLATED SIZE"), cmp_by_inflated_size);
-	init_top_sizes(&ctx->report.top_paths_by_inflate[REPORT_TYPE_BLOB],
-		       ctx->opts.top_nr, _("TOP FILES BY INFLATED SIZE"), cmp_by_inflated_size);
 }
 
 static void survey_phase_objects(struct survey_context *ctx)
@@ -876,7 +806,6 @@ int cmd_survey(int argc, const char **argv, const char *prefix, struct repositor
 		.opts = {
 			.verbose = 0,
 			.show_progress = -1, /* defaults to isatty(2) */
-			.top_nr = 10,
 
 			.refs.want_all_refs = -1,
 
@@ -892,8 +821,6 @@ int cmd_survey(int argc, const char **argv, const char *prefix, struct repositor
 	static struct option survey_options[] = {
 		OPT__VERBOSE(&ctx.opts.verbose, N_("verbose output")),
 		OPT_BOOL(0, "progress", &ctx.opts.show_progress, N_("show progress")),
-		OPT_INTEGER('n', "top", &ctx.opts.top_nr,
-			    N_("number of entries to include in detail tables")),
 
 		OPT_BOOL_F(0, "all-refs", &ctx.opts.refs.want_all_refs, N_("include all refs"),          PARSE_OPT_NONEG),
 
@@ -908,11 +835,6 @@ int cmd_survey(int argc, const char **argv, const char *prefix, struct repositor
 
 	show_usage_with_options_if_asked(argc, argv,
 					 survey_usage, survey_options);
-
-	if (isatty(2))
-		color_fprintf_ln(stderr,
-				 want_color_fd(2, GIT_COLOR_AUTO) ? GIT_COLOR_YELLOW : "",
-				 "(THIS IS EXPERIMENTAL, EXPECT THE OUTPUT FORMAT TO CHANGE!)");
 
 	ctx.repo = repo;
 
