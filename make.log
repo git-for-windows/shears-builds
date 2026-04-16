@@ -1,0 +1,407 @@
+    CC builtin/survey.o
+    GEN GIT-PERL-HEADER
+    GEN git-archimport
+    GEN git-cvsexportcommit
+    GEN git-cvsimport
+    GEN git-cvsserver
+    GEN git-send-email
+    GEN git-svn
+    LINK git
+    BUILTIN git-add
+    BUILTIN git-am
+    BUILTIN git-annotate
+    BUILTIN git-apply
+    BUILTIN git-backfill
+    BUILTIN git-archive
+    BUILTIN git-bisect
+    BUILTIN git-blame
+    BUILTIN git-branch
+    BUILTIN git-bugreport
+    BUILTIN git-bundle
+    BUILTIN git-cat-file
+    BUILTIN git-check-attr
+    BUILTIN git-check-ignore
+    BUILTIN git-check-mailmap
+    BUILTIN git-check-ref-format
+    BUILTIN git-checkout--worker
+    BUILTIN git-checkout-index
+    BUILTIN git-checkout
+    BUILTIN git-clean
+    BUILTIN git-clone
+    BUILTIN git-column
+    BUILTIN git-commit-graph
+    BUILTIN git-commit-tree
+    BUILTIN git-commit
+    BUILTIN git-config
+    BUILTIN git-count-objects
+    BUILTIN git-credential-cache--daemon
+    BUILTIN git-credential-cache
+    BUILTIN git-credential-store
+    BUILTIN git-credential
+    BUILTIN git-describe
+    BUILTIN git-diagnose
+    BUILTIN git-diff-files
+    BUILTIN git-diff-index
+    BUILTIN git-diff-pairs
+    BUILTIN git-diff-tree
+    BUILTIN git-diff
+    BUILTIN git-difftool
+    BUILTIN git-fast-export
+    BUILTIN git-fast-import
+    BUILTIN git-fetch-pack
+    BUILTIN git-fetch
+    BUILTIN git-fmt-merge-msg
+    BUILTIN git-for-each-ref
+    BUILTIN git-for-each-repo
+    BUILTIN git-fsck
+    BUILTIN git-fsmonitor--daemon
+    BUILTIN git-gc
+    BUILTIN git-get-tar-commit-id
+    BUILTIN git-grep
+    BUILTIN git-hash-object
+    BUILTIN git-help
+    BUILTIN git-history
+    BUILTIN git-hook
+    BUILTIN git-index-pack
+    BUILTIN git-init-db
+    BUILTIN git-interpret-trailers
+    BUILTIN git-last-modified
+    BUILTIN git-log
+    BUILTIN git-ls-files
+    BUILTIN git-ls-remote
+    BUILTIN git-ls-tree
+    BUILTIN git-mailinfo
+    BUILTIN git-mailsplit
+    BUILTIN git-merge-base
+    BUILTIN git-merge-file
+    BUILTIN git-merge-index
+    BUILTIN git-merge-ours
+    BUILTIN git-merge-recursive
+    BUILTIN git-merge-tree
+    BUILTIN git-merge
+    BUILTIN git-mktag
+    BUILTIN git-mktree
+    BUILTIN git-multi-pack-index
+    BUILTIN git-mv
+    BUILTIN git-name-rev
+    BUILTIN git-notes
+    BUILTIN git-pack-objects
+    BUILTIN git-pack-redundant
+    BUILTIN git-pack-refs
+    BUILTIN git-patch-id
+    BUILTIN git-prune-packed
+    BUILTIN git-prune
+    BUILTIN git-pull
+    BUILTIN git-push
+    BUILTIN git-range-diff
+    BUILTIN git-read-tree
+    BUILTIN git-rebase
+    BUILTIN git-receive-pack
+    BUILTIN git-reflog
+    BUILTIN git-refs
+    BUILTIN git-remote-ext
+    BUILTIN git-remote-fd
+    BUILTIN git-remote
+    BUILTIN git-repack
+    BUILTIN git-replace
+    BUILTIN git-replay
+    BUILTIN git-repo
+    BUILTIN git-rerere
+    BUILTIN git-reset
+    BUILTIN git-rev-list
+    BUILTIN git-rev-parse
+    BUILTIN git-revert
+    BUILTIN git-rm
+    BUILTIN git-send-pack
+    BUILTIN git-shortlog
+    BUILTIN git-show-branch
+    BUILTIN git-show-index
+    BUILTIN git-show-ref
+    BUILTIN git-sparse-checkout
+    BUILTIN git-stash
+    BUILTIN git-stripspace
+    BUILTIN git-submodule--helper
+    BUILTIN git-survey
+    BUILTIN git-symbolic-ref
+    BUILTIN git-tag
+    BUILTIN git-unpack-file
+    BUILTIN git-unpack-objects
+    BUILTIN git-update-index
+    BUILTIN git-update-ref
+    BUILTIN git-update-server-info
+    BUILTIN git-upload-archive
+    BUILTIN git-upload-pack
+    BUILTIN git-var
+    BUILTIN git-verify-commit
+    BUILTIN git-verify-pack
+    BUILTIN git-verify-tag
+    BUILTIN git-worktree
+    BUILTIN git-write-tree
+    BUILTIN git-cherry
+    BUILTIN git-cherry-pick
+    BUILTIN git-format-patch
+    BUILTIN git-fsck-objects
+    BUILTIN git-init
+    BUILTIN git-maintenance
+    BUILTIN git-merge-subtree
+    BUILTIN git-restore
+    BUILTIN git-show
+    BUILTIN git-stage
+    BUILTIN git-status
+    BUILTIN git-switch
+    BUILTIN git-version
+    BUILTIN git-whatchanged
+    SUBDIR git-gui
+    MSGFMT    po/bg.msg     MSGFMT    po/de.msg     MSGFMT    po/el.msg 579 translated.
+558 translated.
+    MSGFMT    po/fr.msg     MSGFMT    po/hu.msg 381 translated, 4 fuzzy, 6 untranslated.
+    MSGFMT    po/it.msg 520 translated.
+514 translated.
+    MSGFMT    po/ja.msg     MSGFMT    po/nb.msg 519 translated, 1 untranslated.
+    MSGFMT po/pt_br.msg 546 translated, 1 untranslated.
+    MSGFMT po/pt_pt.msg 474 translated, 39 untranslated.
+520 translated.
+    MSGFMT    po/ru.msg     MSGFMT    po/sv.msg 550 translated.
+    MSGFMT    po/vi.msg 576 translated.
+    MSGFMT po/zh_cn.msg 579 translated.
+    GEN git-gui--askpass
+    GEN git-gui--askyesno
+    INDEX lib/
+366 translated, 7 fuzzy, 17 untranslated.
+543 translated.
+GITGUI_VERSION=0.21.0.264.gbb52cd-dirty
+    GEN git-gui
+    SUBDIR gitk-git
+Generating catalog po/bg.msg
+    * new Tcl/Tk interpreter location
+Generating catalog po/ca.msg
+msgfmt --statistics --tcl -l bg -d po/ po/bg.po
+msgfmt --statistics --tcl -l ca -d po/ po/ca.po
+Generating catalog po/de.msg
+msgfmt --statistics --tcl -l de -d po/ po/de.po
+Generating catalog po/es.msg
+msgfmt --statistics --tcl -l es -d po/ po/es.po
+307 translated messages.
+307 translated messages.
+322 translated messages.
+Generating catalog po/fr.msg
+Generating catalog po/hu.msg
+Generating catalog po/it.msg
+msgfmt --statistics --tcl -l fr -d po/ po/fr.po
+msgfmt --statistics --tcl -l hu -d po/ po/hu.po
+msgfmt --statistics --tcl -l it -d po/ po/it.po
+184 translated messages, 46 fuzzy translations, 77 untranslated messages.
+Generating catalog po/ja.msg
+msgfmt --statistics --tcl -l ja -d po/ po/ja.po
+311 translated messages274 translated messages, 17 fuzzy translations, 16 untranslated messages.
+.
+277 translated messages, 18 fuzzy translations, 12 untranslated messages.
+Generating catalog po/pt_br.msg
+msgfmt --statistics --tcl -l pt_br -d po/ po/pt_br.po
+Generating catalog po/pt_pt.msg
+311 translated messages.
+msgfmt --statistics --tcl -l pt_pt -d po/ po/pt_pt.po
+Generating catalog po/ru.msg
+Generating catalog po/sv.msg
+msgfmt --statistics --tcl -l ru -d po/ po/ru.po
+msgfmt --statistics --tcl -l sv -d po/ po/sv.po
+279 translated messages, 16 fuzzy translations, 12 untranslated messages.
+311 translated messages.
+Generating catalog po/ta.msg
+msgfmt --statistics --tcl -l ta -d po/ po/ta.po
+Generating catalog po/vi.msg
+msgfmt --statistics --tcl -l vi -d po/ po/vi.po
+323 translated messages.
+317 translated messages.
+Generating catalog po/zh_cn.msg
+    GEN gitk-wish
+msgfmt --statistics --tcl -l zh_cn -d po/ po/zh_cn.po
+327 translated messages.
+307 translated messages.
+317 translated messages.
+    SUBDIR templates
+    CC oss-fuzz/dummy-cmd-main.o
+    CC oss-fuzz/fuzz-commit-graph.o
+    CC oss-fuzz/fuzz-config.o
+    CC oss-fuzz/fuzz-credential-from-url-gently.o
+    CC oss-fuzz/fuzz-date.o
+    CC oss-fuzz/fuzz-pack-headers.o
+    CC oss-fuzz/fuzz-pack-idx.o
+    CC oss-fuzz/fuzz-parse-attr-line.o
+    CC oss-fuzz/fuzz-url-decode-mem.o
+    LINK oss-fuzz/fuzz-commit-graph
+    LINK oss-fuzz/fuzz-config
+    LINK oss-fuzz/fuzz-credential-from-url-gently
+    LINK oss-fuzz/fuzz-date
+    LINK oss-fuzz/fuzz-pack-headers
+    LINK oss-fuzz/fuzz-pack-idx
+    LINK oss-fuzz/fuzz-parse-attr-line
+    LINK oss-fuzz/fuzz-url-decode-mem
+    MKDIR -p po/build/locale/bg/LC_MESSAGES
+    MSGFMT po/build/locale/bg/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/ca/LC_MESSAGES
+    MSGFMT po/build/locale/ca/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/de/LC_MESSAGES
+    MSGFMT po/build/locale/de/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/el/LC_MESSAGES
+    MSGFMT po/build/locale/el/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/es/LC_MESSAGES
+    MSGFMT po/build/locale/es/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/fr/LC_MESSAGES
+    MSGFMT po/build/locale/fr/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/ga/LC_MESSAGES
+    MSGFMT po/build/locale/ga/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/id/LC_MESSAGES
+    MSGFMT po/build/locale/id/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/is/LC_MESSAGES
+    MSGFMT po/build/locale/is/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/it/LC_MESSAGES
+    MSGFMT po/build/locale/it/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/ko/LC_MESSAGES
+    MSGFMT po/build/locale/ko/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/pl/LC_MESSAGES
+    MSGFMT po/build/locale/pl/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/pt_PT/LC_MESSAGES
+    MSGFMT po/build/locale/pt_PT/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/ru/LC_MESSAGES
+    MKDIR -p po/build/locale/sv/LC_MESSAGES
+    MSGFMT po/build/locale/ru/LC_MESSAGES/git.mo
+    MSGFMT po/build/locale/sv/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/tr/LC_MESSAGES
+    MSGFMT po/build/locale/tr/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/uk/LC_MESSAGES
+    MSGFMT po/build/locale/uk/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/vi/LC_MESSAGES
+    MSGFMT po/build/locale/vi/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/zh_CN/LC_MESSAGES
+    MSGFMT po/build/locale/zh_CN/LC_MESSAGES/git.mo
+    MKDIR -p po/build/locale/zh_TW/LC_MESSAGES
+    MSGFMT po/build/locale/zh_TW/LC_MESSAGES/git.mo
+    MKDIR -p perl/build/lib
+    GEN perl/build/lib/Git.pm
+    MKDIR -p perl/build/lib/Git
+    GEN perl/build/lib/Git/LoadCPAN.pm
+    GEN perl/build/lib/Git/IndexInfo.pm
+    GEN perl/build/lib/Git/I18N.pm
+    GEN perl/build/lib/Git/Packet.pm
+    GEN perl/build/lib/Git/SVN.pm
+    MKDIR -p perl/build/lib/Git/LoadCPAN
+    GEN perl/build/lib/Git/LoadCPAN/Error.pm
+    MKDIR -p perl/build/lib/Git/SVN
+    GEN perl/build/lib/Git/SVN/Fetcher.pm
+    GEN perl/build/lib/Git/SVN/Editor.pm
+    GEN perl/build/lib/Git/SVN/GlobSpec.pm
+    GEN perl/build/lib/Git/SVN/Log.pm
+    GEN perl/build/lib/Git/SVN/Migration.pm
+    GEN perl/build/lib/Git/SVN/Prompt.pm
+    GEN perl/build/lib/Git/SVN/Ra.pm
+    GEN perl/build/lib/Git/SVN/Utils.pm
+    MKDIR -p perl/build/lib/Git/LoadCPAN/Mail
+    GEN perl/build/lib/Git/LoadCPAN/Mail/Address.pm
+    MKDIR -p perl/build/lib/Git/SVN/Memoize
+    GEN perl/build/lib/Git/SVN/Memoize/YAML.pm
+    MKDIR -p perl/build/lib/FromCPAN
+    GEN perl/build/lib/FromCPAN/Error.pm
+    MKDIR -p perl/build/lib/FromCPAN/Mail
+    GEN perl/build/lib/FromCPAN/Mail/Address.pm
+    CC t/helper/test-fake-ssh.o
+    CC t/helper/test-tool.o
+    CC t/helper/test-advise.o
+    CC t/helper/test-bitmap.o
+    CC t/helper/test-bloom.o
+    CC t/helper/test-bundle-uri.o
+    CC t/helper/test-cache-tree.o
+    CC t/helper/test-chmtime.o
+    CC t/helper/test-config.o
+    CC t/helper/test-crontab.o
+    CC t/helper/test-csprng.o
+    CC t/helper/test-date.o
+    CC t/helper/test-delete-gpgsig.o
+    CC t/helper/test-delta.o
+    CC t/helper/test-dir-iterator.o
+    CC t/helper/test-drop-caches.o
+    CC t/helper/test-dump-cache-tree.o
+    CC t/helper/test-dump-fsmonitor.o
+    CC t/helper/test-dump-split-index.o
+    CC t/helper/test-dump-untracked-cache.o
+    CC t/helper/test-env-helper.o
+    CC t/helper/test-example-tap.o
+    CC t/helper/test-find-pack.o
+    CC t/helper/test-fsmonitor-client.o
+    CC t/helper/test-genrandom.o
+    CC t/helper/test-genzeros.o
+    CC t/helper/test-getcwd.o
+    CC t/helper/test-hash-speed.o
+    CC t/helper/test-hash.o
+    CC t/helper/test-hashmap.o
+    CC t/helper/test-hexdump.o
+    CC t/helper/test-json-writer.o
+    CC t/helper/test-lazy-init-name-hash.o
+    CC t/helper/test-match-trees.o
+    CC t/helper/test-mergesort.o
+    CC t/helper/test-mktemp.o
+    CC t/helper/test-name-hash.o
+    CC t/helper/test-online-cpus.o
+    CC t/helper/test-pack-deltas.o
+    CC t/helper/test-pack-mtimes.o
+    CC t/helper/test-parse-options.o
+    CC t/helper/test-parse-pathspec-file.o
+    CC t/helper/test-partial-clone.o
+    CC t/helper/test-path-utils.o
+    CC t/helper/test-path-walk.o
+    CC t/helper/test-pcre2-config.o
+    CC t/helper/test-pkt-line.o
+    CC t/helper/test-proc-receive.o
+    CC t/helper/test-progress.o
+    CC t/helper/test-reach.o
+    CC t/helper/test-read-cache.o
+    CC t/helper/test-read-graph.o
+    CC t/helper/test-read-midx.o
+    CC t/helper/test-ref-store.o
+    CC t/helper/test-reftable.o
+    CC t/helper/test-regex.o
+    CC t/helper/test-rot13-filter.o
+    CC t/helper/test-repository.o
+    CC t/helper/test-revision-walking.o
+    CC t/helper/test-run-command.o
+    CC t/helper/test-scrap-cache-tree.o
+    CC t/helper/test-serve-v2.o
+    CC t/helper/test-sha1.o
+    CC t/helper/test-sha256.o
+    CC t/helper/test-sigchain.o
+    CC t/helper/test-simple-ipc.o
+    CC t/helper/test-string-list.o
+    CC t/helper/test-submodule-config.o
+    CC t/helper/test-submodule-nested-repo-config.o
+    CC t/helper/test-submodule.o
+    CC t/helper/test-subprocess.o
+    CC t/helper/test-trace2.o
+    CC t/helper/test-truncate.o
+    CC t/helper/test-userdiff.o
+    CC t/helper/test-wildmatch.o
+    CC t/helper/test-windows-named-pipe.o
+    CC t/helper/test-write-cache.o
+    CC t/helper/test-xml-encode.o
+    CC t/helper/test-zlib.o
+    CC t/unit-tests/test-lib.o
+    GEN bin-wrappers/git
+    GEN bin-wrappers/scalar
+    GEN bin-wrappers/git-receive-pack
+    GEN bin-wrappers/git-shell
+    GEN bin-wrappers/git-upload-archive
+    GEN bin-wrappers/git-upload-pack
+    GEN bin-wrappers/git-cvsserver
+    GEN bin-wrappers/test-fake-ssh
+    GEN bin-wrappers/test-tool
+    * new test suites
+    LINK t/helper/test-fake-ssh
+    GEN t/unit-tests/clar-decls.h
+    LINK t/helper/test-tool
+    GEN t/unit-tests/clar.suite
+    CC t/unit-tests/u-ctype.o
+    CC t/unit-tests/u-dir.o
+    CC t/unit-tests/u-example-decorate.o
+/usr/bin/ld: t/helper/test-tool.o:(.data.rel.ro+0x1d8): undefined reference to `cmd__iconv'
+collect2: error: ld returned 1 exit status
+make: *** [Makefile:3411: t/helper/test-tool] Error 1
+make: *** Waiting for unfinished jobs....
