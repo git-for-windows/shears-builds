@@ -57,6 +57,13 @@ test_midx_layer_object_uniqueness () {
 	done <$midx_chain
 }
 
+# MIDX compaction requires the v2 format, so make it the default
+# for the rest of this script. We check below that trying
+# compaction with v1 fails using "git -c", which will override this.
+test_expect_success 'set midx version config' '
+	git config --global midx.version 2
+'
+
 test_expect_success 'MIDX compaction with lex-ordered pack names' '
 	git init midx-compact-lex-order &&
 	(

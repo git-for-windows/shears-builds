@@ -19,9 +19,12 @@ midx_read_expect () {
 	NUM_CHUNKS=$3
 	OBJECT_DIR=$4
 	EXTRA_CHUNKS="$5"
+	# This reflects the default midx version we write; it should switch
+	# to 2 if we flip the default.
+	VERSION=1
 	{
 		cat <<-EOF &&
-		header: 4d494458 2 $HASH_LEN $NUM_CHUNKS $NUM_PACKS
+		header: 4d494458 $VERSION $HASH_LEN $NUM_CHUNKS $NUM_PACKS
 		chunks: pack-names oid-fanout oid-lookup object-offsets$EXTRA_CHUNKS
 		num_objects: $NUM_OBJECTS
 		packs:
