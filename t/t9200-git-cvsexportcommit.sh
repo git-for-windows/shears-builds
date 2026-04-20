@@ -11,7 +11,15 @@ if ! test_have_prereq PERL; then
 	test_done
 fi
 
-if ! cvs version >/dev/null 2>&1
+case "$PWD" in
+*:*)
+	skip_all='cvs would get confused by the colon in `pwd`; skipping tests'
+	test_done
+	;;
+esac
+
+cvs >/dev/null 2>&1
+if test $? -ne 1
 then
     skip_all='skipping git cvsexportcommit tests, cvs not found'
     test_done
