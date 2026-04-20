@@ -11,7 +11,8 @@ if ! test_have_prereq PERL; then
 	test_done
 fi
 
-if ! cvs version >/dev/null 2>&1
+cvs >/dev/null 2>&1
+if test $? -ne 1
 then
     skip_all='skipping git cvsexportcommit tests, cvs not found'
     test_done
