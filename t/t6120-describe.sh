@@ -298,6 +298,20 @@ test_expect_success 'name-rev --annotate-stdin' '
 	test_cmp expect actual
 '
 
+test_expect_success 'name-rev --annotate-stdin --name-only' '
+	>expect.unsorted &&
+	for rev in $(git rev-list --all)
+	do
+		name=$(git name-rev --name-only $rev) &&
+		echo "$name" >>expect.unsorted || return 1
+	done &&
+	sort <expect.unsorted >expect &&
+	git name-rev --annotate-stdin --name-only \
+		<list >actual.unsorted &&
+	sort <actual.unsorted >actual &&
+	test_cmp expect actual
+'
+
 test_expect_success 'name-rev --stdin deprecated' '
 	git rev-list --all >list &&
 	if ! test_have_prereq WITH_BREAKING_CHANGES
@@ -785,6 +799,110 @@ test_expect_success 'do not be fooled by invalid describe format ' '
 
 	git rev-parse --short HEAD >out &&
 	test_must_fail git cat-file -t "refs/tags/super-invalid/./../...../ ~^:/?*[////\\\\\\&}/busted.lock-42-g"$(cat out)
+'
+
+test_expect_success 'name-rev --format setup' '
+	mkdir repo-format &&
+	git -C repo-format init &&
+	test_commit -C repo-format first &&
+	test_commit -C repo-format second &&
+	test_commit -C repo-format third &&
+	test_commit -C repo-format fourth &&
+	test_commit -C repo-format fifth &&
+	test_commit -C repo-format sixth &&
+	test_commit -C repo-format seventh &&
+	test_commit -C repo-format eighth
+'
+
+test_expect_success 'format-rev --stdin-mode=revs' '
+	cat >expect <<-\EOF &&
+	eighth
+	seventh
+	fifth
+	EOF
+	git -C repo-format format-rev --stdin-mode=revs \
+		--format=%s >actual <<-\EOF &&
+	HEAD
+	HEAD~
+	HEAD~3
+	EOF
+	test_cmp expect actual
+'
+
+test_expect_success 'format-rev --stdin-mode=text from rev-list same as log' '
+	git -C repo-format log --format=reference >expect &&
+	test_file_not_empty expect &&
+	git -C repo-format rev-list HEAD >list &&
+	git -C repo-format format-rev --stdin-mode=text \
+		--format=reference <list >actual &&
+	test_cmp expect actual
+'
+
+test_expect_success 'format-rev --stdin-mode=text with running text and tree oid' '
+	cmit_oid=$(git -C repo-format rev-parse :/fifth) &&
+	reference=$(git -C repo-format log -n1 --format=reference :/fifth) &&
+	tree=$(git -C repo-format rev-parse HEAD^{tree}) &&
+	cat >expect <<-EOF &&
+	We thought we fixed this in ${reference}.
+	But look at this tree: ${tree}.
+	EOF
+	git -C repo-format format-rev --stdin-mode=text --format=reference \
+		>actual <<-EOF &&
+	We thought we fixed this in ${cmit_oid}.
+	But look at this tree: ${tree}.
+	EOF
+	test_cmp expect actual
+'
+
+test_expect_success 'format-rev with %N (note)' '
+	test_when_finished "git -C repo-format notes remove" &&
+	git -C repo-format notes add -m"Make a note" &&
+	printf "Make a note\n\n\n" >expect &&
+	git -C repo-format format-rev --stdin-mode=revs \
+		--format="tformat:%N" \
+		>actual <<-\EOF &&
+	HEAD
+	HEAD~
+	EOF
+	test_cmp expect actual
+'
+
+test_expect_success 'format-rev --notes<ref> (custom notes ref)' '
+	# One custom notes ref
+	test_when_finished "git -C repo-format notes remove" &&
+	test_when_finished "git -C repo-format notes --ref=word remove" &&
+	git -C repo-format notes add -m"default" &&
+	git -C repo-format notes --ref=word add -m"custom" &&
+	printf "custom\n\n" >expect &&
+	git -C repo-format format-rev --stdin-mode=revs \
+		--format="tformat:%N" \
+		--notes=word \
+		>actual <<-\EOF &&
+	HEAD
+	EOF
+	test_cmp expect actual &&
+	# Glob all
+	printf "default\ncustom\n\n" >expect &&
+	git -C repo-format format-rev --stdin-mode=revs \
+		--format="tformat:%N" \
+		--notes=* >actual <<-\EOF &&
+	HEAD
+	EOF
+	test_cmp expect actual
+'
+
+test_expect_success 'format-rev --stdin-mode=revs on annotated tag peels to commit' '
+	test_when_finished "git -C repo-format tag -d version" &&
+	git -C repo-format tag -a -m"new version" version &&
+	cat >expect <<-\EOF &&
+	eighth
+	EOF
+	git -C repo-format format-rev --stdin-mode=revs \
+		--format=%s \
+		--notes=* >actual <<-\EOF &&
+	version
+	EOF
+	test_cmp expect actual
 '
 
 test_done
