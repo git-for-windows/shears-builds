@@ -4788,6 +4788,8 @@ static void get_object_list_path_walk(struct rev_info *revs)
 	result = walk_objects_by_path(&info);
 	trace2_region_leave("pack-objects", "path-walk", revs->repo);
 
+	path_walk_info_clear(&info);
+
 	if (result)
 		die(_("failed to pack objects via path-walk"));
 }
@@ -5190,7 +5192,7 @@ int cmd_pack_objects(int argc,
 
 	if (path_walk) {
 		const char *option = NULL;
-		if (filter_options.choice)
+		if (!path_walk_filter_compatible(&filter_options))
 			option = "--filter";
 		else if (use_delta_islands)
 			option = "--delta-islands";
@@ -5203,10 +5205,7 @@ int cmd_pack_objects(int argc,
 	}
 	if (path_walk) {
 		strvec_push(&rp, "--boundary");
-		 /*
-		  * We must disable the bitmaps because we are removing
-		  * the --objects / --objects-edge[-aggressive] options.
-		  */
+		strvec_push(&rp, "--objects");
 		use_bitmap_index = 0;
 	} else if (thin) {
 		use_internal_rev_list = 1;

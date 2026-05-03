@@ -206,6 +206,43 @@ test_expect_success 'base & topic, sparse' '
 	test_cmp_sorted expect out
 '
 
+test_expect_success 'base & topic, sparse, no tree pruning' '
+	cat >patterns <<-EOF &&
+	/*
+	!/*/
+	/left/
+	EOF
+
+	test-tool path-walk --stdin-pl --no-pl-sparse-trees \
+		-- base topic <patterns >out &&
+
+	cat >expect <<-EOF &&
+	0:commit::$(git rev-parse topic)
+	0:commit::$(git rev-parse base)
+	0:commit::$(git rev-parse base~1)
+	0:commit::$(git rev-parse base~2)
+	1:tree::$(git rev-parse topic^{tree})
+	1:tree::$(git rev-parse base^{tree})
+	1:tree::$(git rev-parse base~1^{tree})
+	1:tree::$(git rev-parse base~2^{tree})
+	2:blob:a:$(git rev-parse base~2:a)
+	3:tree:a/:$(git rev-parse base:a)
+	4:tree:left/:$(git rev-parse base:left)
+	4:tree:left/:$(git rev-parse base~2:left)
+	5:blob:left/b:$(git rev-parse base~2:left/b)
+	5:blob:left/b:$(git rev-parse base:left/b)
+	6:tree:right/:$(git rev-parse topic:right)
+	6:tree:right/:$(git rev-parse base~1:right)
+	6:tree:right/:$(git rev-parse base~2:right)
+	blobs:3
+	commits:4
+	tags:0
+	trees:10
+	EOF
+
+	test_cmp_sorted expect out
+'
+
 test_expect_success 'topic only' '
 	test-tool path-walk -- topic >out &&
 
@@ -413,6 +450,275 @@ test_expect_success 'trees are reported exactly once' '
 	tree=$(git -C unique-trees rev-parse HEAD:) &&
 	grep "$tree" out >out-filtered &&
 	test_line_count = 1 out-filtered
+'
+
+test_expect_success 'all, blob:none filter' '
+	test-tool path-walk --filter=blob:none -- --all >out &&
+
+	cat >expect <<-EOF &&
+	0:commit::$(git rev-parse topic)
+	0:commit::$(git rev-parse base)
+	0:commit::$(git rev-parse base~1)
+	0:commit::$(git rev-parse base~2)
+	1:tag:/tags:$(git rev-parse refs/tags/first)
+	1:tag:/tags:$(git rev-parse refs/tags/second.1)
+	1:tag:/tags:$(git rev-parse refs/tags/second.2)
+	1:tag:/tags:$(git rev-parse refs/tags/third)
+	1:tag:/tags:$(git rev-parse refs/tags/fourth)
+	1:tag:/tags:$(git rev-parse refs/tags/tree-tag)
+	1:tag:/tags:$(git rev-parse refs/tags/blob-tag)
+	2:tree::$(git rev-parse topic^{tree})
+	2:tree::$(git rev-parse base^{tree})
+	2:tree::$(git rev-parse base~1^{tree})
+	2:tree::$(git rev-parse base~2^{tree})
+	2:tree::$(git rev-parse refs/tags/tree-tag^{})
+	2:tree::$(git rev-parse refs/tags/tree-tag2^{})
+	3:tree:a/:$(git rev-parse base:a)
+	4:tree:child/:$(git rev-parse refs/tags/tree-tag:child)
+	5:tree:left/:$(git rev-parse base:left)
+	5:tree:left/:$(git rev-parse base~2:left)
+	6:tree:right/:$(git rev-parse topic:right)
+	6:tree:right/:$(git rev-parse base~1:right)
+	6:tree:right/:$(git rev-parse base~2:right)
+	blobs:0
+	commits:4
+	tags:7
+	trees:13
+	EOF
+
+	test_cmp_sorted expect out
+'
+
+test_expect_success 'topic only, blob:none filter' '
+	test-tool path-walk --filter=blob:none -- topic >out &&
+
+	cat >expect <<-EOF &&
+	0:commit::$(git rev-parse topic)
+	0:commit::$(git rev-parse base~1)
+	0:commit::$(git rev-parse base~2)
+	1:tree::$(git rev-parse topic^{tree})
+	1:tree::$(git rev-parse base~1^{tree})
+	1:tree::$(git rev-parse base~2^{tree})
+	2:tree:left/:$(git rev-parse base~2:left)
+	3:tree:right/:$(git rev-parse topic:right)
+	3:tree:right/:$(git rev-parse base~1:right)
+	3:tree:right/:$(git rev-parse base~2:right)
+	blobs:0
+	commits:3
+	tags:0
+	trees:7
+	EOF
+
+	test_cmp_sorted expect out
+'
+
+test_expect_success 'all, blob:limit=0 filter' '
+	test-tool path-walk --filter=blob:limit=0 -- --all >out &&
+
+	cat >expect <<-EOF &&
+	0:commit::$(git rev-parse topic)
+	0:commit::$(git rev-parse base)
+	0:commit::$(git rev-parse base~1)
+	0:commit::$(git rev-parse base~2)
+	1:tag:/tags:$(git rev-parse refs/tags/first)
+	1:tag:/tags:$(git rev-parse refs/tags/second.1)
+	1:tag:/tags:$(git rev-parse refs/tags/second.2)
+	1:tag:/tags:$(git rev-parse refs/tags/third)
+	1:tag:/tags:$(git rev-parse refs/tags/fourth)
+	1:tag:/tags:$(git rev-parse refs/tags/tree-tag)
+	1:tag:/tags:$(git rev-parse refs/tags/blob-tag)
+	2:tree::$(git rev-parse topic^{tree})
+	2:tree::$(git rev-parse base^{tree})
+	2:tree::$(git rev-parse base~1^{tree})
+	2:tree::$(git rev-parse base~2^{tree})
+	2:tree::$(git rev-parse refs/tags/tree-tag^{})
+	2:tree::$(git rev-parse refs/tags/tree-tag2^{})
+	3:tree:a/:$(git rev-parse base:a)
+	4:tree:child/:$(git rev-parse refs/tags/tree-tag:child)
+	5:tree:left/:$(git rev-parse base:left)
+	5:tree:left/:$(git rev-parse base~2:left)
+	6:tree:right/:$(git rev-parse topic:right)
+	6:tree:right/:$(git rev-parse base~1:right)
+	6:tree:right/:$(git rev-parse base~2:right)
+	blobs:0
+	commits:4
+	tags:7
+	trees:13
+	EOF
+
+	test_cmp_sorted expect out
+'
+
+test_expect_success 'all, blob:limit=3 filter' '
+	test-tool path-walk --filter=blob:limit=3 -- --all >out &&
+
+	cat >expect <<-EOF &&
+	0:commit::$(git rev-parse topic)
+	0:commit::$(git rev-parse base)
+	0:commit::$(git rev-parse base~1)
+	0:commit::$(git rev-parse base~2)
+	1:tag:/tags:$(git rev-parse refs/tags/first)
+	1:tag:/tags:$(git rev-parse refs/tags/second.1)
+	1:tag:/tags:$(git rev-parse refs/tags/second.2)
+	1:tag:/tags:$(git rev-parse refs/tags/third)
+	1:tag:/tags:$(git rev-parse refs/tags/fourth)
+	1:tag:/tags:$(git rev-parse refs/tags/tree-tag)
+	1:tag:/tags:$(git rev-parse refs/tags/blob-tag)
+	2:tree::$(git rev-parse topic^{tree})
+	2:tree::$(git rev-parse base^{tree})
+	2:tree::$(git rev-parse base~1^{tree})
+	2:tree::$(git rev-parse base~2^{tree})
+	2:tree::$(git rev-parse refs/tags/tree-tag^{})
+	2:tree::$(git rev-parse refs/tags/tree-tag2^{})
+	3:blob:a:$(git rev-parse base~2:a)
+	4:tree:a/:$(git rev-parse base:a)
+	5:tree:child/:$(git rev-parse refs/tags/tree-tag:child)
+	6:tree:left/:$(git rev-parse base:left)
+	6:tree:left/:$(git rev-parse base~2:left)
+	7:blob:left/b:$(git rev-parse base~2:left/b)
+	8:tree:right/:$(git rev-parse topic:right)
+	8:tree:right/:$(git rev-parse base~1:right)
+	8:tree:right/:$(git rev-parse base~2:right)
+	9:blob:right/c:$(git rev-parse base~2:right/c)
+	10:blob:right/d:$(git rev-parse base~1:right/d)
+	blobs:4
+	commits:4
+	tags:7
+	trees:13
+	EOF
+
+	test_cmp_sorted expect out
+'
+
+test_expect_success 'setup sparse filter blob' '
+	# Cone-mode patterns: include root, exclude all dirs, include left/
+	cat >patterns <<-\EOF &&
+	/*
+	!/*/
+	/left/
+	EOF
+	sparse_oid=$(git hash-object -w -t blob patterns)
+'
+
+test_expect_success 'all, sparse:oid filter' '
+	test-tool path-walk --filter=sparse:oid=$sparse_oid -- --all >out &&
+
+	cat >expect <<-EOF &&
+	0:commit::$(git rev-parse topic)
+	0:commit::$(git rev-parse base)
+	0:commit::$(git rev-parse base~1)
+	0:commit::$(git rev-parse base~2)
+	1:tag:/tags:$(git rev-parse refs/tags/first)
+	1:tag:/tags:$(git rev-parse refs/tags/second.1)
+	1:tag:/tags:$(git rev-parse refs/tags/second.2)
+	1:tag:/tags:$(git rev-parse refs/tags/third)
+	1:tag:/tags:$(git rev-parse refs/tags/fourth)
+	1:tag:/tags:$(git rev-parse refs/tags/tree-tag)
+	1:tag:/tags:$(git rev-parse refs/tags/blob-tag)
+	2:blob:/tagged-blobs:$(git rev-parse refs/tags/blob-tag^{})
+	2:blob:/tagged-blobs:$(git rev-parse refs/tags/blob-tag2^{})
+	3:tree::$(git rev-parse topic^{tree})
+	3:tree::$(git rev-parse base^{tree})
+	3:tree::$(git rev-parse base~1^{tree})
+	3:tree::$(git rev-parse base~2^{tree})
+	3:tree::$(git rev-parse refs/tags/tree-tag^{})
+	3:tree::$(git rev-parse refs/tags/tree-tag2^{})
+	4:blob:a:$(git rev-parse base~2:a)
+	5:blob:file2:$(git rev-parse refs/tags/tree-tag2^{}:file2)
+	6:tree:a/:$(git rev-parse base:a)
+	7:tree:child/:$(git rev-parse refs/tags/tree-tag:child)
+	8:tree:left/:$(git rev-parse base:left)
+	8:tree:left/:$(git rev-parse base~2:left)
+	9:blob:left/b:$(git rev-parse base~2:left/b)
+	9:blob:left/b:$(git rev-parse base:left/b)
+	10:tree:right/:$(git rev-parse topic:right)
+	10:tree:right/:$(git rev-parse base~1:right)
+	10:tree:right/:$(git rev-parse base~2:right)
+	blobs:6
+	commits:4
+	tags:7
+	trees:13
+	EOF
+
+	test_cmp_sorted expect out
+'
+
+test_expect_success 'topic only, sparse:oid filter' '
+	test-tool path-walk --filter=sparse:oid=$sparse_oid -- topic >out &&
+
+	cat >expect <<-EOF &&
+	0:commit::$(git rev-parse topic)
+	0:commit::$(git rev-parse base~1)
+	0:commit::$(git rev-parse base~2)
+	1:tree::$(git rev-parse topic^{tree})
+	1:tree::$(git rev-parse base~1^{tree})
+	1:tree::$(git rev-parse base~2^{tree})
+	2:blob:a:$(git rev-parse base~2:a)
+	3:tree:left/:$(git rev-parse base~2:left)
+	4:blob:left/b:$(git rev-parse base~2:left/b)
+	5:tree:right/:$(git rev-parse topic:right)
+	5:tree:right/:$(git rev-parse base~1:right)
+	5:tree:right/:$(git rev-parse base~2:right)
+	blobs:2
+	commits:3
+	tags:0
+	trees:7
+	EOF
+
+	test_cmp_sorted expect out
+'
+
+# Demonstrate the SEEN flag ordering issue: when the same tree/blob OID
+# appears at two sibling paths where one is in-cone and the other is
+# out-of-cone, the path-walk must still discover blobs at the in-cone
+# path even when the shared tree OID was first encountered out-of-cone.
+# Since sparse:oid includes all trees, the out-of-cone tree (aaa/) is
+# walked first, and its blob is skipped. The path-walk then re-walks
+# the same tree OID at the in-cone path (zzz/) to find the blob there.
+
+test_expect_success 'setup shared tree OID across cone boundary' '
+	git checkout --orphan shared-tree &&
+	git rm -rf . &&
+	mkdir aaa zzz &&
+	echo "shared content" >aaa/file &&
+	echo "shared content" >zzz/file &&
+	echo "root file" >rootfile &&
+	git add aaa zzz rootfile &&
+	git commit -m "aaa and zzz have same tree OID" &&
+
+	# Verify they really share a tree OID
+	aaa_tree=$(git rev-parse HEAD:aaa) &&
+	zzz_tree=$(git rev-parse HEAD:zzz) &&
+	test "$aaa_tree" = "$zzz_tree" &&
+
+	# Cone pattern: include root + zzz/ (not aaa/)
+	cat >shared-patterns <<-\EOF &&
+	/*
+	!/*/
+	/zzz/
+	EOF
+	shared_sparse_oid=$(git hash-object -w -t blob shared-patterns)
+'
+
+test_expect_success 'sparse:oid with shared tree OID across cone boundary' '
+	test-tool path-walk \
+		--filter=sparse:oid=$shared_sparse_oid \
+		-- shared-tree >out &&
+
+	cat >expect <<-EOF &&
+	0:commit::$(git rev-parse shared-tree)
+	1:tree::$(git rev-parse shared-tree^{tree})
+	2:blob:rootfile:$(git rev-parse shared-tree:rootfile)
+	3:tree:aaa/:$(git rev-parse shared-tree:aaa)
+	4:tree:zzz/:$(git rev-parse shared-tree:zzz)
+	5:blob:zzz/file:$(git rev-parse shared-tree:zzz/file)
+	blobs:2
+	commits:1
+	tags:0
+	trees:3
+	EOF
+
+	test_cmp_sorted expect out
 '
 
 test_done
