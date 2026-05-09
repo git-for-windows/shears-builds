@@ -63,7 +63,7 @@ static int sparse_checkout_list(int argc, const char **argv, const char *prefix,
 	int res;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
-	setup_work_tree();
+	setup_work_tree(the_repository);
 	if (!cfg->apply_sparse_checkout)
 		die(_("this worktree is not sparse"));
 
@@ -229,7 +229,7 @@ static int update_working_directory(struct repository *r,
 	o.dst_index = r->index;
 	o.skip_sparse_checkout = 0;
 
-	setup_work_tree();
+	setup_work_tree(the_repository);
 
 	repo_hold_locked_index(r, &lock_file, LOCK_DIE_ON_ERROR);
 
@@ -469,7 +469,7 @@ static int sparse_checkout_init(int argc, const char **argv, const char *prefix,
 		OPT_END(),
 	};
 
-	setup_work_tree();
+	setup_work_tree(the_repository);
 	repo_read_index(repo);
 
 	init_opts.cone_mode = -1;
@@ -740,7 +740,8 @@ static void sanitize_paths(struct repository *repo,
 		int prefix_len = strlen(prefix);
 
 		for (i = 0; i < args->nr; i++) {
-			char *prefixed_path = prefix_path(prefix, prefix_len, args->v[i]);
+			char *prefixed_path = prefix_path(the_repository, prefix,
+							  prefix_len, args->v[i]);
 			strvec_replace(args, i, prefixed_path);
 			free(prefixed_path);
 		}
@@ -806,7 +807,7 @@ static int sparse_checkout_add(int argc, const char **argv, const char *prefix,
 	int ret;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
-	setup_work_tree();
+	setup_work_tree(the_repository);
 	if (!cfg->apply_sparse_checkout)
 		die(_("no sparse-checkout to add to"));
 
@@ -861,7 +862,7 @@ static int sparse_checkout_set(int argc, const char **argv, const char *prefix,
 	struct strvec patterns = STRVEC_INIT;
 	int ret;
 
-	setup_work_tree();
+	setup_work_tree(the_repository);
 	repo_read_index(repo);
 
 	set_opts.cone_mode = -1;
@@ -917,7 +918,7 @@ static int sparse_checkout_reapply(int argc, const char **argv,
 	};
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
-	setup_work_tree();
+	setup_work_tree(the_repository);
 	if (!cfg->apply_sparse_checkout)
 		die(_("must be in a sparse-checkout to reapply sparsity patterns"));
 
@@ -980,7 +981,7 @@ static int sparse_checkout_clean(int argc, const char **argv,
 		OPT_END(),
 	};
 
-	setup_work_tree();
+	setup_work_tree(the_repository);
 	if (!cfg->apply_sparse_checkout)
 		die(_("must be in a sparse-checkout to clean directories"));
 	if (!cfg->core_sparse_checkout_cone)
@@ -1058,7 +1059,7 @@ static int sparse_checkout_disable(int argc, const char **argv,
 	 * forcibly return to a dense checkout regardless of initial state.
 	 */
 
-	setup_work_tree();
+	setup_work_tree(the_repository);
 	argc = parse_options(argc, argv, prefix,
 			     builtin_sparse_checkout_disable_options,
 			     builtin_sparse_checkout_disable_usage, 0);
