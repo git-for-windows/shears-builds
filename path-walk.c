@@ -9,6 +9,9 @@
 #include "hashmap.h"
 #include "hex.h"
 #include "list-objects.h"
+#include "list-objects-filter-options.h"
+#include "object-name.h"
+#include "odb.h"
 #include "object.h"
 #include "oid-array.h"
 #include "path.h"
@@ -178,11 +181,6 @@ static int add_tree_entries(struct path_walk_context *ctx,
 			return -1;
 		}
 
-		/* Skip this object if already seen. */
-		if (o->flags & SEEN)
-			continue;
-		o->flags |= SEEN;
-
 		strbuf_setlen(&path, base_len);
 		strbuf_add(&path, entry.path, entry.pathlen);
 
@@ -193,6 +191,40 @@ static int add_tree_entries(struct path_walk_context *ctx,
 		if (type == OBJ_TREE)
 			strbuf_addch(&path, '/');
 
+		if (o->flags & SEEN) {
+			/*
+			 * A tree with a shared OID may appear at multiple
+			 * paths. Even though we already added this tree to
+			 * the output at some other path, we still need to
+			 * walk into it at this in-cone path to discover
+			 * blobs that were not found at the earlier
+			 * out-of-cone path.
+			 *
+			 * Only do this for paths not yet in our map, to
+			 * avoid duplicate entries when the same tree OID
+			 * appears at the same path across multiple commits.
+			 */
+			if (type == OBJ_TREE && ctx->info->pl &&
+			    ctx->info->pl->use_cone_patterns &&
+			    !ctx->info->pl_sparse_trees &&
+			    !strmap_contains(&ctx->paths_to_lists, path.buf)) {
+				int dtype;
+				enum pattern_match_result m;
+				m = path_matches_pattern_list(path.buf, path.len,
+							      path.buf + base_len,
+							      &dtype,
+							      ctx->info->pl,
+							      ctx->repo->index);
+				if (m != NOT_MATCHED) {
+					add_path_to_list(ctx, path.buf, type,
+							 &entry.oid,
+							 !(o->flags & UNINTERESTING));
+					push_to_stack(ctx, path.buf);
+				}
+			}
+			continue;
+		}
+
 		if (ctx->info->pl) {
 			int dtype;
 			enum pattern_match_result match;
@@ -202,7 +234,8 @@ static int add_tree_entries(struct path_walk_context *ctx,
 							  ctx->repo->index);
 
 			if (ctx->info->pl->use_cone_patterns &&
-			    match == NOT_MATCHED)
+			    match == NOT_MATCHED &&
+			    (type == OBJ_BLOB || ctx->info->pl_sparse_trees))
 				continue;
 			else if (!ctx->info->pl->use_cone_patterns &&
 				 type == OBJ_BLOB &&
@@ -237,6 +270,7 @@ static int add_tree_entries(struct path_walk_context *ctx,
 				continue;
 		}
 
+		o->flags |= SEEN;
 		add_path_to_list(ctx, path.buf, type, &entry.oid,
 				 !(o->flags & UNINTERESTING));
 
@@ -314,9 +348,29 @@ static int walk_path(struct path_walk_context *ctx,
 	/* Evaluate function pointer on this data, if requested. */
 	if ((list->type == OBJ_TREE && ctx->info->trees) ||
 	    (list->type == OBJ_BLOB && ctx->info->blobs) ||
-	    (list->type == OBJ_TAG && ctx->info->tags))
-		ret = ctx->info->path_fn(path, &list->oids, list->type,
-					ctx->info->path_fn_data);
+	    (list->type == OBJ_TAG && ctx->info->tags)) {
+		struct oid_array *oids = &list->oids;
+		struct oid_array filtered = OID_ARRAY_INIT;
+
+		if (list->type == OBJ_BLOB && ctx->info->blob_limit) {
+			for (size_t i = 0; i < list->oids.nr; i++) {
+				unsigned long size;
+
+				if (odb_read_object_info(ctx->repo->objects,
+							 &list->oids.oid[i],
+							 &size) != OBJ_BLOB ||
+				    size < ctx->info->blob_limit)
+					oid_array_append(&filtered,
+							 &list->oids.oid[i]);
+			}
+			oids = &filtered;
+		}
+
+		if (oids->nr)
+			ret = ctx->info->path_fn(path, oids, list->type,
+						 ctx->info->path_fn_data);
+		oid_array_clear(&filtered);
+	}
 
 	/* Expand data for children. */
 	if (list->type == OBJ_TREE) {
@@ -376,7 +430,7 @@ static int setup_pending_objects(struct path_walk_info *info,
 		CALLOC_ARRAY(tags, 1);
 	if (info->blobs)
 		CALLOC_ARRAY(tagged_blobs, 1);
-	if (info->trees)
+	if (info->trees || info->blobs)
 		root_tree_list = strmap_get(&ctx->paths_to_lists, root_path);
 
 	/*
@@ -421,7 +475,7 @@ static int setup_pending_objects(struct path_walk_info *info,
 
 		switch (obj->type) {
 		case OBJ_TREE:
-			if (!info->trees)
+			if (!info->trees && !info->blobs)
 				continue;
 			if (pending->path) {
 				char *path = *pending->path ? xstrfmt("%s/", pending->path)
@@ -485,6 +539,119 @@ static int setup_pending_objects(struct path_walk_info *info,
 	return 0;
 }
 
+static int prepare_filters_one(struct path_walk_info *info,
+			       struct list_objects_filter_options *options)
+{
+	switch (options->choice) {
+	case LOFC_DISABLED:
+		return 1;
+
+	case LOFC_BLOB_NONE:
+		if (info)
+			info->blobs = 0;
+		return 1;
+
+	case LOFC_BLOB_LIMIT:
+		if (info) {
+			if (!options->blob_limit_value) {
+				info->blobs = 0;
+			} else if (!info->blob_limit ||
+				   options->blob_limit_value < info->blob_limit) {
+				info->blob_limit = options->blob_limit_value;
+			}
+		}
+		return 1;
+
+	case LOFC_TREE_DEPTH:
+		if (options->tree_exclude_depth) {
+			error(_("tree:%lu filter not supported by the path-walk API"),
+			      options->tree_exclude_depth);
+			return 0;
+		}
+		if (info) {
+			info->trees = 0;
+			info->blobs = 0;
+		}
+		return 1;
+
+	case LOFC_OBJECT_TYPE:
+		if (info) {
+			info->commits &= options->object_type == OBJ_COMMIT;
+			info->tags &= options->object_type == OBJ_TAG;
+			info->trees &= options->object_type == OBJ_TREE;
+			info->blobs &= options->object_type == OBJ_BLOB;
+		}
+		return 1;
+
+	case LOFC_SPARSE_OID:
+		if (info) {
+			struct object_id sparse_oid;
+			struct repository *repo = info->revs->repo;
+
+			if (info->pl) {
+				warning(_("sparse filter cannot be combined with existing sparse patterns"));
+				return 0;
+			}
+
+			if (repo_get_oid_with_flags(repo,
+						    options->sparse_oid_name,
+						    &sparse_oid,
+						    GET_OID_BLOB)) {
+				error(_("unable to access sparse blob in '%s'"),
+				      options->sparse_oid_name);
+				return 0;
+			}
+
+			CALLOC_ARRAY(info->pl, 1);
+			info->pl->use_cone_patterns = 1;
+
+			if (add_patterns_from_blob_to_list(&sparse_oid, "", 0,
+							   info->pl) < 0) {
+				clear_pattern_list(info->pl);
+				FREE_AND_NULL(info->pl);
+				error(_("unable to parse sparse filter data in '%s'"),
+				      oid_to_hex(&sparse_oid));
+				return 0;
+			}
+
+			if (!info->pl->use_cone_patterns) {
+				clear_pattern_list(info->pl);
+				FREE_AND_NULL(info->pl);
+				warning(_("sparse filter is not cone-mode compatible"));
+				return 0;
+			}
+		}
+		return 1;
+
+	case LOFC_COMBINE:
+		for (size_t i = 0; i < options->sub_nr; i++) {
+			if (!prepare_filters_one(info, &options->sub[i]))
+				return 0;
+		}
+		return 1;
+
+	default:
+		error(_("object filter '%s' not supported by the path-walk API"),
+		      list_objects_filter_spec(options));
+		return 0;
+	}
+}
+
+static int prepare_filters(struct path_walk_info *info,
+			   struct list_objects_filter_options *options)
+{
+	if (!prepare_filters_one(info, options))
+		return 0;
+	if (info)
+		list_objects_filter_release(options);
+	return 1;
+}
+
+int path_walk_filter_compatible(struct list_objects_filter_options *options)
+{
+	return prepare_filters(NULL, options);
+}
+
 /**
  * Given the configuration of 'info', walk the commits based on 'info->revs' and
  * call 'info->path_fn' on each discovered path.
@@ -512,6 +679,9 @@ int walk_objects_by_path(struct path_walk_info *info)
 
 	trace2_region_enter("path-walk", "commit-walk", info->revs->repo);
 
+	if (!prepare_filters(info, &info->revs->filter))
+		return -1;
+
 	CALLOC_ARRAY(commit_list, 1);
 	commit_list->type = OBJ_COMMIT;
 
@@ -534,9 +704,16 @@ int walk_objects_by_path(struct path_walk_info *info)
 	/*
 	 * Set these values before preparing the walk to catch
 	 * lightweight tags pointing to non-commits and indexed objects.
+	 *
+	 * Keep tree_objects set whenever blobs are wanted: blobs may
+	 * be reachable through trees that show up as pending objects
+	 * (e.g., via lightweight tags pointing to trees, or annotated
+	 * tags whose peeled target is a tree). Without tree_objects,
+	 * prepare_revision_walk() would discard those pending trees
+	 * and we would never descend into them.
 	 */
 	info->revs->blob_objects = info->blobs;
-	info->revs->tree_objects = info->trees;
+	info->revs->tree_objects = info->trees || info->blobs;
 
 	if (prepare_revision_walk(info->revs))
 		die(_("failed to setup revision walk"));
