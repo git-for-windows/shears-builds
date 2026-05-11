@@ -1946,8 +1946,10 @@ int prepare_auto_maintenance(struct repository *r, int quiet,
 {
 	int enabled, auto_detach;
 
-	if (!repo_config_get_bool(r, "maintenance.auto", &enabled) &&
-	    !enabled)
+	if (repo_config_get_bool(r, "maintenance.auto", &enabled) &&
+	    repo_config_get_bool(r, "gc.auto", &enabled))
+		enabled = 1;
+	if (!enabled)
 		return 0;
 
 	/*
