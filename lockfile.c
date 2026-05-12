@@ -356,3 +356,12 @@ int rollback_lock_file(struct lock_file *lk)
 	delete_tempfile(&lk->pid_tempfile);
 	return delete_tempfile(&lk->tempfile);
 }
+
+void lock_file_reassign_owner(struct lock_file *lk, pid_t owner)
+{
+	if (!is_lock_file_locked(lk))
+		BUG("cannot reassign ownership of unlocked lockfile");
+	lk->tempfile->owner = owner;
+	if (lk->pid_tempfile)
+		lk->pid_tempfile->owner = owner;
+}

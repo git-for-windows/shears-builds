@@ -2161,26 +2161,39 @@ void sanitize_stdfds(void)
 		close(fd);
 }
 
-int daemonize(void)
+pid_t daemonize_without_exit(void)
 {
 #ifdef NO_POSIX_GOODIES
 	errno = ENOSYS;
 	return -1;
 #else
-	switch (fork()) {
-		case 0:
-			break;
-		case -1:
-			die_errno(_("fork failed"));
-		default:
-			exit(0);
-	}
+	pid_t pid = fork();
+	if (pid < 0)
+		return -1;
+	if (pid > 0)
+		return pid;
+
 	if (setsid() == -1)
 		die_errno(_("setsid failed"));
 	close(0);
 	close(1);
 	close(2);
 	sanitize_stdfds();
+	return 0;
+#endif
+}
+
+int daemonize(void)
+{
+#ifdef NO_POSIX_GOODIES
+	errno = ENOSYS;
+	return -1;
+#else
+	pid_t pid = daemonize_without_exit();
+	if (pid < 0)
+		die_errno(_("fork failed"));
+	if (pid > 0)
+		exit(0);
 	return 0;
 #endif
 }
