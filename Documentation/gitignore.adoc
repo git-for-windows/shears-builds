@@ -7,7 +7,7 @@ gitignore - Specifies intentionally untracked files to ignore
 
 SYNOPSIS
 --------
-$XDG_CONFIG_HOME/git/ignore, $GIT_DIR/info/exclude, .gitignore
+$XDG_CONFIG_HOME/git/ignore, $GIT_COMMON_DIR/info/exclude, .gitignore
 
 DESCRIPTION
 -----------
@@ -34,7 +34,7 @@ precedence, the last matching pattern decides the outcome):
    includes such `.gitignore` files in its repository, containing patterns for
    files generated as part of the project build.
 
- * Patterns read from `$GIT_DIR/info/exclude`.
+ * Patterns read from `$GIT_COMMON_DIR/info/exclude`.
 
  * Patterns read from the file specified by the configuration
    variable `core.excludesFile`.
