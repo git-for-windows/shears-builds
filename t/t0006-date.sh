@@ -187,9 +187,13 @@ check_approxidate '3:00' '2009-08-30 03:00:00'
 check_approxidate '15:00' '2009-08-30 15:00:00'
 check_approxidate 'noon today' '2009-08-30 12:00:00'
 check_approxidate 'today at noon' '2009-08-30 12:00:00' success -12
+check_approxidate 'noon today' '2009-09-01 12:00:00' success +36
 check_approxidate 'noon yesterday' '2009-08-29 12:00:00'
 check_approxidate 'last Friday at noon' '2009-08-28 12:00:00'
 check_approxidate 'last Friday at noon' '2009-08-28 12:00:00' success -12
+check_approxidate 'noon yesterday' '2009-08-29 12:00:00' success -12
+check_approxidate 'tea last saturday' '2009-08-29 17:00:00'
+check_approxidate 'tea last saturday' '2009-08-29 17:00:00' success -12
 check_approxidate 'January 5th noon pm' '2009-01-05 12:00:00'
 check_approxidate 'January 5th noon pm' '2009-01-05 12:00:00' success -12
 check_approxidate '10am noon' '2009-08-29 12:00:00'
