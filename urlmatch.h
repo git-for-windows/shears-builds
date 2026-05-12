@@ -35,6 +35,7 @@ struct url_info {
 };
 
 char *url_normalize(const char *, struct url_info *);
+char *url_parse(const char *, struct url_info *);
 
 /*
  * Like url_normalize(), but also allows '*' glob characters in the host
