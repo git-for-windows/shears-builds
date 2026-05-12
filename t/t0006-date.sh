@@ -156,11 +156,18 @@ check_parse '2100-00-00 00:00:00 +11' bad
 REQUIRE_64BIT_TIME=
 
 check_approxidate() {
+	old_date=$GIT_TEST_DATE_NOW
+	GIT_TEST_DATE_NOW=$(($old_date${4:-+0}*60*60)); export GIT_TEST_DATE_NOW
+	caption=$1
+	if [ ! -z $4 ]; then
+		caption="$caption; offset $4h"
+	fi
 	echo "$1 -> $2 +0000" >expect
-	test_expect_${3:-success} "parse approxidate ($1)" "
+	test_expect_${3:-success} "parse approxidate ($caption)" "
 	test-tool date approxidate '$1' >actual &&
 	test_cmp expect actual
 	"
+	GIT_TEST_DATE_NOW=$old_date; export GIT_TEST_DATE_NOW
 }
 
 check_approxidate now '2009-08-30 19:20:00'
@@ -182,6 +189,8 @@ check_approxidate 'noon today' '2009-08-30 12:00:00'
 check_approxidate 'noon yesterday' '2009-08-29 12:00:00'
 check_approxidate 'January 5th noon pm' '2009-01-05 12:00:00'
 check_approxidate '10am noon' '2009-08-29 12:00:00'
+check_approxidate 'January 5th yesterday' '2009-01-29 19:20:00'
+check_approxidate 'January 5th yesterday' '2008-12-31 19:20:00' success +48
 
 check_approxidate 'last tuesday' '2009-08-25 19:20:00'
 check_approxidate 'July 5th' '2009-07-05 19:20:00'
