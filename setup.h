@@ -150,6 +150,7 @@ int path_inside_repo(const char *prefix, const char *path);
 
 void sanitize_stdfds(void);
 int daemonize(void);
+pid_t daemonize_without_exit(void);
 
 /*
  * GIT_REPO_VERSION is the version we write by default. The
