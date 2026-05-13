@@ -283,9 +283,13 @@ include shared.mak
 # Define SKIP_DASHED_BUILT_INS if you do not need the dashed versions of the
 # built-ins to be linked/copied at all.
 #
+# Define USE_NED_ALLOCATOR if you want to replace the platforms default
+# memory allocators with the nedmalloc allocator written by Niall Douglas.
+#
 # Define OVERRIDE_STRDUP to override the libc version of strdup(3).
 # This is necessary when using a custom allocator in order to avoid
 # crashes due to allocation and free working on different 'heaps'.
+# It's defined automatically if USE_NED_ALLOCATOR is set.
 #
 # Define NO_REGEX if your C library lacks regex support with REG_STARTEND
 # feature.
@@ -868,7 +872,6 @@ TEST_BUILTINS_OBJS += test-submodule-config.o
 TEST_BUILTINS_OBJS += test-submodule-nested-repo-config.o
 TEST_BUILTINS_OBJS += test-submodule.o
 TEST_BUILTINS_OBJS += test-subprocess.o
-TEST_BUILTINS_OBJS += test-synthesize.o
 TEST_BUILTINS_OBJS += test-trace2.o
 TEST_BUILTINS_OBJS += test-truncate.o
 TEST_BUILTINS_OBJS += test-userdiff.o
@@ -1509,6 +1512,8 @@ BUILTIN_OBJS += builtin/write-tree.o
 # upstream unnecessarily (making merging in future changes easier).
 THIRD_PARTY_SOURCES += compat/inet_ntop.c
 THIRD_PARTY_SOURCES += compat/inet_pton.c
+THIRD_PARTY_SOURCES += compat/mimalloc/%
+THIRD_PARTY_SOURCES += compat/nedmalloc/%
 THIRD_PARTY_SOURCES += compat/obstack.%
 THIRD_PARTY_SOURCES += compat/poll/%
 THIRD_PARTY_SOURCES += compat/regex/%
@@ -2264,6 +2269,52 @@ ifdef NATIVE_CRLF
 	BASIC_CFLAGS += -DNATIVE_CRLF
 endif
 
+ifdef USE_NED_ALLOCATOR
+	COMPAT_CFLAGS += -Icompat/nedmalloc
+	COMPAT_OBJS += compat/nedmalloc/nedmalloc.o
+	OVERRIDE_STRDUP = YesPlease
+endif
+
+ifdef USE_MIMALLOC
+	MIMALLOC_OBJS = \
+		compat/mimalloc/alloc-aligned.o \
+		compat/mimalloc/alloc.o \
+		compat/mimalloc/arena.o \
+		compat/mimalloc/bitmap.o \
+		compat/mimalloc/heap.o \
+		compat/mimalloc/init.o \
+		compat/mimalloc/libc.o \
+		compat/mimalloc/options.o \
+		compat/mimalloc/os.o \
+		compat/mimalloc/page.o \
+		compat/mimalloc/random.o \
+		compat/mimalloc/prim/prim.o \
+		compat/mimalloc/segment.o \
+		compat/mimalloc/segment-map.o \
+		compat/mimalloc/stats.o
+
+	COMPAT_CFLAGS += -Icompat/mimalloc -DMI_DEBUG=0 -DUSE_MIMALLOC --std=gnu11
+	COMPAT_OBJS += $(MIMALLOC_OBJS)
+
+$(MIMALLOC_OBJS): COMPAT_CFLAGS += -DBANNED_H
+
+$(MIMALLOC_OBJS): COMPAT_CFLAGS += \
+	-DMI_WIN_USE_FLS \
+	-Wno-attributes \
+	-Wno-unknown-pragmas \
+	-Wno-unused-function \
+	-Wno-array-bounds
+
+ifdef DEVELOPER
+$(MIMALLOC_OBJS): COMPAT_CFLAGS += \
+	-Wno-pedantic \
+	-Wno-declaration-after-statement \
+	-Wno-old-style-definition \
+	-Wno-missing-prototypes \
+	-Wno-implicit-function-declaration
+endif
+endif
+
 ifdef OVERRIDE_STRDUP
 	COMPAT_CFLAGS += -DOVERRIDE_STRDUP
 	COMPAT_OBJS += compat/strdup.o
@@ -2972,6 +3023,12 @@ endif
 ifdef NO_REGEX
 compat/regex/regex.sp compat/regex/regex.o: EXTRA_CPPFLAGS = \
 	-DGAWK -DNO_MBSUPPORT
+endif
+
+ifdef USE_NED_ALLOCATOR
+compat/nedmalloc/nedmalloc.sp compat/nedmalloc/nedmalloc.o: EXTRA_CPPFLAGS = \
+	-DNDEBUG -DREPLACE_SYSTEM_ALLOCATOR
+compat/nedmalloc/nedmalloc.sp: SP_EXTRA_FLAGS += -Wno-non-pointer-null
 endif
 
 headless-git.o: compat/win32/headless.c GIT-CFLAGS
