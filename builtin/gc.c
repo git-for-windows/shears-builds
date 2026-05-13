@@ -1811,10 +1811,33 @@ static int maintenance_run_tasks(struct maintenance_run_opts *opts,
 				   TASK_PHASE_FOREGROUND))
 			result = 1;
 
-	/* Failure to daemonize is ok, we'll continue in foreground. */
 	if (opts->detach > 0) {
+		pid_t child_pid;
+
 		trace2_region_enter("maintenance", "detach", the_repository);
-		daemonize();
+
+		child_pid = daemonize_without_exit();
+		if (!child_pid) {
+			/*
+			 * We're in the child process, so we take ownership of
+			 * the lockfile.
+			 */
+			lock_file_reassign_owner(&lk, getpid());
+		} else if (child_pid > 0) {
+			/*
+			 * We're in the parent process, so we drop ownership of
+			 * the lockfile to prevent us from removing it upon
+			 * exit.
+			 */
+			lock_file_reassign_owner(&lk, child_pid);
+			exit(0);
+		} else {
+			/*
+			 * Failure to daemonize is ok, we'll continue in
+			 * foreground.
+			 */
+		}
+
 		trace2_region_leave("maintenance", "detach", the_repository);
 	}
 

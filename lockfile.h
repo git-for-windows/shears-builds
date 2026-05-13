@@ -341,4 +341,14 @@ static inline int commit_lock_file_to(struct lock_file *lk, const char *path)
  */
 int rollback_lock_file(struct lock_file *lk);
 
+/*
+ * Reassign ownership of the lockfile to a different process.
+ *
+ * This is intended for use after `fork(2)`-ing. The parent transfers ownership
+ * to the daemonized child so that its atexit handler does not unlink the lock
+ * that should outlive it, and the child claims the inherited tempfiles so that
+ * they are cleaned up when the daemon exits.
+ */
+void lock_file_reassign_owner(struct lock_file *lk, pid_t owner);
+
 #endif /* LOCKFILE_H */
