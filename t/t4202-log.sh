@@ -1916,11 +1916,10 @@ test_expect_success 'log --max-count-oldest=1000 --graph --boundary' '
 '
 
 test_expect_success 'log --oneline --graph --boundary --max-count-oldest=1' '
-	test_when_finished rm actual &&
-	echo 2 >expect &&
-	git log --oneline --graph --boundary --max-count-oldest=1 HEAD~1..HEAD \
-	| wc -l >actual &&
-	test_cmp expect actual
+	test_when_finished rm -f actual &&
+	git log --oneline --graph --boundary --max-count-oldest=1 \
+		HEAD~1..HEAD >actual &&
+	test_line_count = 2 actual
 '
 
 cat >expect <<-\EOF
