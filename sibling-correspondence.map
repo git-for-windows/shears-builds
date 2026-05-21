@@ -1,0 +1,961 @@
+  1:  f3012abdd7cf3423892cdcb9366882dd4be76b4e =   1:  6a0ddecaa74b93551bc49896773ef531500ed7db ci(dockerized): reduce the PID limit for private repositories
+  2:  76a8af7cfc1973b82bffc760d2d10a0d1147845f =   2:  c34cfadd1e29f4195e0747dcd06a060356d2b70e mingw: skip symlink type auto-detection for network share targets
+  3:  c78446abdc49e24e4c4df6e932f0835052468d2d =   3:  80861ed67ece1330800f2b236501f87bc13ed137 unix-socket: avoid leak when initialization fails
+  4:  81a4146a67b499b6cc8f087cde0a4fdf14cd3c3c =   4:  5f79eb8e820bc58b30b27040cb30bf60a421becd grep: prevent `^$` false match at end of file
+  9:  54abc3dfa7afe948d284b99758ff71cfa842b1e2 =   5:  4fcbe4a8a73dd5264eff7bcc7f33db1f61c74344 t9350: point out that refs are not updated correctly
+ 11:  d3f865d6ecb59186fba4559b3c69143ae6eae83f =   6:  df52da53bc5df6107894d3ceb4fc68b141d9a401 transport-helper: add trailing --
+ 40:  de00d58b3fac2b94ff945b215fd638c079ff6a8a =   7:  622c8b1521eb720ae4ad501fb7babf1e5f934762 vcpkg_install: detect lack of Git
+ 42:  fa2f0458173bcc8af6daae2a68ab6f06a21955fb =   8:  eafe5b44ef71ac887229d2482a60b68fd1c33afd vcpkg_install: add comment regarding slow network connections
+ 44:  0c8db83c632b73ccd5e39fa2fdebe6198df7ad01 =   9:  9f2cee7dfab371ad4798b537a153d0d6e034f327 vcbuild: install ARM64 dependencies when building ARM64 binaries
+ 46:  c73081066726d38832b151beaa6b588456b03086 =  10:  746353fba2d0826f2c77416ceacd0da8874203f0 vcbuild: add an option to install individual 'features'
+ 47:  3fe2155e7782e9b3b9715a0ccf5d6b9f85332fd8 =  11:  fdbfeab2366f20eac6fe1efdc526bc8dfd258f27 cmake: allow building for Windows/ARM64
+  5:  ce99e5b2c85f0d099f99079152c221141417d72c =  12:  d7999d761bf13b9063d24acbb24aabe9193c1ab6 mingw: include the Python parts in the build
+ 49:  892151928869075dfb476f451796c577ed5c6a72 =  13:  dfeba90880460d985c6afc2f351cf535e42257f4 ci(vs-build) also build Windows/ARM64 artifacts
+  6:  7e0b9101407c1739a1e3ebded484e6c990e4c732 !  14:  84b022129d2ebead20133c9954ce0e3202d73858 win32/pthread: avoid name clashes with winpthread
+    @@ compat/win32/pthread.h: int pthread_create(pthread_t *thread, const void *unused
+     +#define pthread_self win32_pthread_self
+      
+      int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);
+    - 
+    + int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
+ 51:  1a5b095f43e247127287ddc25640c44b05826662 =  15:  4743c896247d2fc15f1133d388fe759524b632a2 Add schannel to curl installation
+ 52:  b65fea9d0aa5f41f6651f6cf7ad4fdec7482002d =  16:  719c17c59e95e559dd79fb0b0df6218a85feef0e hash-object: demonstrate a >4GB/LLP64 problem
+  7:  3444062ec5e0af26e842838b5dddb06766c88a0b =  17:  80caa446378db697f0ce3b524564d761ea8c0ec1 git-compat-util: avoid redeclaring _DEFAULT_SOURCE
+ 54:  1f594cfcc775b9dda24b04a27241c256bca96263 =  18:  eca9941c7f2c33589845ce6a54f33e5f28395238 cmake(): allow setting HOST_CPU for cross-compilation
+ 55:  1458a25c195ec4768106c2671e26414dfe84a9bf =  19:  5cd5381c38ff5d2570c7d5cbd6c8fb9343010579 object-file.c: use size_t for header lengths
+  8:  3126d94c5de34b015de7e757dea833c8ca3824f9 =  20:  fcff9e3f7f9e549829361fd17d5682423fd72848 Import the source code of mimalloc v2.2.7
+ 57:  b08d6ed3d6d21e049dfb56e6b7745c341404ce47 =  21:  0ed0f4291f8736f75add316536a1b346306e43a1 CMake: default Visual Studio generator has changed
+ 58:  1f100ee91134743d2877cadc50b7a1cb17046e57 =  22:  beb69f91be2bd414ddad6ccfbc61e6b5f2fa04be hash algorithms: use size_t for section lengths
+ 10:  927dab191e1b225441b62a137f7a1a9e5430089c =  23:  b4587df0892d5cdd40d6d82603806e0d61615b2f mimalloc: adjust for building inside Git
+ 12:  fdb757cc24a05c3ee6d576b84c663cf35c0c9b01 =  24:  598613071e3a22bed4c0191882d276f45c08c962 mingw: demonstrate a `git add` issue with NTFS junctions
+ 60:  e24835226f125679dd0b3163e90fccdea740894a =  25:  1cc19664bb7dffb46e2836632115aa205b5d9005 .gitignore: add Visual Studio CMakeSetting.json file
+ 61:  be9c705cf3e1337e3eb47c90e69bf8a59d014ff6 =  26:  dd42c91a074bbce3a87c0f3ada9743b7a9674924 hash-object --stdin: verify that it works with >4GB/LLP64
+ 13:  41b0542d24ca2fded42ba78fc498b583b5dd9245 !  27:  695f52d09a14c92298e4e9bd66615d85f93ea0df mimalloc: offer a build-time option to enable it
+    @@ Makefile: BUILTIN_OBJS += builtin/write-tree.o
+      THIRD_PARTY_SOURCES += compat/inet_ntop.c
+      THIRD_PARTY_SOURCES += compat/inet_pton.c
+     +THIRD_PARTY_SOURCES += compat/mimalloc/%
+    ++THIRD_PARTY_SOURCES += compat/nedmalloc/%
+      THIRD_PARTY_SOURCES += compat/obstack.%
+      THIRD_PARTY_SOURCES += compat/poll/%
+      THIRD_PARTY_SOURCES += compat/regex/%
+    @@ Makefile: ifdef NATIVE_CRLF
+      	BASIC_CFLAGS += -DNATIVE_CRLF
+      endif
+      
+    ++ifdef USE_NED_ALLOCATOR
+    ++	COMPAT_CFLAGS += -Icompat/nedmalloc
+    ++	COMPAT_OBJS += compat/nedmalloc/nedmalloc.o
+    ++	OVERRIDE_STRDUP = YesPlease
+    ++endif
+    ++
+     +ifdef USE_MIMALLOC
+     +	MIMALLOC_OBJS = \
+     +		compat/mimalloc/alloc-aligned.o \
+    @@ config.mak.dev: endif
+     +ifndef USE_MIMALLOC
+      DEVELOPER_CFLAGS += -std=gnu99
+      endif
+    ++endif
+     +endif
+      else
+      # FreeBSD cannot limit to C99 because its system headers unconditionally
+ 14:  147c5542e944758a0c33dc5d198a1927de940cbf =  28:  ea80beb32f5f8fbf3a6fe1ee98477f2718fa8cf5 t5505/t5516: allow running without `.git/branches/` in the templates
+ 15:  8fd5208b6a1221290c045f8612cfa91870b45c57 =  29:  4aa121dae00593a9c64ae9eaaefa1edbdfc8d5a2 remote-helper: check helper status after import/export
+ 16:  c51d114a0f96c1034d8eec643286b45ad7f70934 =  30:  6e394a3b60dea6a4b68b034a755ffcd4dff7506f clean: do not traverse mount points
+ 17:  4288d84ffc5dcc8b9c7fd60858fcb1f58d9df702 =  31:  d6191eb0672604ccb44c1aba2299d3345bfb0a6b strbuf_realpath(): use platform-dependent API if available
+ 20:  67687624d97d6c79db1e541f930094b29d589139 =  32:  15db4e7ad875433427d706e12bd0246a89766463 http: use new "best effort" strategy for Secure Channel revoke checking
+ 63:  3903d5b96198964b78981c9323ba4f2d2215de15 =  33:  44eba35ad4c4a1e4483c5c3efc7f30623ec1a5df subtree: update `contrib/subtree` `test` target
+ 64:  f0d05a19ef1d0e174075352e613bbcc8f38c31c4 =  34:  22d9feafc41b4a88edeb480c01b1da47657ee0c8 CMakeLists: add default "x64-windows" arch for Visual Studio
+ 65:  45cad00893dba4a1bfe277bf6681d81b3ec52d34 =  35:  1031cd9dc2a643812cb535f45fadcd3970c0c1f3 hash-object: add another >4GB/LLP64 test case
+ 66:  7ca54545c606d070988227561c38bd7e1be0a81e !  36:  f5765cf196f2a61cc51fac74d6d2fe59604511c2 setup: properly use "%(prefix)/" when in WSL
+    @@ Commit message
+         Signed-off-by: Derrick Stolee <derrickstolee@github.com>
+     
+      ## setup.c ##
+    -@@ setup.c: const char *setup_git_directory_gently(int *nongit_ok)
+    +@@ setup.c: const char *setup_git_directory_gently(struct repository *repo, int *nongit_ok)
+      		break;
+      	case GIT_DIR_INVALID_OWNERSHIP:
+      		if (!nongit_ok) {
+ 18:  72f50249b521cd5ffc85955928ae4e5ac90e1368 =  37:  8d61424395bc35c45c5e85a5bceeabc69606b2ab mingw: use mimalloc
+ 19:  f54833460d802dbe2b2b2e365663a83510bf4068 =  38:  e0c54d5422cc97809898f5e3ffb2d8507543f489 t5505/t5516: fix white-space around redirectors
+ 21:  e2dd0d53107ee1b94f2383574dfd77246ee83ef0 =  39:  9984e5b9111e9eeb04ef0380f50f4d159b8fe713 Always auto-gc after calling a fast-import transport
+ 22:  bb5a2699d060fe234dc638bf8b2f7e5894924cda =  40:  304a6983e7bbcf7b4eb1f2681a51825bab6f2aaf mingw: prevent regressions with "drive-less" absolute paths
+ 23:  36ba272f15b338e0130e945583ef00b1d9fb3025 =  41:  852ab90663d4e831e36456de2043e4732b558613 clean: remove mount points when possible
+ 24:  26039c1c665670a4207497fd92de730330cd9a29 =  42:  ee23c4c928d42781d4e5eb4600626386ef9fd3d6 transport: optionally disable side-band-64k
+ 25:  ee1c587e039509741d1b8c59eef554b216e5a085 =  43:  835be5c6f7f08c5993c97652cb9d923ac20f3279 mingw: fix fatal error working on mapped network drives on Windows
+ 26:  edee103207b088c055bf68037dde6b38c549905e =  44:  e05506ead02749edec62c4637bd90a160d787ef6 clink.pl: fix MSVC compile script to handle libcurl-d.lib
+ 27:  fb3b93d9a97cee7cc86fa292cdca4a2a6ef51ed7 =  45:  dc918faac8952ead83fb56bbc3e65bd754ed548a mingw: implement a platform-specific `strbuf_realpath()`
+ 28:  8c1a8d26cf4d780ecb94523ccafbae65db6005ec =  46:  178798dce49bee925c14f67be74f49ed822c86ab t3701: verify that we can add *lots* of files interactively
+ 29:  df63a579c40e313ea860e2920ea16eab5c212b9b =  47:  c6f09cd8a5cbccf8ff7d8dafd3600a73234f3d6a commit: accept "scissors" with CR/LF line endings
+ 70:  a837f5053711a4c08b778f9d0b915ed19e21f89e =  48:  d18195d1a731a55afb3ef32eb38a6194b94230a7 t0014: fix indentation
+ 71:  25e9ee974842d69beb2179d7d0020dc02c1ca221 =  49:  449785fca54f3899879cf853a98242c82342f00b git-gui: accommodate for intent-to-add files
+ 72:  10d2984dbae42b0ca31683eea81639fa8e5b33fe =  50:  4dc77a03bfda50f68e641ef52a8fbc00b8751e25 mingw: allow for longer paths in `parse_interpreter()`
+ 73:  a901d8ffb84e890abd95068eb10485fb24426677 =  51:  8d28c22ad9b2a858ec9e2f967437d0da9196a0a9 compat/vcbuild: document preferred way to build in Visual Studio
+ 74:  dd7a356f5c7f19b9364378560f837cb71d031c1c =  52:  35cb7de7837c6a908194d8ea8be1fb07afd17359 http: optionally send SSL client certificate
+ 75:  0bbc3fe93227a8ee0bedbcbcff806209f9df7dfb =  53:  75e7f897482104ab7c3c4d531e421c1d906a683b ci: run `contrib/subtree` tests in CI builds
+ 76:  aa7f7e275df5196c4583938b469550d720631296 =  54:  07ba500fd50ed6435a8acd9251b37ad1d82f558a CMake: show Win32 and Generator_platform build-option values
+ 77:  6e0737cf1e41970d17c7706c31149f86c31e8054 =  55:  7c93dc48c1207f2de9da524df2fb0aa4c608b9dd hash-object: add a >4GB/LLP64 test case using filtered input
+ 78:  a39e9e2989025a756169be073c513d9765fbd4c1 =  56:  f338a43aad20e09365669cce3ea4a0dcc6525471 compat/mingw.c: do not warn when failing to get owner
+ 30:  0e2367583a2be63694715c6c2b36cc01773629f9 =  57:  158c899dc0505b89ccc5961cc8406db920e0d573 windows: skip linking `git-<command>` for built-ins
+ 31:  b32c2f1e606077601dd2f53ca218b6a337f4ee57 =  58:  abc9678e2eb8c445439caaac037cb42d105d44fc mingw: stop hard-coding `CC = gcc`
+ 32:  2752041f89aad3bc1d2892faa9f9a3fe44b4fff2 =  59:  e97ad68aeceaf7153b3e128963480263e9e98087 mingw: drop the -D_USE_32BIT_TIME_T option
+ 33:  89c4ddee926841f0ec1f7ed2e0714ffcf84e1b89 =  60:  f311e91905d0e6a7d3d516c19a821f0db5512bbc mingw: only use -Wl,--large-address-aware for 32-bit builds
+ 34:  01cdeedbf6507a3852e847de3bc09c374b49962b =  61:  d2b27f4f1667b5a2f617f8286d887639177ca812 mingw: avoid over-specifying `--pic-executable`
+ 35:  73705ff1fef7b565b46a5dfe21b499731b435dce =  62:  b3884a988c13ee76fc075f5b5f0c9e6e030a9ee8 mingw: set the prefix and HOST_CPU as per MSYS2's settings
+ 36:  e30502ca17fd80663bdba325bb56a617d57bc57c =  63:  04261c90f06d9fe2e9bdf4a2e477fc163b11d21b mingw: only enable the MSYS2-specific stuff when compiling in MSYS2
+ 37:  6aa2ceac4994c160b3d0322c64327124801e3ab4 =  64:  d55a49eb9b1e1e21d6770bfe7a6c9b6f4b5651b7 mingw: rely on MSYS2's metadata instead of hard-coding it
+ 38:  24b67091f55a5b222a9a9d05c5d2f445c33c4883 =  65:  44e5140fc0514497a1f9890495e4978dc48c9574 mingw: always define `ETC_*` for MSYS2 environments
+ 39:  ae2c39a561c69bfd0d2d9ea996e3162343df128e =  66:  d2044dcdb74eef7167d1ce2b056843382f67fe5b max_tree_depth: lower it for clang builds in general on Windows
+ 41:  11933e4e04f5b9c8f31e60fec97651273f9d90bc =  67:  b65fac1e0a7415edd9b5e80399a8976938b67a68 mingw: ensure valid CTYPE
+ 43:  0abf5c264e5d1009a1b2cd0f311f2b144238d1bd =  68:  5b241f9c22c531030d6f6ebff6dee6711c121f93 mingw: allow `git.exe` to be used instead of the "Git wrapper"
+ 45:  6aaf50da201574330b48968fb6d99058a91105c0 =  69:  b02ca9d69acf40c974264d043a8d23e6346dd985 mingw: ignore HOMEDRIVE/HOMEPATH if it points to Windows' system directory
+ 86:  f1d2efbb19b17b3e840c7c3b03a5624782b969b7 =  70:  dc95ab504e9b050d901c4a1bbe1fc08cbaedb4f7 survey: stub in new experimental 'git-survey' command
+ 87:  0468a5ca5023accdc3edf40b9c8d2a5df3855e22 =  71:  2823524cc373fab55a08b346bac9ba0d5236e837 survey: add command line opts to select references
+ 48:  a2dc421af23065d28e67c845de354725b262018e =  72:  af12d9d906975ac9e04de1a60c39171861d27241 clink.pl: fix libexpatd.lib link error when using MSVC
+ 88:  da5f1f85d717b6c3f539c36dc005d7190a403c82 =  73:  f9fae9efcb32bf804afe17987387ce76e097dc1a survey: start pretty printing data in table form
+ 50:  9ac04ee529cf25fb49cfa9e1e9e400b474e70f33 =  74:  aed40452bc384b7346b9a76ebe8d90cf4bff6511 Makefile: clean up .ilk files when MSVC=1
+ 89:  c821569809edd5936cbcae92cf62433b71351b99 =  75:  36b9e26783ab5a607719af2368251d1331e5e4e2 survey: add object count summary
+ 53:  0ad553a911514558f27320d7d1f82d013c3aacb5 =  76:  4a9ceaa288ce9a56af02f62d387716326677024e vcbuild: add support for compiling Windows resource files
+ 90:  ab582e5db5a57f2e1034c7ddaf9783549e5b9908 =  77:  2b9e014346b927f2946749eaef314067ab9aeeb5 survey: summarize total sizes by object type
+ 56:  0863b93d186aa30324cfcff8c4491dc03abedceb =  78:  cc6b8133bb3acb98b3a3bbd73d266d868881f0fe config.mak.uname: add git.rc to MSVC builds
+ 68:  8635f429a968eb3a061897bec3da209b30519e54 =  79:  3306aab07b2e3b30b2738e2a98f934b4361a8ef4 MinGW: link as terminal server aware
+ 91:  a796d9b1afb026e9609e01258c683ff0958b7857 =  80:  47f332fdfbb1406c330ab730ac47c6c7e6c0ac84 survey: show progress during object walk
+ 92:  7ab638995c9a11fcc29a34e2bff8184c27556408 =  81:  f23c1ee42bbc125eecd31ac72e22966eb5b5115d mingw: make sure `errno` is set correctly when socket operations fail
+ 59:  3902f52971989dc6ad9bbef81d0c800a2f97825c =  82:  6aed29333c88263d9c698bb8bdeac560367f3cd1 clink.pl: ignore no-stack-protector arg on MSVC=1 builds
+ 94:  18b06f45d9179a401feabe3050dd3546d7a13dba =  83:  f8f0aa5947055503e4dc4f28390b47bffe735a88 http: optionally load libcurl lazily
+ 95:  f0a44bb5784314badb15d85b764401ddfd0ab9e3 =  84:  5ce6d5b7e1234e74bfdcdee7051c4a4b23bd71d2 survey: add ability to track prioritized lists
+ 96:  44eba88bc928b57eda9362c2773d0ae49c16d978 !  85:  4e80181283e65336463561d8609e183414bd082c compat/mingw: handle WSA errors in strerror
+    @@ Makefile: CLAR_TEST_SUITES += u-hash
+      CLAR_TEST_SUITES += u-list-objects-filter-options
+      CLAR_TEST_SUITES += u-mem-pool
+     +CLAR_TEST_SUITES += u-mingw
+    + CLAR_TEST_SUITES += u-odb-inmemory
+      CLAR_TEST_SUITES += u-oid-array
+      CLAR_TEST_SUITES += u-oidmap
+    - CLAR_TEST_SUITES += u-oidtree
+     
+      ## compat/mingw-posix.h ##
+     @@ compat/mingw-posix.h: int mingw_socket(int domain, int type, int protocol);
+    @@ t/meson.build: clar_test_suites = [
+        'unit-tests/u-list-objects-filter-options.c',
+        'unit-tests/u-mem-pool.c',
+     +  'unit-tests/u-mingw.c',
+    +   'unit-tests/u-odb-inmemory.c',
+        'unit-tests/u-oid-array.c',
+        'unit-tests/u-oidmap.c',
+    -   'unit-tests/u-oidtree.c',
+     
+      ## t/unit-tests/u-mingw.c (new) ##
+     @@
+ 62:  517d52b4b736fdeaebb65d833829fa8eb2393171 =  86:  91721448e771d4f5cd65ab4b9453d6c0862b9e5d clink.pl: move default linker options for MSVC=1 builds
+ 98:  5ca3f7ee0336599acbc2003425b0a78e846c3014 =  87:  312309d3511896e758c406d0494905a80a4df5f7 http: support lazy-loading libcurl also on Windows
+ 99:  2fcd6809b250387c9edf17a603f2d02f84e66882 =  88:  2fd075283c0922643387a6caec6482507dde515a survey: add report of "largest" paths
+100:  7d6e60d4f68bcdbb4ac932b5f47d1cc9a5ccaf9a =  89:  a8dd018899a96cd837d8fbb535834f881175fb96 compat/mingw: drop outdated comment
+ 67:  8c1956e58ac7cee7120563ee8b6d51c24d899222 =  90:  67350dda80af9cdd7d54ec5c550178b428ac7d3b Add config option `windows.appendAtomically`
+ 69:  7fce3079b12461faa2c529059ad9beab7290d4ac =  91:  07ebf5ff466cca6f2168cf64d54765b726aee3cb cmake: install headless-git.
+102:  9b5e1f6dd970dd93134229dc27c2c4bdf8cce4d9 =  92:  3de82c69b957043852fb94db1a3340880756052b http: when loading libcurl lazily, allow for multiple SSL backends
+103:  962afbe214648881c7d020959a740b2da022410a =  93:  32f432a9cbe9951f986b0111b326e5cbba284a70 survey: add --top=<N> option and config
+104:  fa70a23f4180796fea1b34b15ec3cbba94b9a11d =  94:  80219bac4fdfa34f0c078e20426bf8f2b79051a1 t0301: actually test credential-cache on Windows
+ 79:  4e38a617770f661dda1416e998de352a33254f6f =  95:  fe58cb5df1f37b5868711fdb66512657922617d6 mingw: $env:TERM="xterm-256color" for newer OSes
+ 80:  fefea44808f7cc4f6be4efe46d36342061855c8a =  96:  e7b632fb39facac5211464e8f7855c0130df7128 winansi: check result and Buffer before using Name
+ 81:  65fa507aff3b3083ebb1ad57b24f721615a2f5b8 =  97:  e9a18af63169a0c51710ed6eaf59788bc020db84 mingw: change core.fsyncObjectFiles = 1 by default
+ 82:  19a3768a3e991babb37c5b88901c4a2ea1f3a45d =  98:  e41744f8ba48268576fad06677c51e3ce77c9792 Fix Windows version resources
+ 83:  35d7d3b66444b17781a895ca049e5f379c033407 =  99:  b330bd15927906d22b481282ca3a3dadea9ceb67 status: fix for old-style submodules with commondir
+ 84:  9a3580d2153cd55cad2e82f707200e7c2849e01e <   -:  ---------------------------------------- ci: work around a problem with HTTP/2 vs libcurl v8.10.0
+ 85:  f6702702abc7881b05b5c947fcad50bdf18dfef3 <   -:  ---------------------------------------- revision: create mark_trees_uninteresting_dense()
+106:  de0ea739f993b4fdc967b96d3ea30ea8bcc2f868 = 100:  559201d72808b2454599d3a4b12f8b4472200af2 git.rc: include winuser.h
+107:  a60cc6cf35241a8f7a37837d7bf9e3e48c0564e9 = 101:  be79cfb9ae72a8b486eca7a5c70b2b1008684481 mingw: do load libcurl dynamically by default
+108:  a2478b1d5a748de73acc7bf7e61232586277e595 ! 102:  5d026d42403318241eee7d84e1e9bcff370419b9 Add a GitHub workflow to verify that Git/Scalar work in Nano Server
+    @@ .github/workflows/nano-server.yml (new)
+     +      IMAGE: mcr.microsoft.com/powershell:nanoserver-ltsc2022
+     +
+     +    steps:
+    -+      - uses: actions/checkout@v5
+    -+      - uses: git-for-windows/setup-git-for-windows-sdk@v1
+    ++      - uses: actions/checkout@v6
+    ++      - uses: git-for-windows/setup-git-for-windows-sdk@v2
+     +      - name: build Git
+     +        shell: bash
+     +        run: make -j15
+109:  1d26323fa27e54ab5d0028c19275e7db885429fa = 103:  a4069227f07bc35c410a07ab42dd932496ba7aa0 mingw: suggest `windows.appendAtomically` in more cases
+110:  3847cef89c36d23c85b841e383838d64d1934a68 = 104:  5df0d349e9477980bb7ec28b010c51bf9c4c6f73 win32: use native ANSI sequence processing, if possible
+111:  480387c0c2e5c43a9ea42ef014dd2a6bfa9fd30d = 105:  6fc49e2af0d7bf1034316fc547e273e6b6228725 common-main.c: fflush stdout buffer upon exit
+112:  ad93fb4d27dd2fe3249aa5bd3e193819bc2b0050 = 106:  e9658163bb5ed4c2e0ce7ae3dd061e6207e16e51 t5601/t7406(mingw): do run tests with symlink support
+113:  7312cad112a35fcfc41e7b5bd6a0aaa61bbab181 = 107:  c073a03f5600359d834e94087257d81c2524bbd9 win32: ensure that `localtime_r()` is declared even in i686 builds
+114:  8e6d2f122ca949035d5847356999f02abcd93527 = 108:  00606ac5b2d11afa181e8d31a07cf8eb615b37e6 Fallback to AppData if XDG_CONFIG_HOME is unset
+115:  8c39648d81815e85ac74304e6af7e6b24e5d2a9c = 109:  0fe0902c3804c2567ad7813f04e94fb051f53966 run-command: be helpful with Git LFS fails on Windows 7
+116:  d345408a5ad747f95f77698cdc46a22d3ef425da = 110:  c198b9fc0dabc4cc879f31267d60247169483d76 survey: clearly note the experimental nature in the output
+ 93:  572ede91c11899ea17d3b9473ff3ddc555c70242 = 111:  1820de0f97082f87c23715395912751a51238a38 t5563: verify that NTLM authentication works
+ 97:  2576daa900ebddf51925dc5dac99c84f3435ebac = 112:  b8dee103ec0334cc283254c6a53138a1f5fa02e9 http: disallow NTLM authentication by default
+101:  456bc2e527e2275ecd2854981a2bcef8a1e3bd2f = 113:  1c77312740e4cb88d1618253e33161259f1b305c http: warn if might have failed because of NTLM
+105:  3aebc8b7ed6c87f3d8e62d060dfce7eb9afa05f2 = 114:  253ab90aeedf8252808baa4e495f253d2eb50489 credential: advertise NTLM suppression and allow helpers to re-enable
+117:  3aaf302a0468e8f770dad45df3e9b0799f9d8178 = 115:  0aab05b48cfe3129ca8cc44b011260e6ede6f5e0 credential-cache: handle ECONNREFUSED gracefully
+118:  8a9003bbab4a7e352821cc4302633b74dbdc562a = 116:  43d30e831f780a77ec4c89b41640de8effac6508 reftable: do make sure to use custom allocators
+119:  c1fd0d7882fedc996fbb1df33c4437840c6e822e = 117:  6eaccefc8ed098d31bab15ea1f6f2ff0fa075704 check-whitespace: avoid alerts about upstream commits
+120:  98c0e987406342e9d84cf45b648454771143044c = 118:  700ae43ea27d1836a776c2a6da2d6bec066fbd65 t/t5571-prep-push-hook.sh: Add test with writing to stderr
+121:  9adc6f682e9e6f98efdaa2939b7d8f8cbcbc8bda = 119:  905d7c9466f44254cbb67e37d44c1f7783ac8c1a dir: do not traverse mount points
+122:  d9e316ca92f0f040cda9afd020e95806a5147939 = 120:  fb8930fdf5098d0ed76b4b79898ea6ebd7d041f7 win32: thread-utils: handle multi-socket systems
+123:  261d4b03a8ed6283fc9eb67aef4844e143809c61 = 121:  4e1b56dc3e12cb4f6f3a1ae30e614bbf2709812e t5563: add tests for http.emptyAuth with Negotiate
+124:  b7195c86a66e510e9a43c0d6084b763f1944113c = 122:  2f94f3e62b0476cefe42d4e88e75ca6b87ef189e ci(macos): skip the `git p4` tests
+125:  65d9f3ac9cf4c9d4726201cb7836762ef9235530 = 123:  3aca7a80714bd965cadb78b9c62f90d5a6247d82 Win32: make FILETIME conversion functions public
+126:  1975479442d1f86fb47c1e2d6ec10f52c46d9d78 = 124:  5b7167333728eca0e3f262f2c81d084dff5e353d Win32: dirent.c: Move opendir down
+127:  e28770de2f15d6600da6f810ebfbea5d79034c6d = 125:  e928f421e8cc4a9b073fe8ee421f8df0bb9b4fa4 mingw: make the dirent implementation pluggable
+128:  22731473a7016d6478fa9f60b3ed36e77dff161a = 126:  df27754d5e54f39d263f1d61b72caeb8b6aa20c3 Win32: make the lstat implementation pluggable
+129:  3aedfb52ec8e36d7ef4bceb4f257b35453932a4a = 127:  2db62bb7b1ab75d73127a2f903fd2e2f68e79d1c mingw: add infrastructure for read-only file system level caches
+130:  eeeaa3f071f992c8d4e7577be426ec5db8ccd926 = 128:  eea4874f0a40fe6ec137eb72c93aabebd07ccef6 mingw: add a cache below mingw's lstat and dirent implementations
+131:  7c4809ae021af29c3ad34670ea700a74416b1c76 = 129:  484989665ef9e9e49679e86bd25a8e0de3d67fef fscache: load directories only once
+132:  349536c568fcbde2e11a2c152b1899d1bfc63a42 = 130:  574d1cda942149dbaff099862de522f04c784b58 fscache: add key for GIT_TRACE_FSCACHE
+146:  91a61bf4f376d5e67f50aabd901661d569d5ed9f = 131:  860b64c95ee582128f3bdb160847c2b4481103bd git-gui--askyesno: fix funny text wrapping
+133:  720c7734db53da35e79bf5bd023aaf3b3e39feb2 = 132:  76554a96e997731d773d1909cea81b26a8c50138 fscache: remember not-found directories
+148:  5f7c318783ced871324139f6d43b46f4dbba51f4 = 133:  2c30b5d23b7c9a2bd1866a4ca6a504d5affd6882 git-gui--askyesno (mingw): use Git for Windows' icon, if available
+134:  ad1262c4a80789f5a8f4c1d9030aa903f7125a32 = 134:  1375bd081f282d078a848228163910c948891b73 fscache: add a test for the dir-not-found optimization
+135:  6c75ee5f1509014e392aac89ce0521f639538133 = 135:  857d66249205560cc6537f8992fb3f151afe9cd9 add: use preload-index and fscache for performance
+136:  81cee0a06a7b31013a7f9ca32de796820930761f = 136:  fbc67dce8395ddf0f418504c075b8c64cbac2bc6 dir.c: make add_excludes aware of fscache during status
+137:  467f43963ee68a3a150aec2758c0d41dc0e7254d = 137:  b26fca17f1cb70a80e792ecfab640b95608a0648 fscache: make fscache_enabled() public
+138:  8f9393762f7de8658b3ea6a28199ecc0031126da = 138:  d82bf1d1695cf653d089e25a92b10aad5512e5c0 dir.c: regression fix for add_excludes with fscache
+139:  da36c3ca102e7b53bee3880219b16638e26955ef = 139:  8bd3b983930bf06cb3bafd179bd3b31a5459d187 fetch-pack.c: enable fscache for stats under .git/objects
+140:  d01eb855573ac234e350b44fe98547f47c24ea31 = 140:  815412541a093487d0d405e08b450cde37fcffc8 checkout.c: enable fscache for checkout again
+141:  7161b790c0784358aa61579c60ea8d20e43a56f4 = 141:  67272103d8823f57aea764a6b6ab01fc43b90ace Enable the filesystem cache (fscache) in refresh_index().
+142:  20d2ba6273392551fa37c1a26e1e2e1a63e172cf = 142:  c927c13daf9007ded26e11a8bd1ae914092e8926 fscache: use FindFirstFileExW to avoid retrieving the short name
+143:  7f91ce2ba0ce179a2de7170d9d00d2935fd6323c = 143:  13ea55e93a71372a7e976dcde74ee1ff7f8872d0 fscache: add GIT_TEST_FSCACHE support
+144:  338b0eeac99411064c5cf919f1921e44dee5538c = 144:  19f1140715e2370eb91131a0e259b750a13f16d0 fscache: add fscache hit statistics
+145:  82ad88707ac460104dcc107ba605e6c60d3a6a0a = 145:  6cd633412783e029c1d67060a4b138fa00bb1160 unpack-trees: enable fscache for sparse-checkout
+147:  c9d4b3ddefb502c28e2944b0403a098ae9e7e8cb = 146:  124d38cf18a284287f02c0de9f16054becfd4fdc status: disable and free fscache at the end of the status command
+149:  399244e1923de9dc1de97d7021937e9f579a9e12 = 147:  5f07aad7d7068b0c5910bdcd632658ac54656102 mem_pool: add GIT_TRACE_MEMPOOL support
+150:  9fa27509e4f81fc5de48b2bcffd68fac65f9b92f = 148:  5400818f1407b03ee643e548ee70b4215a9f4cbf fscache: fscache takes an initial size
+151:  55f2e09d2174aeb8f04967a0b86d9bf9744f72ea = 149:  bfad4bff4bbcc78283d67aa1f4307757fc90463e fscache: update fscache to be thread specific instead of global
+152:  dce3f2d62f4f179a807dee6a57e04e787099117c = 150:  dc5d526334edf503888625e4ba99d6a747b2ca63 fscache: teach fscache to use mempool
+153:  e9afbffefb5bb900954c11a81603dd2a8fea0074 = 151:  a8d086403339393733f6023ae3231da44d3c3d91 fscache: make fscache_enable() thread safe
+154:  7ae83d4b3373da811c84a4ebde46e028ad7b8e68 = 152:  fe81d2aecae651e5fe8f17e3884344ab8795db21 fscache: teach fscache to use NtQueryDirectoryFile
+155:  8011fd3548b0e05ca5b42383ca88518a8f605441 = 153:  d85afaae5dc38d1c6bda4f823b44c4327843e985 fscache: remember the reparse tag for each entry
+156:  bf1a75af4ee9252a09e7a8ecdb6796abd11a2b91 = 154:  4e435bf86252ef89a2f37b33572a823dd5093896 fscache: implement an FSCache-aware is_mount_point()
+157:  68f924198ef39ef1571ec5d67dd16a09be6cd847 = 155:  3272ccf7168ad8011908a8d839ce9ab859412e9b clean: make use of FSCache
+158:  bdb7b292fe092d2cacab4c7b754b37fca56aa583 = 156:  9495d3b82939fee1f2245691ae83f9405a507498 pack-objects (mingw): demonstrate a segmentation fault with large deltas
+159:  825cf35810c377fd328cd27c3129cf68b19ad50b = 157:  6eab604e2d9d3c9d6b6bcdbea9fce0dd11901678 mingw: support long paths
+160:  d3bebdf4fb276012d4eb65ccf994d14f80e2242a = 158:  d3d113313f35be3431d5927c8f0ce913a7bf11a8 win32(long path support): leave drive-less absolute paths intact
+161:  deeeef1182daa5ae2d907523105e4e56f08afc1c = 159:  33e6da12353504587d6ea52e7e536afbe6aa92a1 compat/fsmonitor/fsm-*-win32: support long paths
+162:  8470a0dd9272ca931ca829aa95d24fda5f7f3a48 = 160:  2cc436272aa9cc2371243db298562d4c4e7f9161 clean: suggest using `core.longPaths` if paths are too long to remove
+163:  a7f502cedbaa6024fa682c988281d609dfd4c728 = 161:  608f9effb3f6cc312620ef6946b9eab8e78f8e25 mingw: Support `git_terminal_prompt` with more terminals
+164:  4e087fc94c6aae1c5a923b369c130a8bc67d82ee = 162:  793fd76ead2e4a6cbfb876a07503d78991fff416 compat/terminal.c: only use the Windows console if bash 'read -r' fails
+165:  f4714db3f4446d7def0e2322bedc1eb915938507 = 163:  1611461ab43e481e258c649645ac8568ffe0a650 mingw (git_terminal_prompt): do fall back to CONIN$/CONOUT$ method
+182:  4b2f02bc1add4ceb793bdae26f84043dda39bf74 = 164:  56e40ed49c4fcbda6aa01b62422011336355acb9 mingw: introduce code to detect whether we're inside a Windows container
+184:  7fb46bb60605b99709645fc176e9da67c165881f = 165:  c4cb298c3ec54efce8b86d55983098dd7092fc34 mingw: when running in a Windows container, try to rename() harder
+186:  15374ba0a804c650bcbdd8fca81665b99ea4c745 = 166:  df8fb65b6998559a13d77b36a78366e449ef6bb3 mingw: move the file_attr_to_st_mode() function definition
+188:  279f7416182684ddce037098d96cda276b913997 = 167:  2af84fa8ff46a529e6ba477572975093331d523c mingw: Windows Docker volumes are *not* symbolic links
+166:  266d03179d6484c1a39487a578859a10904e5f76 = 168:  61ace2dab60a69ae7547b69665d05e6246671d78 Win32: symlink: move phantom symlink creation to a separate function
+167:  7ae918316dd7243cb6517d171be32a547829d361 ! 169:  0ef992d2c883b18c6c0ee769ee4e951c7903ad67 Introduce helper to create symlinks that knows about index_state
+    @@ refs/files-backend.c: static int create_ref_symlink(struct ref_lock *lock, const
+      	if (ret)
+     
+      ## setup.c ##
+    -@@ setup.c: static void copy_templates_1(struct strbuf *path, struct strbuf *template_path,
+    +@@ setup.c: static void copy_templates_1(struct repository *repo,
+      			if (strbuf_readlink(&lnk, template_path->buf,
+      					    st_template.st_size) < 0)
+      				die_errno(_("cannot readlink '%s'"), template_path->buf);
+    @@ setup.c: static void copy_templates_1(struct strbuf *path, struct strbuf *templa
+      				die_errno(_("cannot symlink '%s' '%s'"),
+      					  lnk.buf, path->buf);
+      			strbuf_release(&lnk);
+    -@@ setup.c: static int create_default_files(const char *template_path,
+    - 		repo_git_path_replace(the_repository, &path, "tXXXXXX");
+    +@@ setup.c: static int create_default_files(struct repository *repo,
+    + 		repo_git_path_replace(repo, &path, "tXXXXXX");
+      		if (!close(xmkstemp(path.buf)) &&
+      		    !unlink(path.buf) &&
+     -		    !symlink("testing", path.buf) &&
+168:  262293397e8380db65316bd0e6cbcc0ebd2f8520 = 170:  c29ac28170875d6d05269b8325fe909c9ba2f577 mingw: allow to specify the symlink type in .gitattributes
+169:  41b140b7fa49509668e1bd59ba02068bca1014de = 171:  954b570ff1ecce227d57b05ef6fa852dbbe4410b Win32: symlink: add test for `symlink` attribute
+170:  4de59df1d9b125ffcf7c29563ac1d26ec05cfd12 = 172:  246b555ab921dddb2620a287eaad6fb26d0b5f92 mingw: explicitly specify with which cmd to prefix the cmdline
+171:  0e73be0b92adc5450512994fe84674ae5241e59e = 173:  75626ec7253406b8b59545b4105a1d89eb56d88e mingw: when path_lookup() failed, try BusyBox
+172:  6d4ae9e37b2f4e28df756b6c33e3997f47ad1f5a = 174:  e8f719503c0b6c55b8c50f465ebe97ce57c284ad test-tool: learn to act as a drop-in replacement for `iconv`
+173:  d94ecc10f9a991c4ad312379654d91281d702fef = 175:  4206c3528e12c4d4db767589def6008638ec8957 tests(mingw): if `iconv` is unavailable, use `test-helper --iconv`
+174:  bc667af6d7a2bad0d4046dd4d60295392ac12a27 = 176:  9afbf13e8b12efe117de0797b46f98b3c3005004 gitattributes: mark .png files as binary
+175:  29059623ec5a141a3ab649f41122ee87e8c634dd = 177:  4e18110c3c1d762100ffa52fc8e600f40b7a7867 tests: move test PNGs into t/lib-diff/
+176:  d41acd88be26f9148a62902034cadebeaea1a29c = 178:  436e907f749e207157868ef5cf64fba86c08ee5b tests: only override sort & find if there are usable ones in /usr/bin/
+177:  88faed07bca01e8d2f519faf4033e12e6fe76e60 = 179:  e75f200452906c43aba295579af62be501032eb5 tests: use the correct path separator with BusyBox
+178:  fcc67dd209904c770adf1ecd47a3ec123fbcaf81 = 180:  e95faa744d8e1315123d6727c45bb8c425231360 mingw: only use Bash-ism `builtin pwd -W` when available
+179:  3ad05487118c88b5034699496486896fb22ee67e = 181:  5b4ab2e16aabc24805bff8116b7f45dafe7df9eb tests (mingw): remove Bash-specific pwd option
+180:  1070eeda0bb2e99679fc0601a8f4ac684082e12a = 182:  77060f97a338a849ab53bc480744cd79e3875304 test-lib: add BUSYBOX prerequisite
+181:  9dbe5525ebe2e5be59172e746b7cb4cf92b23b71 = 183:  75bf18f4dbf66e3e9b973bd112272f56da5ea1ac t5003: use binary file from t/lib-diff/
+192:  a5acc4a75bf8e27af255c8f36ee27948c7a9217f = 184:  5d76d66cae29601f8ad3cdb95a2bcbb91eec8a50 Describe Git for Windows' architecture
+183:  c886b5dbd77bf47871e46ad0daef74689f90d758 = 185:  d4e7f1892300a0ed9c428e73c5101ae56105d762 t5532: workaround for BusyBox on Windows
+194:  c3dc1a5b6d8a2418d834a3807f9bba9b2ae2a4c4 = 186:  0f86745a56e21537db998ec49db57349145ded5d Modify the Code of Conduct for Git for Windows
+185:  7941811c0e881351273d8c1c9e13b9f21f2cbde4 = 187:  76b07747506616910eed35a95edc138473763c76 t5605: special-case hardlink test for BusyBox-w32
+196:  a0839d07dcc022e1d731176d66cd9c00c112fe05 = 188:  5b701df33bab1b3a74bff02d0c6911fa50a7046d CONTRIBUTING.md: add guide for first-time contributors
+187:  8c94c26d11e76c8963bf8c18c602de871c05167e = 189:  70dd9ec240210249793b6ac0c705e448d32b2ece t5813: allow for $PWD to be a Windows path
+198:  122d15c7ab452d6b3a329416704d5abee0f734ff = 190:  e58b6482a834af9c8854e9d85aa19d5d1257f499 README.md: Add a Windows-specific preamble
+189:  54086d1f895e3095ca77c817b9e90a71dcbda87f = 191:  41744ab041b43268d05a773da2668ce980ea9272 t9200: skip tests when $PWD contains a colon
+193:  03af5a887022f9f4d10983a4171efbeef538c576 = 192:  d43f2cd63f287cc435443f85afeb9630be84415e mingw: kill child processes in a gentler way
+200:  88bd6055868058836f2af4dc4f64b4a34fa57ca5 = 193:  b53d4371e79651ddab911167af98b1dbbdad9447 Add an issue template
+201:  ea455fb532ffe7db7c51a99176f72a7449b0e5ae = 194:  a3856e88fa6630f329de2a7f8ae0ba1797027561 Add a GitHub workflow to monitor component updates
+190:  0ca0b776a9f360605b4de8e3a609d2c3de39faf9 = 195:  711908fa5d27887737d4cac370f30ec008b90555 mingw: work around rename() failing on a read-only file
+191:  6387b7986293f6caaa916bb3fed447cac5e55b70 = 196:  f54cc76959723f859f7431f64cda48212b845a05 mingw: optionally enable wsl compability file mode bits
+195:  d99182d2b84b555fbdcf07862f01eea2132a8f60 = 197:  3e0e5dcec85818a3aee7b054c2780a834501fbc3 mingw: really handle SIGINT
+197:  6e2b87b4e379a8a19e5be1d2ed4198d81b242ef2 = 198:  5d89a5c353213684062f1ebe056c48bf6a450c93 Partially un-revert "editor: save and reset terminal after calling EDITOR"
+203:  12491d0c0d8d7192d5222fe109f873dac820ab60 = 199:  e4d56e760fa42298ddc35668d598cf419b1a5d1b Modify the GitHub Pull Request template (to reflect Git for Windows)
+199:  8df03b183aa4623570fb2a420b7b074bbe4e6b05 = 200:  ae3f056c2bf507ae9bf0229c997e174738f0995b reset: reinstate support for the deprecated --stdin option
+202:  e03ecdede45be31b67fc48ff243526c7413ffcad = 201:  1baf4a16a3455bcd9e49ee3247b6d663bc792311 fsmonitor: reintroduce core.useBuiltinFSMonitor
+204:  959eba202bd17489399e0703a24bc6503d1ab59b = 202:  c398e024347da3253baa8b52ed5b997e7b2c8364 dependabot: help keeping GitHub Actions versions up to date
+205:  bdd250b179a82be14f4211e35c770143200ea120 = 203:  4707bf96cddb25b472bd356471f8f0f5b57c68d7 SECURITY.md: document Git for Windows' policies
+206:  06e3c617ce66e7fb68351cba050b6073239465eb ! 204:  be0c8183b8d750c2a6e103c9379e42bc7afe77e1 Add an AGENTS.md file to help with AI-assisted debugging/development
+    @@ Commit message
+         Assisted-by: Claude Opus 4.5
+         Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+     
+    + ## .gitattributes ##
+    +@@
+    + *.py text eol=lf diff=python
+    + *.bat text eol=crlf
+    + *.png binary
+    ++/AGENTS.md conflict-marker-size=32
+    + CODE_OF_CONDUCT.md -whitespace
+    + /Documentation/**/*.adoc text eol=lf whitespace=trail,space,incomplete
+    + /command-list.txt text eol=lf
+    +
+      ## AGENTS.md (new) ##
+     @@
+     +# Git for Windows - Development Guide
+    @@ AGENTS.md (new)
+     +GIT_TRACE2_EVENT=/path/to/trace.txt git <command>
+     +```
+     +
+    ++### Instrumenting Git Internals During Tests
+    ++
+    ++When adding debug output to Git's C code during test investigation,
+    ++`fprintf(stderr, ...)` from git subprocesses spawned by the test framework
+    ++is typically swallowed (redirected or discarded by the test harness). Use
+    ++Trace2 instead:
+    ++
+    ++```c
+    ++trace2_data_intmax("index", NULL, "my_debug/cache_nr", istate->cache_nr);
+    ++trace2_data_string("index", NULL, "my_debug/state", some_string);
+    ++```
+    ++
+    ++Then run the test with `GIT_TRACE2_EVENT` or `GIT_TRACE2_PERF` pointing to
+    ++a file, and grep the output. This integrates with Git's existing tracing
+    ++infrastructure and survives the test framework's output management.
+    ++
+    ++As a last resort (e.g. when Trace2 is not initialized yet at the point you
+    ++need to instrument), write to a fixed file path:
+    ++
+    ++```c
+    ++FILE *f = fopen("/tmp/debug.log", "a");
+    ++if (f) { fprintf(f, "state: %u\n", value); fclose(f); }
+    ++```
+    ++
+     +### Comparing Branches After Rebase
+     +
+     +```bash
+    @@ AGENTS.md (new)
+     +often makes sense to squash both old and new downstream changes, and then
+     +to "interpolate" between them when encountering merge conflicts).
+     +
+    ++### Bisecting Failures in `seen`
+    ++
+    ++When a topic passes on its own but fails after being merged to `seen`, the
+    ++failure is caused by interaction with another in-flight topic. To identify
+    ++the culprit:
+    ++
+    ++1. Fetch the exact `seen` commit from the failing CI run (get the SHA from
+    ++   the workflow run metadata via the GitHub API).
+    ++2. Use a worktree checked out at that `seen` commit.
+    ++3. Bisect the first-parent history between `upstream/master` and `seen~1`
+    ++   (excluding the topic's own merge). At each bisection step, merge the
+    ++   topic in temporarily, build, run the test, then undo the merge.
+    ++4. Write a `git bisect run` script that automates this. Key pitfalls:
+    ++   - The script must `unset` test environment variables (especially
+    ++     `GIT_TEST_SPLIT_INDEX`) before cleanup operations like
+    ++     `git checkout -f`, otherwise the worktree's own index can get
+    ++     corrupted.
+    ++   - Use `git checkout -f "$ORIG"` (not `git reset --hard`) to undo the
+    ++     temporary merge, since `reset --hard` under split-index can corrupt.
+    ++   - Save the current commit OID at the start (`ORIG=$(git rev-parse HEAD)`)
+    ++     because `ORIG_HEAD` is unreliable during bisect.
+    ++   - On merge conflict, return 125 (skip) and `git merge --abort`.
+    ++5. Store the alias for running with the full set of CI test variables as a
+    ++   repository-local alias (to avoid repeating the long export list and to
+    ++   allow the user to approve the tool call once).
+    ++
+     +### CI/Workflow Failure Investigation
+     +
+     +When a CI workflow fails, the debugging process has a high cost per iteration.
+    @@ AGENTS.md (new)
+     +- For build failures: replicate the build environment and commands.
+     +- For macOS issues: if you lack a Mac, at least trace the Makefile logic
+     +  to understand what flags should be set and why.
+    ++- For test failures that only appear in specific CI jobs (like
+    ++  `linux-TEST-vars`): reproduce with the _exact_ set of environment
+    ++  variables that job sets. Check `ci/run-build-and-tests.sh` for the
+    ++  job's variable block. Do not assume a single variable (e.g.
+    ++  `GIT_TEST_SPLIT_INDEX`) is sufficient; other variables may contribute
+    ++  to the failure path.
+    ++- When a test fails in `seen` but not on the topic branch alone, check
+    ++  out the exact `seen` commit from the failing CI run (get the SHA from
+    ++  the workflow run metadata) and reproduce against that. The interaction
+    ++  with other in-flight topics is the likely cause.
+    ++
+    ++**5. Do not assume CI coverage from platform support.** When asking "why
+    ++does platform X not see this bug?", verify whether CI actually tests that
+    ++combination on that platform. For example, `GIT_TEST_SPLIT_INDEX=yes` is
+    ++only set by `linux-TEST-vars`; there is no equivalent `osx-TEST-vars` or
+    ++`windows-TEST-vars` job. A bug that only manifests under split-index
+    ++testing may be present on all platforms but only caught on Linux.
+     +
+     +**5. Add comprehensive diagnostics on first attempt.** If you must push to
+     +CI to test, make that push count:
+    @@ AGENTS.md (new)
+     +
+     +## Rebasing Workflow
+     +
+    ++Rebases are the bread and butter of Git for Windows: topic branches are
+    ++rebased every time upstream Git releases a new version. This section covers
+    ++the workflow for managing downstream patches through repeated rebases.
+    ++
+    ++### Merging-Rebases
+    ++
+    ++Git for Windows uses "merging-rebases" to maintain downstream patches. Unlike
+    ++a flat series of commits, the downstream changes are organized as topic
+    ++branches merged together, preserving the logical grouping of related changes.
+    ++
+    ++Each integration branch (`main`, `shears/next`, `shears/seen`) contains a
+    ++marker commit with the message "Start the merging-rebase to \<version\>". This
+    ++commit separates upstream history from downstream patches. Reference it with:
+    ++
+    ++```bash
+    ++# Find the marker commit
+    ++git log --oneline --grep="Start the merging-rebase" -1
+    ++
+    ++# Reference it using commit message search syntax
+    ++origin/main^{/Start.the.merging-rebase}
+    ++```
+    ++
+    ++When working with merging-rebases:
+    ++
+    ++- **Downstream patches start after the marker**: Use
+    ++  `origin/main^{/Start.the.merging-rebase}..origin/main` to see all
+    ++  downstream commits
+    ++- **Topic branches are merged, not rebased flat**: Each logical feature or
+    ++  fix is a branch merged into the integration branch
+    ++- **Merge commits are preserved**: The rebase recreates the merge structure
+    ++  on top of the new upstream base
+    ++
+    ++To compare downstream patches before and after a rebase:
+    ++
+    ++```bash
+    ++# Compare the old and new downstream patch series
+    ++git range-diff \
+    ++  old-base^{/Start.the.merging-rebase}..old-branch \
+    ++  new-base^{/Start.the.merging-rebase}..new-branch
+    ++```
+    ++
+    ++### Starting a Merging-Rebase
+    ++
+    ++To rebase the downstream patches onto a new upstream version, create a marker
+    ++commit and use it as the base for an interactive rebase:
+    ++
+    ++```bash
+    ++# Variables for the commit message
+    ++tag=v2.53.0
+    ++# The previous marker - this becomes the exclusion point for --onto
+    ++previousMergeOid=$(git rev-parse origin/main^{/Start.the.merging-rebase})
+    ++tagOid=$(git rev-parse "$tag")
+    ++tipOid=$(git rev-parse origin/main)
+    ++
+    ++# Create the marker commit with two parents: the tag and the current tip
+    ++markerOid=$(git commit-tree "$tag^{tree}" -p "$tag" -p "$tipOid" -m "Start the merging-rebase to $tag
+    ++
+    ++This commit starts the rebase of $previousMergeOid to $tagOid")
+    ++
+    ++# Graft the marker to appear as if it has only the tag as parent
+    ++git replace --graft "$markerOid" "$tag"
+    ++
+    ++# Use the marker as the base for rebasing (only commits after previousMergeOid)
+    ++git rebase -r --onto "$markerOid" "$previousMergeOid" origin/main
+    ++
+    ++# After the rebase completes, delete the replace ref
+    ++git replace -d "$markerOid"
+    ++```
+    ++
+    ++The marker commit is created with two parents: the upstream tag and the
+    ++current branch tip. The `git replace --graft` makes Git see only the tag as
+    ++parent during the rebase, allowing the downstream commits to be cleanly
+    ++rebased onto the new upstream. After the rebase completes, the replace ref
+    ++is deleted to clean up.
+    ++
+    ++#### The shears/* Branches
+    ++
+    ++Upstream Git has four integration branches: `seen`, `next`, `master`, and
+    ++`maint`. Git for Windows maintains a corresponding `shears/*` branch for each
+    ++(`shears/seen`, `shears/next`, `shears/master`, `shears/maint`) that
+    ++continuously rebases Git for Windows' `main` onto the respective upstream
+    ++branch.
+    ++
+    ++These branches are updated incrementally rather than from scratch, avoiding
+    ++re-resolution of merge conflicts. The update process leverages reachability:
+    ++
+    ++1. **Integrate new downstream commits**: If `origin/main` has commits not yet
+    ++   in the shears branch, rebase them on top (using `-r` to preserve branch
+    ++   structure). Update the marker commit's message and second parent.
+    ++
+    ++2. **Integrate new upstream commits**: If the upstream branch has commits not
+    ++   yet integrated, rebase onto the new upstream tip. Update the marker commit
+    ++   accordingly.
+    ++
+    ++The marker commit's second parent always points to the current `origin/main`
+    ++tip, making it trivial to identify what downstream commits are included.
+    ++Similarly, the marker's first parent (the upstream base) shows exactly which
+    ++upstream version is integrated.
+    ++
+    ++### When to Skip a Patch
+    ++
+    ++Use `git rebase --skip` when the patch is already in the new base:
+    ++
+    ++- **Upstreamed**: The patch was accepted upstream and is now in `seen`
+    ++- **Backported**: A fix we backported is now included in the upstream base
+    ++- **Superseded**: HEAD already contains evolved code that includes this
+    ++  change
+    ++
+    ++Signs to skip rather than resolve: HEAD has the functionality, the
+    ++conflict would discard the patch entirely, or `git range-diff` shows
+    ++the downstream and upstream patches are equivalent.
+    ++
+    ++To find the corresponding upstream commit for a conflicting patch:
+    ++
+    ++```bash
+    ++git range-diff --left-only REBASE_HEAD^! REBASE_HEAD..
+    ++```
+    ++
+    ++### Resolving Merge Conflicts
+    ++
+    ++When resolving merge conflicts during a rebase (especially when squashing
+    ++fixups), the goal is to **apply the minimal surgical change** that the
+    ++patch intended, not to reconstruct entire functions or add duplicate code.
+    ++
+    ++#### 1. Understand What the Patch Wants
+    ++
+    ++First, examine the patch being applied:
+    ++
+    ++```bash
+    ++git show REBASE_HEAD
+    ++```
+    ++
+    ++Look at the actual changes (lines starting with `-` and `+`):
+    ++- What lines are being removed?
+    ++- What lines are being added?
+    ++- What is the context (function name, nearby code)?
+    ++
+    ++**Key insight**: The patch shows the *intent*---a specific small change to
+    ++make. Focus on this, not on the conflict markers' content.
+    ++
+    ++**Code movement detection**: If the patch shows large changes, check with
+    ++`--ignore-space-change`:
+    ++
+    ++```bash
+    ++git show <conflicted-commit> --ignore-space-change
+    ++```
+    ++
+    ++This reveals whether the commit is primarily **moving code** (lots of
+    ++whitespace changes) or making **logic changes** (actual code modifications).
+    ++When code was moved and re-indented, focus only on the non-whitespace
+    ++changes when resolving the conflict.
+    ++
+    ++#### 2. Understand Where the Code Is Now
+    ++
+    ++The conflict occurred because the code moved or changed since the patch was
+    ++created. Find where that code actually exists now:
+    ++
+    ++```bash
+    ++# If the patch was changing a specific pattern, find all occurrences
+    ++git grep -n "pattern from patch"
+    ++
+    ++# View the conflicted file around those locations
+    ++```
+    ++
+    ++**Common mistake**: Assuming the conflict markers show you what to do. They
+    ++do not---they just show where Git got confused.
+    ++
+    ++#### 3. Apply the Surgical Change
+    ++
+    ++Make **only** the change the patch intended, but in the current location:
+    ++
+    ++- If the patch adds `--abbrev=12` to a range-diff call, find where that
+    ++  range-diff call is NOW and add it there
+    ++- If the patch changes a `.split()` pattern, find where that pattern is NOW
+    ++  and change it
+    ++- Do not copy entire functions from the conflict markers
+    ++- Do not create duplicates
+    ++
+    ++#### 4. Remove ALL Conflict Markers
+    ++
+    ++Conflict markers make the file invalid code:
+    ++```
+    ++<<<<<<< HEAD
+    ++=======
+    ++>>>>>>> commit-hash
+    ++```
+    ++
+    ++**All three types of markers must be completely removed.**
+    ++
+    ++#### 5. Verify the Resolution
+    ++
+    ++**Critical**: After staging your resolution, verify it matches the patch
+    ++intent:
+    ++
+    ++```bash
+    ++# Compare your staged changes to the original patch
+    ++git diff --cached
+    ++git rebase --show-current-patch
+    ++
+    ++# Or more directly, compare to REBASE_HEAD
+    ++git diff --cached
+    ++git show REBASE_HEAD
+    ++
+    ++# For code that was moved/re-indented, ignore whitespace
+    ++git diff --cached --ignore-space-change
+    ++git show REBASE_HEAD --ignore-space-change
+    ++```
+    ++
+    ++**Verify, verify, verify**: The output of `git diff --cached` should
+    ++correspond closely to the diff in `git show REBASE_HEAD`. The line numbers
+    ++and context will differ (because code moved), but the actual changes (the
+    ++`-` and `+` lines) should match the patch intent.
+    ++
+    ++**After completing a rebase**, always verify the final result:
+    ++
+    ++```bash
+    ++# Compare tree before and after rebase
+    ++git diff @{1}
+    ++
+    ++# Shows what changed in each rebased commit
+    ++git range-diff @{1}...
+    ++```
+    ++
+    ++If the rebase was onto the same base commit (e.g., squashing fixups), the
+    ++`git diff @{1}` should be empty---this proves the rebase only reorganized
+    ++commits without changing the end result. If the rebase was onto a new base
+    ++commit (e.g., rebasing onto a new upstream release), the diff should match
+    ++the difference between the old and new base commits, modulo any changes
+    ++from upstreamed or backported patches. The `git range-diff @{1}...` shows
+    ++the intended amendments (like adding `--abbrev=12`) were correctly applied
+    ++to each commit.
+    ++
+    ++### Conflict Resolution Red Flags
+    ++
+    ++These indicate you are doing it wrong:
+    ++
+    ++- Your diff adds hundreds of lines when the patch only changed 3
+    ++- Conflict markers remain in the file
+    ++- Functions appear twice in the file
+    ++- You added `<<<<<<< HEAD` or `=======` to the staged changes
+    ++- Syntax check fails after resolution
+    ++
+    ++### Key Conflict Resolution Lessons
+    ++
+    ++1. **Context changes, intent does not** - The patch's line numbers are
+    ++   wrong, but the change is right
+    ++2. **Conflict markers lie** - They show you where Git got confused, not
+    ++   what you should do
+    ++3. **One change at a time** - If the patch adds one line, your resolution
+    ++   should add one line
+    ++4. **Verify, verify, verify** - `git diff --cached` should match
+    ++   `git show REBASE_HEAD` (modulo context)
+    ++5. **Post-rebase verification** - `git diff @{1}` (empty) and
+    ++   `git range-diff @{1}...` (shows amendments)
+    ++6. **Ignore whitespace for code moves** - Use `--ignore-space-change` to
+    ++   see the actual logic changes when code was moved and re-indented
+    ++7. **When in doubt, look at the range-diff** - `git range-diff` shows if
+    ++   you matched the intent
+    ++
+    ++### Useful Rebase Tools
+    ++
+    ++- `git rebase --show-current-patch` - See what change is being applied
+    ++- `git show REBASE_HEAD` - Alternative to above, works better with
+    ++  `--ignore-space-change`
+    ++- `git show <commit> --ignore-space-change` - See only logic changes, not
+    ++  whitespace/indentation
+    ++- `git grep -n "pattern"` - Find where code moved to
+    ++- `git log -L <start>,<end>:<file> REBASE_HEAD..HEAD` - See how upstream
+    ++  modified a line range since the original patch; invaluable for
+    ++  understanding how conflicting lines changed
+    ++- `git diff --cached` - After staging resolution, verify it matches
+    ++  REBASE_HEAD
+    ++- `git diff @{1}` - After rebase, compare tree before/after
+    ++- `git range-diff @{1}...` - After rebase, verify intended changes were made
+    ++- `git range-diff A^! B^!` - Compare original patch to your resolution
+    ++
+    ++### Leveraging Rerere
+    ++
+    ++Git's "reuse recorded resolution" (`rerere`) feature automatically records
+    ++how you resolve conflicts and replays those resolutions when the same
+    ++conflict recurs. This is invaluable for repeated rebases where the same
+    ++downstream patches conflict with similar upstream changes.
+    ++
+    ++When you see `Staged 'file' using previous resolution`, Git has applied a
+    ++previously recorded resolution. Always verify these auto-resolutions are
+    ++still correct---upstream context may have changed enough that the old
+    ++resolution no longer applies cleanly.
+    ++
+    ++To enable rerere:
+    ++```bash
+    ++git config --global rerere.enabled true
+    ++```
+    ++
+    ++### Automation Tips
+    ++
+    ++When running rebases in automated or scripted contexts, disable the pager
+    ++to avoid hangs:
+    ++
+    ++```bash
+    ++GIT_PAGER=cat git range-diff ...
+    ++# or
+    ++git --no-pager log ...
+    ++```
+    ++
+    ++### Non-interactive "Interactive" Rebases
+    ++
+    ++AI agents cannot drive interactive editors reliably. Instead, insert a
+    ++`break` as the first todo command so the rebase stops immediately, then
+    ++edit the todo file directly:
+    ++
+    ++```bash
+    ++# Start the rebase, stopping before any picks execute
+    ++GIT_SEQUENCE_EDITOR='sed -i 1ib' git rebase -ir <base>
+    ++
+    ++# Find and edit the todo file with the view/edit tools
+    ++git rev-parse --git-path rebase-merge/git-rebase-todo
+    ++
+    ++# After editing the todo, continue (GIT_EDITOR=true suppresses the
+    ++# editor that fixup -C and amend! commands would otherwise open)
+    ++GIT_EDITOR=true git rebase --continue
+    ++```
+    ++
+    ++### Scripted Hunk Staging
+    ++
+    ++`git add -p` is interactive by default, but its prompts follow a
+    ++predictable protocol. To stage the first hunk of a file without
+    ++human interaction:
+    ++
+    ++```bash
+    ++printf '%s\n' s y q | git add -p <file>
+    ++```
+    ++
+    ++The `s` splits a large hunk, `y` stages the first sub-hunk, and `q`
+    ++quits. Adjust the sequence for different hunk selections (e.g.,
+    ++`y y n q` to stage the first two hunks but skip the third).
+    ++
+    ++### Finding Which Commit to Amend
+    ++
+    ++When a working-tree change belongs in an earlier commit (an `hg absorb`
+    ++workflow), use `git log -L` to find which commit last touched the
+    ++relevant lines:
+    ++
+    ++```bash
+    ++git log -L <start>,+<count>:<file>
+    ++```
+    ++
+    ++This shows the full history of a line range, making it easy to identify
+    ++the commit whose title you need for a `fixup!` commit. This is far more
+    ++surgical than grepping through full diffs.
+    ++
+     +### Fixup Commits
+     +
+     +Downstream patches sometimes require adjustment due to changes in the
+    @@ AGENTS.md (new)
+     +- **Tabs for indentation**: The codebase uses tabs, not spaces.
+     +- **No trailing whitespace**: Clean up your lines.
+     +
+    ++**Pre-commit checklist.** Run all three checks before every commit:
+    ++
+    ++```bash
+    ++git diff --check &&
+    ++git diff --no-color | LC_ALL=C grep '[^ -~]' &&
+    ++  echo "ERROR: non-ASCII characters found" &&
+    ++git diff --no-color | grep '^+' | sed 's/\t/        /g' |
+    ++  grep '.\{82\}' &&
+    ++  echo "ERROR: lines exceed 80 columns"
+    ++```
+    ++
+    ++The first command catches whitespace errors. If either of the latter
+    ++two produces output, fix the offending lines before committing. Note
+    ++that these checks apply to commit messages as well (wrap at 76 columns
+    ++for messages, 80 for code).
+    ++
+     +See `Documentation/CodingGuidelines` for the full set of conventions.
+     +
+     +### strbuf patterns
+    @@ AGENTS.md (new)
+     +for sizes that may exceed 4GB. Be careful with format strings: use `PRIuMAX`
+     +with a cast for `size_t` values.
+     +
+    ++## Contributing to Upstream Git via GitGitGadget
+    ++
+    ++### Overview
+    ++
+    ++The upstream Git project accepts contributions via the mailing list
+    ++(`git@vger.kernel.org`). [GitGitGadget](https://gitgitgadget.github.io/)
+    ++bridges GitHub PRs to the mailing list: you push a branch to your GitHub
+    ++fork, open a PR against https://github.com/gitgitgadget/git, and
+    ++GitGitGadget formats and sends the patches.
+    ++
+    ++### Workflow
+    ++
+    ++1. Push the topic branch to your personal fork on GitHub (the remote
+    ++   that points at `https://github.com/<you>/git`).
+    ++2. Open a PR from `<you>:<branch>` against `gitgitgadget/git`'s `master`.
+    ++3. The PR title becomes the patch series subject; the PR body becomes the
+    ++   cover letter. Use
+    ++   `gh pr create --repo gitgitgadget/git --head <you>:<branch>`.
+    ++4. Use `/submit` as a PR comment to send patches to the mailing list.
+    ++5. After review feedback, update the branch, force-push, and `/submit` again.
+    ++
+    ++### Branch Naming
+    ++
+    ++Do **not** use an initials prefix (like `ds/` or `js/`). That convention is
+    ++used by the Git maintainer when picking up topics, not by contributors. Use
+    ++descriptive names like `tests-explicit-bare-repo`.
+    ++
+    ++### Cover Letter Style
+    ++
+    ++The PR body is the cover letter. It should be plain text (not Markdown with
+    ++headers or bullet formatting), since it will be sent as email. Structure:
+    ++
+    ++- A brief subject line (the PR title, e.g. "tests: access bare repositories
+    ++  explicitly")
+    ++- Motivation: why is this change needed?
+    ++- Summary: what does the series do? What patterns/techniques does it use?
+    ++- Scope: is this part of a larger effort? If so, link to the tracking PR.
+    ++
+    ++Keep it factual and measured. Avoid framing changes in terms of security
+    ++when contributing to upstream Git; frame them as robustness, correctness,
+    ++or preparation for future defaults.
+    ++
+    ++### Commit Message Conventions (Upstream Git)
+    ++
+    ++Upstream Git commit messages follow stricter conventions than the Microsoft
+    ++Git fork:
+    ++
+    ++- **Subject line**: `<area>: <description>` (lowercase after the colon).
+    ++  The `<area>` is typically a file name without extension (e.g. `t0001`,
+    ++  `setup`, `scalar`) or a subsystem name (e.g. `tests`, `refs`).
+    ++- **Body**: Flowing English prose, no bullet points. Wrap at 76 columns.
+    ++- **ASCII only**: No Unicode characters anywhere in the message.
+    ++- **Trailers**: `Signed-off-by` is mandatory. `Assisted-by` for AI.
+    ++- The subject line must accurately describe the diff content. If a commit
+    ++  adds `--git-dir=.` to one invocation, do not title it "wrap bare repo
+    ++  commands in subshell with `GIT_DIR`".
+    ++
+    ++### Patch Series with Dependencies
+    ++
+    ++When contributing a branch thicket (multiple related patch series with
+    ++dependencies), submit the foundation series first and note the overall
+    ++effort in the cover letter with a link to the tracking PR or `compare`
+    ++URL. Submit dependent series after earlier ones land in `seen`.
+    ++
+    ++Use `git replay --onto <target> <base>..<branch>` to test whether a
+    ++sub-branch applies cleanly to a given base (e.g., `upstream/master` or
+    ++`upstream/seen`) without touching the working tree. By default (since
+    ++the `--ref-action` default changed to `update`), `git replay` updates
+    ++named refs in the range directly, producing no stdout output. Use
+    ++`--ref-action=print` to get the old behavior of printing `update-ref`
+    ++commands to stdout instead. Always verify that `git replay` actually
+    ++did something by checking the reflog of the affected branches.
+    ++
+    ++## Working with Worktrees
+    ++
+    ++### General Principles
+    ++
+    ++Use worktrees to work on multiple topics simultaneously without stashing
+    ++or switching branches. Keep worktrees as subdirectories of the main
+    ++repository and add them to `.git/info/exclude` so they do not show up
+    ++as untracked files.
+    ++
+    ++```bash
+    ++git worktree add <name> <branch>
+    ++echo "<name>" >> .git/info/exclude
+    ++```
+    ++
+    ++### Rewriting Commits with `--update-refs`
+    ++
+    ++When rewriting history in a worktree (e.g., fixing a commit message via
+    ++`amend!` + autosquash), use `--update-refs` so that other local branches
+    ++pointing into the rewritten range are updated automatically:
+    ++
+    ++```bash
+    ++# Create a local branch at the commit to be pushed
+    ++git branch <push-name> <tip>
+    ++
+    ++# Create the amend! commit and autosquash
+    ++git commit --allow-empty -F <message-file>
+    ++GIT_SEQUENCE_EDITOR=true GIT_EDITOR=true \
+    ++  git rebase -i --autosquash --update-refs <base>
+    ++
+    ++# Verify: tree should be identical
+    ++git diff <push-name>@{1}..<push-name>
+    ++
+    ++# Force-push the updated branch
+    ++git push <remote> <push-name> --force-with-lease
+    ++```
+    ++
+    ++The `--update-refs` flag is essential: without it, only the checked-out
+    ++branch is rewritten and other branches become stale, pointing at
+    ++pre-rewrite commits.
+    ++
+    ++### Verifying Rebase Results
+    ++
+    ++After any rebase, verify that the tree content is unchanged (unless you
+    ++intentionally modified it):
+    ++
+    ++```bash
+    ++git diff @{1}              # Should be empty for pure rewording
+    ++git range-diff @{1}...     # Shows per-commit changes
+    ++```
+    ++
+    ++## Analyzing Branch Thickets
+    ++
+    ++When a branch is structured as a sequence of merged sub-branches (a
+    ++"branch thicket"), use the merge structure to extract sub-branches:
+    ++
+    ++```bash
+    ++# List the merge commits (sub-branches)
+    ++git log --oneline --first-parent <branch>...upstream/master | grep 'Merge branch'
+    ++
+    ++# Extract commits for a specific sub-branch (second parent of its merge)
+    ++git log --oneline <merge>^1..<merge>^2
+    ++
+    ++# Find what each sub-branch forks from
+    ++git log -1 --format='%H %s' <first-commit-in-sub-branch>^
+    ++```
+    ++
+    ++Use `git replay` to test whether sub-branches can be rebased onto a new
+    ++base without conflicts. This replaces speculation about "overlapping files"
+    ++with actual evidence:
+    ++
+    ++```bash
+    ++git replay --onto upstream/master <old-base>..<branch>
+    ++```
+    ++
+    ++If the range contains merge commits, `git replay` will fail with "replaying
+    ++merge commits is not supported yet!" In that case, identify the linear
+    ++commit range and replay just those commits.
+    ++
+     +## Resources
+     +
+     +- [Git for Windows](https://gitforwindows.org/)
+     +- [Git Internals](https://git-scm.com/book/en/v2/Git-Internals-Plumbing-and-Porcelain)
+    ++- [GitGitGadget](https://gitgitgadget.github.io/) - Bridge GitHub PRs to
+    ++  the Git mailing list
+    ++- [Git Mailing List Archive](https://lore.kernel.org/git/) - Searchable
+    ++  archive of all upstream discussion
+207:  67d22b3871233650108b87d0ecd150689aee54f4 <   -:  ---------------------------------------- fixup! Add an AGENTS.md file to help with AI-assisted debugging/development
+208:  33a43bdbea3d5702cc732b8f0ac7b108967a60f5 <   -:  ---------------------------------------- fixup! Add an AGENTS.md file to help with AI-assisted debugging/development
+209:  25a8151e1aa61e48d92697cf8148375b766c0cf5 <   -:  ---------------------------------------- fixup! Add an AGENTS.md file to help with AI-assisted debugging/development
+210:  c770ccc16dc55e04d7e5e7a9cfdccde914adc138 <   -:  ---------------------------------------- fixup! Add an AGENTS.md file to help with AI-assisted debugging/development
+211:  b9ce73231d0ba60dafdfae2d2d28ce808480a6c4 <   -:  ---------------------------------------- fixup! Add an AGENTS.md file to help with AI-assisted debugging/development
+212:  b2576b6306f1a45dcb90a07b4e20393a0e29e0b3 <   -:  ---------------------------------------- fixup! ci: work around a problem with HTTP/2 vs libcurl v8.10.0
+213:  0445f1780455b18d1ea9f9422c951b9dcc3fe97d <   -:  ---------------------------------------- fixup! revision: create mark_trees_uninteresting_dense()
+214:  7dca14110aa7435233c6b2044ea924d6722d6742 <   -:  ---------------------------------------- fixup! Add a GitHub workflow to verify that Git/Scalar work in Nano Server
+215:  0638d907e35538d65d5895553461f7573bc4f6d6 <   -:  ---------------------------------------- build: tolerate use of _Generic from glibc 2.43 with Clang
+  -:  ---------------------------------------- > 205:  9fb4852fd0d4c8d13765eb353b3ca85bc134df8d ??? t5563: add tests for http.emptyAuth with Negotiate
