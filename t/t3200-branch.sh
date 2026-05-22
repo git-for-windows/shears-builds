@@ -1719,4 +1719,286 @@ test_expect_success 'errors if given a bad branch name' '
 	test_cmp expect actual
 '
 
+test_expect_success '--forked: setup' '
+	test_create_repo forked-upstream &&
+	test_commit -C forked-upstream base &&
+	git -C forked-upstream branch one base &&
+	git -C forked-upstream branch two base &&
+
+	test_create_repo forked-other &&
+	test_commit -C forked-other other-base &&
+	git -C forked-other branch foreign other-base &&
+
+	git clone forked-upstream forked &&
+	git -C forked remote add other ../forked-other &&
+	git -C forked fetch other &&
+	git -C forked branch --track local-one origin/one &&
+	git -C forked branch --track local-two origin/two &&
+	git -C forked branch --track local-foreign other/foreign &&
+	git -C forked branch detached &&
+	git -C forked branch --track topic-on-main main
+'
+
+test_expect_success '--forked <remote-tracking-branch> lists matching branches' '
+	git -C forked branch --forked origin/one >actual &&
+	echo local-one >expect &&
+	test_cmp expect actual
+'
+
+test_expect_success '--forked <local-branch> lists branches tracking that local branch' '
+	git -C forked branch --forked main >actual &&
+	echo topic-on-main >expect &&
+	test_cmp expect actual
+'
+
+test_expect_success '--forked <glob> matches every upstream under the pattern' '
+	git -C forked branch --forked "origin/*" >actual &&
+	cat >expect <<-\EOF &&
+	local-one
+	local-two
+	main
+	EOF
+	test_cmp expect actual
+'
+
+test_expect_success '--forked unions multiple <branch> arguments' '
+	git -C forked branch --forked origin/one other/foreign >actual &&
+	cat >expect <<-\EOF &&
+	local-foreign
+	local-one
+	EOF
+	test_cmp expect actual
+'
+
+test_expect_success '--forked combines literal and glob arguments' '
+	git -C forked branch --forked main "other/*" >actual &&
+	cat >expect <<-\EOF &&
+	local-foreign
+	topic-on-main
+	EOF
+	test_cmp expect actual
+'
+
+test_expect_success '--forked "*/*" covers every remote-tracking upstream' '
+	git -C forked branch --forked "*/*" >actual &&
+	cat >expect <<-\EOF &&
+	local-foreign
+	local-one
+	local-two
+	main
+	EOF
+	test_cmp expect actual
+'
+
+test_expect_success '--forked rejects unknown branch/pattern' '
+	test_must_fail git -C forked branch --forked nope 2>err &&
+	test_grep "not a valid branch or pattern" err
+'
+
+test_expect_success '--forked requires at least one <branch>' '
+	test_must_fail git -C forked branch --forked 2>err &&
+	test_grep "at least one <branch>" err
+'
+
+test_expect_success '--prune-merged: setup' '
+	test_create_repo pm-upstream &&
+	test_commit -C pm-upstream base &&
+	git -C pm-upstream checkout -b next &&
+	test_commit -C pm-upstream one-commit &&
+	test_commit -C pm-upstream two-commit &&
+	git -C pm-upstream branch one HEAD~ &&
+	git -C pm-upstream branch two HEAD &&
+	git -C pm-upstream branch wip main &&
+	git -C pm-upstream checkout main
+'
+
+test_expect_success '--prune-merged deletes branches integrated into upstream' '
+	test_when_finished "rm -rf pm-merged" &&
+	git clone pm-upstream pm-merged &&
+	git -C pm-merged branch one one-commit &&
+	git -C pm-merged branch --set-upstream-to=origin/next one &&
+	git -C pm-merged branch two two-commit &&
+	git -C pm-merged branch --set-upstream-to=origin/next two &&
+
+	git -C pm-merged branch --prune-merged "origin/*" &&
+
+	test_must_fail git -C pm-merged rev-parse --verify refs/heads/one &&
+	test_must_fail git -C pm-merged rev-parse --verify refs/heads/two
+'
+
+test_expect_success '--prune-merged with a literal upstream argument' '
+	test_when_finished "rm -rf pm-literal" &&
+	git clone pm-upstream pm-literal &&
+	git -C pm-literal branch one one-commit &&
+	git -C pm-literal branch --set-upstream-to=origin/next one &&
+	git -C pm-literal branch keepme one-commit &&
+	git -C pm-literal branch --set-upstream-to=origin/main keepme &&
+
+	git -C pm-literal branch --prune-merged origin/next &&
+
+	test_must_fail git -C pm-literal rev-parse --verify refs/heads/one &&
+	git -C pm-literal rev-parse --verify refs/heads/keepme
+'
+
+test_expect_success '--prune-merged unions multiple <branch> arguments' '
+	test_when_finished "rm -rf pm-union" &&
+	git clone pm-upstream pm-union &&
+	git -C pm-union branch one one-commit &&
+	git -C pm-union branch --set-upstream-to=origin/next one &&
+	git -C pm-union branch two base &&
+	git -C pm-union branch --set-upstream-to=origin/main two &&
+
+	git -C pm-union branch --prune-merged origin/next origin/main &&
+
+	test_must_fail git -C pm-union rev-parse --verify refs/heads/one &&
+	test_must_fail git -C pm-union rev-parse --verify refs/heads/two
+'
+
+test_expect_success '--prune-merged with a local-branch argument' '
+	test_create_repo pm-local &&
+	test_when_finished "rm -rf pm-local" &&
+	test_commit -C pm-local base &&
+	git -C pm-local branch topic base &&
+	git -C pm-local config branch.topic.remote . &&
+	git -C pm-local config branch.topic.merge refs/heads/main &&
+	git -C pm-local checkout --detach &&
+
+	git -C pm-local branch --prune-merged main &&
+
+	test_must_fail git -C pm-local rev-parse --verify refs/heads/topic &&
+	git -C pm-local rev-parse --verify refs/heads/main
+'
+
+test_expect_success '--prune-merged spares branches with un-integrated commits' '
+	test_when_finished "rm -rf pm-unmerged" &&
+	git clone pm-upstream pm-unmerged &&
+	git -C pm-unmerged checkout -b wip origin/wip &&
+	git -C pm-unmerged branch --set-upstream-to=origin/next wip &&
+	test_commit -C pm-unmerged local-only &&
+	git -C pm-unmerged checkout - &&
+
+	git -C pm-unmerged branch --prune-merged "origin/*" 2>err &&
+	test_grep "not fully merged" err &&
+	test_grep "Skipped 1 branch" err &&
+	test_grep "git branch -D" err &&
+	test_grep ! "If you are sure you want to delete it" err &&
+	git -C pm-unmerged rev-parse --verify refs/heads/wip
+'
+
+test_expect_success '--prune-merged skips branches whose upstream is gone' '
+	test_when_finished "rm -rf pm-upstream-gone" &&
+	git clone pm-upstream pm-upstream-gone &&
+	git -C pm-upstream-gone branch one one-commit &&
+	git -C pm-upstream-gone branch --set-upstream-to=origin/next one &&
+
+	git -C pm-upstream-gone update-ref -d refs/remotes/origin/next &&
+	git -C pm-upstream-gone branch --prune-merged "origin/*" &&
+
+	git -C pm-upstream-gone rev-parse --verify refs/heads/one
+'
+
+test_expect_success '--prune-merged never deletes the checked-out branch' '
+	test_when_finished "rm -rf pm-head" &&
+	git clone pm-upstream pm-head &&
+	git -C pm-head checkout -b one one-commit &&
+	git -C pm-head branch --set-upstream-to=origin/next one &&
+
+	git -C pm-head branch --prune-merged "origin/*" &&
+
+	git -C pm-head rev-parse --verify refs/heads/one
+'
+
+test_expect_success '--prune-merged spares the local default branch' '
+	test_when_finished "rm -rf pm-default" &&
+	git clone pm-upstream pm-default &&
+	git -C pm-default checkout --detach &&
+	git -C pm-default branch --prune-merged "origin/*" &&
+	git -C pm-default rev-parse --verify refs/heads/main
+'
+
+test_expect_success '--prune-merged protects the default branch by name only' '
+	test_when_finished "rm -rf pm-default-alias" &&
+	git clone pm-upstream pm-default-alias &&
+	git -C pm-default-alias branch --track trunk origin/main &&
+	git -C pm-default-alias checkout --detach &&
+	git -C pm-default-alias branch --prune-merged "origin/*" &&
+	git -C pm-default-alias rev-parse --verify refs/heads/main &&
+	test_must_fail git -C pm-default-alias rev-parse --verify refs/heads/trunk
+'
+
+test_expect_success '--prune-merged with literal arg also protects default-name' '
+	test_when_finished "rm -rf pm-literal-default" &&
+	git clone pm-upstream pm-literal-default &&
+	git -C pm-literal-default checkout --detach &&
+	git -C pm-literal-default branch --prune-merged origin/main &&
+	git -C pm-literal-default rev-parse --verify refs/heads/main
+'
+
+test_expect_success '--prune-merged requires at least one <branch>' '
+	test_must_fail git -C pm-upstream branch --prune-merged 2>err &&
+	test_grep "at least one <branch>" err
+'
+
+test_expect_success '--prune-merged honours branch.<name>.pruneMerged=false' '
+	test_when_finished "rm -rf pm-optout" &&
+	git clone pm-upstream pm-optout &&
+	git -C pm-optout branch one one-commit &&
+	git -C pm-optout branch --set-upstream-to=origin/next one &&
+	git -C pm-optout branch two two-commit &&
+	git -C pm-optout branch --set-upstream-to=origin/next two &&
+	git -C pm-optout config branch.one.pruneMerged false &&
+
+	git -C pm-optout branch --prune-merged "origin/*" 2>err &&
+
+	git -C pm-optout rev-parse --verify refs/heads/one &&
+	test_must_fail git -C pm-optout rev-parse --verify refs/heads/two &&
+	test_grep "Skipping .one." err
+'
+
+test_expect_success 'branch -d still deletes a pruneMerged=false branch' '
+	test_when_finished "rm -rf pm-optout-d" &&
+	git clone pm-upstream pm-optout-d &&
+	git -C pm-optout-d branch one one-commit &&
+	git -C pm-optout-d branch --set-upstream-to=origin/next one &&
+	git -C pm-optout-d config branch.one.pruneMerged false &&
+
+	git -C pm-optout-d branch -d one &&
+	test_must_fail git -C pm-optout-d rev-parse --verify refs/heads/one
+'
+
+test_expect_success '--prune-merged --dry-run prints but does not delete' '
+	test_when_finished "rm -rf pm-dryrun" &&
+	git clone pm-upstream pm-dryrun &&
+	git -C pm-dryrun branch one one-commit &&
+	git -C pm-dryrun branch --set-upstream-to=origin/next one &&
+
+	git -C pm-dryrun branch --prune-merged --dry-run "origin/*" >out &&
+	test_grep "Would delete branch .one." out &&
+	git -C pm-dryrun rev-parse --verify refs/heads/one
+'
+
+test_expect_success '--prune-merged --dry-run skips un-integrated branches' '
+	test_when_finished "rm -rf pm-dryrun-unmerged" &&
+	git clone pm-upstream pm-dryrun-unmerged &&
+	git -C pm-dryrun-unmerged checkout -b wip origin/next &&
+	git -C pm-dryrun-unmerged branch --set-upstream-to=origin/next wip &&
+	test_commit -C pm-dryrun-unmerged local-only &&
+	git -C pm-dryrun-unmerged checkout - &&
+	git -C pm-dryrun-unmerged branch merged one-commit &&
+	git -C pm-dryrun-unmerged branch --set-upstream-to=origin/next merged &&
+
+	git -C pm-dryrun-unmerged branch --prune-merged --dry-run "origin/*" \
+		>out 2>err &&
+	test_grep "Would delete branch .merged." out &&
+	test_grep ! "Would delete branch .wip." out &&
+	test_grep "not fully merged" err &&
+	git -C pm-dryrun-unmerged rev-parse --verify refs/heads/wip &&
+	git -C pm-dryrun-unmerged rev-parse --verify refs/heads/merged
+'
+
+test_expect_success '--dry-run requires --prune-merged' '
+	test_must_fail git -C pm-upstream branch --dry-run 2>err &&
+	test_grep "requires --prune-merged" err
+'
+
 test_done
