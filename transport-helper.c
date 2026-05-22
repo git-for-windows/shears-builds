@@ -630,7 +630,7 @@ static const char *connect_service_cmd(enum git_connect_service service)
 	case GIT_CONNECT_UPLOAD_ARCHIVE:
 		return "git-upload-archive";
 	}
-	BUG("unknown git_connect_type: %d", service);
+	BUG("unknown git_connect_service: %d", service);
 }
 
 static int process_connect_service(struct transport *transport,
