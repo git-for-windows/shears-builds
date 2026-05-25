@@ -17,8 +17,9 @@
 #define PARENT2		(1u<<17)
 #define STALE		(1u<<18)
 #define RESULT		(1u<<19)
+#define ENQUEUED	(1u<<20)
 
-static const unsigned all_flags = (PARENT1 | PARENT2 | STALE | RESULT);
+static const unsigned all_flags = (PARENT1 | PARENT2 | STALE | RESULT | ENQUEUED);
 
 static int compare_commits_by_gen(const void *_a, const void *_b)
 {
@@ -39,14 +40,25 @@ static int compare_commits_by_gen(const void *_a, const void *_b)
 	return 0;
 }
 
-static int queue_has_nonstale(struct prio_queue *queue)
+static void maybe_enqueue(struct prio_queue *queue, struct commit *c,
+			  int *nonstale_count)
 {
-	for (size_t i = 0; i < queue->nr; i++) {
-		struct commit *commit = queue->array[i].data;
-		if (!(commit->object.flags & STALE))
-			return 1;
+	if (c->object.flags & ENQUEUED)
+		return;
+	c->object.flags |= ENQUEUED;
+	prio_queue_put(queue, c);
+	if (!(c->object.flags & STALE))
+		(*nonstale_count)++;
+}
+
+static void mark_stale(struct commit *c, unsigned queued_flag,
+		       int *nonstale_count)
+{
+	if (!(c->object.flags & STALE)) {
+		if (c->object.flags & queued_flag)
+			(*nonstale_count)--;
+		c->object.flags |= STALE;
 	}
-	return 0;
 }
 
 /* all input commits in one and twos[] must have been parsed! */
@@ -59,6 +71,7 @@ static int paint_down_to_common(struct repository *r,
 {
 	struct prio_queue queue = { compare_commits_by_gen_then_commit_date };
 	int i;
+	int nonstale_count = 0;
 	timestamp_t last_gen = GENERATION_NUMBER_INFINITY;
 	struct commit_list **tail = result;
 
@@ -70,18 +83,22 @@ static int paint_down_to_common(struct repository *r,
 		commit_list_append(one, result);
 		return 0;
 	}
-	prio_queue_put(&queue, one);
+	maybe_enqueue(&queue, one, &nonstale_count);
 
 	for (i = 0; i < n; i++) {
 		twos[i]->object.flags |= PARENT2;
-		prio_queue_put(&queue, twos[i]);
+		maybe_enqueue(&queue, twos[i], &nonstale_count);
 	}
 
-	while (queue_has_nonstale(&queue)) {
+	while (nonstale_count > 0) {
 		struct commit *commit = prio_queue_get(&queue);
 		struct commit_list *parents;
 		int flags;
 		timestamp_t generation = commit_graph_generation(commit);
+
+		commit->object.flags &= ~ENQUEUED;
+		if (!(commit->object.flags & STALE))
+			nonstale_count--;
 
 		if (min_generation && generation > last_gen)
 			BUG("bad generation skip %"PRItime" > %"PRItime" at %s",
@@ -131,8 +148,10 @@ static int paint_down_to_common(struct repository *r,
 				return error(_("could not parse commit %s"),
 					     oid_to_hex(&p->object.oid));
 			}
+			if (flags & STALE)
+				mark_stale(p, ENQUEUED, &nonstale_count);
 			p->object.flags |= flags;
-			prio_queue_put(&queue, p);
+			maybe_enqueue(&queue, p, &nonstale_count);
 		}
 	}
 
@@ -1040,12 +1059,15 @@ struct commit_list *get_reachable_subset(struct commit **from, size_t nr_from,
 define_commit_slab(bit_arrays, struct bitmap *);
 static struct bit_arrays bit_arrays;
 
-static void insert_no_dup(struct prio_queue *queue, struct commit *c)
+static void insert_no_dup(struct prio_queue *queue, struct commit *c,
+			  int *nonstale_count)
 {
 	if (c->object.flags & PARENT2)
 		return;
 	prio_queue_put(queue, c);
 	c->object.flags |= PARENT2;
+	if (!(c->object.flags & STALE))
+		(*nonstale_count)++;
 }
 
 static struct bitmap *get_bit_array(struct commit *c, int width)
@@ -1071,6 +1093,7 @@ void ahead_behind(struct repository *r,
 {
 	struct prio_queue queue = { .compare = compare_commits_by_gen_then_commit_date };
 	size_t width = DIV_ROUND_UP(commits_nr, BITS_IN_EWORD);
+	int nonstale_count = 0;
 
 	if (!commits_nr || !counts_nr)
 		return;
@@ -1089,13 +1112,16 @@ void ahead_behind(struct repository *r,
 		struct bitmap *bitmap = get_bit_array(c, width);
 
 		bitmap_set(bitmap, i);
-		insert_no_dup(&queue, c);
+		insert_no_dup(&queue, c, &nonstale_count);
 	}
 
-	while (queue_has_nonstale(&queue)) {
+	while (nonstale_count > 0) {
 		struct commit *c = prio_queue_get(&queue);
 		struct commit_list *p;
 		struct bitmap *bitmap_c = get_bit_array(c, width);
+
+		if (!(c->object.flags & STALE))
+			nonstale_count--;
 
 		for (size_t i = 0; i < counts_nr; i++) {
 			int reach_from_tip = !!bitmap_get(bitmap_c, counts[i].tip_index);
@@ -1125,9 +1151,9 @@ void ahead_behind(struct repository *r,
 			 * queue is STALE.
 			 */
 			if (bitmap_popcount(bitmap_p) == commits_nr)
-				p->item->object.flags |= STALE;
+				mark_stale(p->item, PARENT2, &nonstale_count);
 
-			insert_no_dup(&queue, p->item);
+			insert_no_dup(&queue, p->item, &nonstale_count);
 		}
 
 		free_bit_array(c);
