@@ -359,6 +359,35 @@ test_expect_success 'describe --contains and --no-match' '
 	test_cmp expect actual
 '
 
+test_expect_success 'describe --contains --all --match' '
+	echo "tags/A^0" >expect &&
+	tagged_commit=$(git rev-parse "refs/tags/A^0") &&
+	test_must_fail git describe --contains --all --match="B" $tagged_commit >actual &&
+	git describe --contains --all --match="A" $tagged_commit >actual &&
+	test_cmp expect actual
+'
+
+test_expect_success 'describe --contains --all --match branch' '
+	echo "branch_A" >expect &&
+	tagged_commit=$(git rev-parse "refs/tags/A^0") &&
+	git describe --contains --all --match="branch*" $tagged_commit >actual &&
+	test_cmp expect actual
+'
+
+test_expect_success 'describe --contains --all --match and --exclude' '
+	echo "branch_C~1" >expect &&
+	tagged_commit=$(git rev-parse "refs/tags/A^0") &&
+	git describe --contains --all --match="branch*" --exclude="branch_A" $tagged_commit >actual &&
+	test_cmp expect actual
+'
+
+test_expect_success 'describe --contains --all --exclude' '
+	echo "branch_A" >expect &&
+	tagged_commit=$(git rev-parse "refs/tags/A^0") &&
+	git describe --contains --all --exclude="A" --exclude="c" --exclude="test*" $tagged_commit >actual &&
+	test_cmp expect actual
+'
+
 test_expect_success 'setup and absorb a submodule' '
 	test_create_repo sub1 &&
 	test_commit -C sub1 initial &&
