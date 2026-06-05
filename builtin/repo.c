@@ -22,13 +22,14 @@
 #include "tree.h"
 #include "tree-walk.h"
 #include "utf8.h"
+#include "wildmatch.h"
 
 #define REPO_INFO_USAGE \
 	"git repo info [--format=(lines|nul) | -z] [--all | <key>...]", \
 	"git repo info --keys [--format=(lines|nul) | -z]"
 
 #define REPO_STRUCTURE_USAGE \
-	"git repo structure [--format=(table|lines|nul) | -z] [<revs>...]"
+	"git repo structure [<options>] [<revs>...]"
 
 static const char *const repo_usage[] = {
 	REPO_INFO_USAGE,
@@ -898,15 +899,38 @@ struct count_references_data {
 	struct ref_stats *stats;
 	struct rev_info *revs;
 	struct repository *repo;
+	const struct string_list *filters;
 	struct progress *progress;
 	bool add_to_pending;
 };
+
+static int ref_matches_any_filter(const char *refname,
+				  const struct string_list *filters)
+{
+	if (!filters->nr)
+		return 1;
+	for (size_t i = 0, namelen = strlen(refname); i < filters->nr; i++) {
+		const char *p = filters->items[i].string;
+		size_t plen = strlen(p);
+		if (plen <= namelen &&
+		    !strncmp(refname, p, plen) &&
+		    (refname[plen] == '\0' || refname[plen] == '/' ||
+		     (plen && p[plen - 1] == '/')))
+			return 1;
+		if (!wildmatch(p, refname, WM_PATHNAME))
+			return 1;
+	}
+	return 0;
+}
 
 static int count_references(const struct reference *ref, void *cb_data)
 {
 	struct count_references_data *data = cb_data;
 	struct ref_stats *stats = data->stats;
 	size_t ref_count;
+
+	if (!ref_matches_any_filter(ref->name, data->filters))
+		return 0;
 
 	switch (ref_kind_from_refname(ref->name)) {
 	case FILTER_REFS_BRANCHES:
@@ -945,6 +969,7 @@ static int count_references(const struct reference *ref, void *cb_data)
 static void structure_count_references(struct ref_stats *stats,
 				       struct rev_info *revs,
 				       struct repository *repo,
+				       const struct string_list *filters,
 				       int show_progress,
 				       bool add_to_pending)
 {
@@ -952,6 +977,7 @@ static void structure_count_references(struct ref_stats *stats,
 		.stats = stats,
 		.revs = revs,
 		.repo = repo,
+		.filters = filters,
 		.add_to_pending = add_to_pending,
 	};
 
@@ -1104,6 +1130,7 @@ static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
 	struct rev_info revs;
 	int show_progress = -1;
 	bool included_revision_args = false;
+	struct string_list ref_filters = STRING_LIST_INIT_DUP;
 	struct option options[] = {
 		OPT_CALLBACK_F(0, "format", &format, N_("format"),
 			       N_("output format"),
@@ -1113,6 +1140,9 @@ static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
 			       PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			       parse_format_cb),
 		OPT_BOOL(0, "progress", &show_progress, N_("show progress")),
+		OPT_STRING_LIST(0, "ref-filter", &ref_filters, N_("pattern"),
+				N_("only count refs matching <pattern>; "
+				   "repeat to union multiple patterns")),
 		OPT_END()
 	};
 
@@ -1129,7 +1159,8 @@ static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
 			return error(_("unrecognized argument: %s"), argv[1]);
 	}
 
-	structure_count_references(&stats.refs, &revs, repo, show_progress, !included_revision_args);
+	structure_count_references(&stats.refs, &revs, repo, &ref_filters,
+				   show_progress, !included_revision_args);
 	structure_count_objects(&stats.objects, &revs, repo, show_progress);
 
 	switch (format) {
@@ -1148,6 +1179,7 @@ static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
 	}
 
 	stats_table_clear(&table);
+	string_list_clear(&ref_filters, 0);
 	release_revisions(&revs);
 
 	return 0;
