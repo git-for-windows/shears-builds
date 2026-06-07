@@ -73,6 +73,7 @@ void initialize_repository(struct repository *repo)
 	ALLOC_ARRAY(repo->index, 1);
 	index_state_init(repo->index, repo);
 	repo->check_deprecated_config = true;
+	repo->bare_cfg = -1;
 	repo_config_values_init(&repo->config_values_private_);
 
 	/*
@@ -153,7 +154,7 @@ static void repo_set_commondir(struct repository *repo,
 {
 	struct strbuf sb = STRBUF_INIT;
 
-	free(repo->commondir);
+	FREE_AND_NULL(repo->commondir);
 
 	if (commondir) {
 		repo->different_commondir = 1;

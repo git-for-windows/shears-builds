@@ -349,7 +349,7 @@ int for_each_commit_graft(each_commit_graft_fn fn, void *cb_data)
 
 struct commit_buffer {
 	void *buffer;
-	unsigned long size;
+	size_t size;
 };
 define_commit_slab(buffer_slab, struct commit_buffer);
 
@@ -366,7 +366,8 @@ void free_commit_buffer_slab(struct buffer_slab *bs)
 	free(bs);
 }
 
-void set_commit_buffer(struct repository *r, struct commit *commit, void *buffer, unsigned long size)
+void set_commit_buffer(struct repository *r, struct commit *commit,
+		       void *buffer, size_t size)
 {
 	struct commit_buffer *v = buffer_slab_at(
 		r->parsed_objects->buffer_slab, commit);
@@ -374,7 +375,9 @@ void set_commit_buffer(struct repository *r, struct commit *commit, void *buffer
 	v->size = size;
 }
 
-const void *get_cached_commit_buffer(struct repository *r, const struct commit *commit, unsigned long *sizep)
+const void *get_cached_commit_buffer(struct repository *r,
+				     const struct commit *commit,
+				     size_t *sizep)
 {
 	struct commit_buffer *v = buffer_slab_peek(
 		r->parsed_objects->buffer_slab, commit);
@@ -390,12 +393,12 @@ const void *get_cached_commit_buffer(struct repository *r, const struct commit *
 
 const void *repo_get_commit_buffer(struct repository *r,
 				   const struct commit *commit,
-				   unsigned long *sizep)
+				   size_t *sizep)
 {
 	const void *ret = get_cached_commit_buffer(r, commit, sizep);
 	if (!ret) {
 		enum object_type type;
-		unsigned long size;
+		size_t size;
 		ret = odb_read_object(r->objects, &commit->object.oid, &type, &size);
 		if (!ret)
 			die("cannot read commit object %s",
@@ -437,7 +440,7 @@ static inline void set_commit_tree(struct commit *c, struct tree *t)
 static void load_tree_from_commit_contents(struct repository *r, struct commit *commit)
 {
 	enum object_type type;
-	unsigned long size;
+	size_t size;
 	char *buf;
 	const char *p;
 	struct object_id tree_oid;
@@ -604,7 +607,7 @@ int repo_parse_commit_internal(struct repository *r,
 {
 	enum object_type type;
 	void *buffer;
-	unsigned long size;
+	size_t size;
 	struct object_info oi = {
 		.typep = &type,
 		.sizep = &size,
@@ -1192,7 +1195,7 @@ int parse_signed_commit(const struct commit *commit,
 			struct strbuf *payload, struct strbuf *signature,
 			const struct git_hash_algo *algop)
 {
-	unsigned long size;
+	size_t size;
 	const char *buffer = repo_get_commit_buffer(the_repository, commit,
 						    &size);
 	int ret = parse_buffer_signed_by_header(buffer, size, payload, signature, algop);
@@ -1300,7 +1303,7 @@ static void handle_signed_tag(const struct commit *parent, struct commit_extra_h
 	struct merge_remote_desc *desc;
 	struct commit_extra_header *mergetag;
 	char *buf;
-	unsigned long size;
+	size_t size;
 	enum object_type type;
 	struct strbuf payload = STRBUF_INIT;
 	struct strbuf signature = STRBUF_INIT;
@@ -1365,7 +1368,7 @@ int verify_commit_buffer(const char *buffer, size_t size,
 
 int check_commit_signature(const struct commit *commit, struct signature_check *sigc)
 {
-	unsigned long size;
+	size_t size;
 	const char *buffer = repo_get_commit_buffer(the_repository, commit, &size);
 	int ret = verify_commit_buffer(buffer, size, sigc);
 
@@ -1462,7 +1465,7 @@ struct commit_extra_header *read_commit_extra_headers(struct commit *commit,
 						      const char **exclude)
 {
 	struct commit_extra_header *extra = NULL;
-	unsigned long size;
+	size_t size;
 	const char *buffer = repo_get_commit_buffer(the_repository, commit,
 						    &size);
 	extra = read_commit_extra_header_lines(buffer, size, exclude);

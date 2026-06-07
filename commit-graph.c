@@ -1669,7 +1669,7 @@ static void compute_reachable_generation_numbers(
 			struct commit *current = list->item;
 			struct commit_list *parent;
 			int all_parents_computed = 1;
-			uint32_t max_gen = 0;
+			timestamp_t max_gen = 0;
 
 			for (parent = current->parents; parent; parent = parent->next) {
 				repo_parse_commit(info->r, parent->item);
@@ -2016,8 +2016,8 @@ static void fill_oids_from_all_packs(struct write_commit_graph_context *ctx)
 	odb_prepare_alternates(ctx->r->objects);
 	for (source = ctx->r->objects->sources; source; source = source->next) {
 		struct odb_source_files *files = odb_source_files_downcast(source);
-		packfile_store_for_each_object(files->packed, &oi, add_packed_commits_oi,
-					       ctx, &opts);
+		odb_source_for_each_object(&files->packed->base, &oi, add_packed_commits_oi,
+					   ctx, &opts);
 	}
 
 	if (ctx->progress_done < ctx->approx_nr_objects)

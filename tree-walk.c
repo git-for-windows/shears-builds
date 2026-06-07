@@ -49,7 +49,7 @@ static int decode_tree_entry(struct tree_desc *desc, const char *buf, unsigned l
 
 static int init_tree_desc_internal(struct tree_desc *desc,
 				   const struct object_id *oid,
-				   const void *buffer, unsigned long size,
+				   const void *buffer, size_t size,
 				   struct strbuf *err,
 				   enum tree_desc_flags flags)
 {
@@ -63,7 +63,7 @@ static int init_tree_desc_internal(struct tree_desc *desc,
 }
 
 void init_tree_desc(struct tree_desc *desc, const struct object_id *tree_oid,
-		    const void *buffer, unsigned long size)
+		    const void *buffer, size_t size)
 {
 	struct strbuf err = STRBUF_INIT;
 	if (init_tree_desc_internal(desc, tree_oid, buffer, size, &err, 0))
@@ -72,7 +72,7 @@ void init_tree_desc(struct tree_desc *desc, const struct object_id *tree_oid,
 }
 
 int init_tree_desc_gently(struct tree_desc *desc, const struct object_id *oid,
-			  const void *buffer, unsigned long size,
+			  const void *buffer, size_t size,
 			  enum tree_desc_flags flags)
 {
 	struct strbuf err = STRBUF_INIT;
@@ -87,7 +87,7 @@ void *fill_tree_descriptor(struct repository *r,
 			   struct tree_desc *desc,
 			   const struct object_id *oid)
 {
-	unsigned long size = 0;
+	size_t size = 0;
 	void *buf = NULL;
 
 	if (oid) {
@@ -610,7 +610,7 @@ int get_tree_entry(struct repository *r,
 {
 	int retval;
 	void *tree;
-	unsigned long size;
+	size_t size;
 	struct object_id root;
 
 	tree = odb_read_object_peeled(r->objects, tree_oid, OBJ_TREE, &size, &root);
@@ -682,7 +682,7 @@ enum get_oid_result get_tree_entry_follow_symlinks(struct repository *r,
 		if (!t.buffer) {
 			void *tree;
 			struct object_id root;
-			unsigned long size;
+			size_t size;
 			tree = odb_read_object_peeled(r->objects, &current_tree_oid,
 						      OBJ_TREE, &size, &root);
 			if (!tree)
@@ -777,7 +777,7 @@ enum get_oid_result get_tree_entry_follow_symlinks(struct repository *r,
 			goto done;
 		} else if (S_ISLNK(*mode)) {
 			/* Follow a symlink */
-			unsigned long link_len;
+			size_t link_len;
 			size_t len;
 			char *contents, *contents_start;
 			struct dir_state *parent;

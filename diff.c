@@ -3606,10 +3606,10 @@ static int checkdiff_consume(void *priv, char *line, unsigned long len)
 }
 
 static unsigned char *deflate_it(char *data,
-				 unsigned long size,
-				 unsigned long *result_size)
+				 size_t size,
+				 size_t *result_size)
 {
-	int bound;
+	size_t bound;
 	unsigned char *deflated;
 	git_zstream stream;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
@@ -3636,10 +3636,10 @@ static void emit_binary_diff_body(struct diff_options *o,
 	void *delta;
 	void *deflated;
 	void *data;
-	unsigned long orig_size;
-	unsigned long delta_size;
-	unsigned long deflate_size;
-	unsigned long data_size;
+	size_t orig_size;
+	size_t delta_size;
+	size_t deflate_size;
+	size_t data_size;
 
 	/* We could do deflated delta, or we could do just deflated two,
 	 * whichever is smaller.
@@ -7842,7 +7842,7 @@ int textconv_object(struct repository *r,
 		    const struct object_id *oid,
 		    int oid_valid,
 		    char **buf,
-		    unsigned long *buf_size)
+		    size_t *buf_size)
 {
 	struct diff_filespec *df;
 	struct userdiff_driver *textconv;
