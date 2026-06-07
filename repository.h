@@ -118,6 +118,13 @@ struct repository {
 	bool worktree_config_is_bogus;
 
 	/*
+	 * Whether the repository is bare, as set by "core.bare" config or
+	 * inferred during repository discovery. -1 means unset/unknown, 0
+	 * means non-bare, 1 means bare.
+	 */
+	int bare_cfg;
+
+	/*
 	 * Path from the root of the top-level superproject down to this
 	 * repository.  This is only non-NULL if the repository is initialized
 	 * as a submodule of another repository.
@@ -221,12 +228,9 @@ const char *repo_get_work_tree(struct repository *repo);
  */
 struct set_gitdir_args {
 	const char *commondir;
-	const char *object_dir;
 	const char *graft_file;
 	const char *index_file;
-	const char *alternate_db;
 	bool disable_ref_updates;
-	bool skip_initializing_odb;
 };
 
 void repo_set_gitdir(struct repository *repo, const char *root,

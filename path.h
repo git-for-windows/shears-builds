@@ -161,6 +161,7 @@ int normalize_path_copy(char *dst, const char *src);
 int strbuf_normalize_path(struct strbuf *src);
 int longest_ancestor_length(const char *path, struct string_list *prefixes);
 char *strip_path_suffix(const char *path, const char *suffix);
+int is_mount_point_via_stat(struct strbuf *path);
 int daemon_avoid_alias(const char *path);
 
 /*
@@ -217,7 +218,7 @@ void safe_create_dir(struct repository *repo, const char *dir, int share);
  *
  *   - It always adjusts shared permissions.
  *
- * Returns a negative erorr code on error, 0 on success.
+ * Returns a negative error code on error, 0 on success.
  */
 int safe_create_dir_in_gitdir(struct repository *repo, const char *path);
 
