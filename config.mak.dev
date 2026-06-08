@@ -28,6 +28,9 @@ endif
 else
 # FreeBSD cannot limit to C99 because its system headers unconditionally
 # rely on C11 features.
+#
+# Clang cannot limit to C99 when using glibc 2.43 because its system headers
+# depend on the _Generic C11 feature. This works with GCC though.
 endif
 
 DEVELOPER_CFLAGS += -Wdeclaration-after-statement
