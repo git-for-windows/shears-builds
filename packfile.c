@@ -896,11 +896,12 @@ unsigned long unpack_object_header_buffer(const unsigned char *buf,
 }
 
 /*
- * Size_t variant for >4GB delta results on Windows.
+ * Read a delta object's header at curpos in p (already inflated as needed)
+ * and return the size of the result object (the post-application target).
  */
-static size_t get_size_from_delta_sz(struct packed_git *p,
-				     struct pack_window **w_curs,
-				     off_t curpos)
+size_t get_size_from_delta(struct packed_git *p,
+			   struct pack_window **w_curs,
+			   off_t curpos)
 {
 	const unsigned char *data;
 	unsigned char delta_head[20], *in;
@@ -947,18 +948,10 @@ static size_t get_size_from_delta_sz(struct packed_git *p,
 	data = delta_head;
 
 	/* ignore base size */
-	get_delta_hdr_size_sz(&data, delta_head+sizeof(delta_head));
+	get_delta_hdr_size(&data, delta_head+sizeof(delta_head));
 
 	/* Read the result size */
-	return get_delta_hdr_size_sz(&data, delta_head+sizeof(delta_head));
-}
-
-unsigned long get_size_from_delta(struct packed_git *p,
-				  struct pack_window **w_curs,
-				  off_t curpos)
-{
-	size_t size = get_size_from_delta_sz(p, w_curs, curpos);
-	return cast_size_t_to_ulong(size);
+	return get_delta_hdr_size(&data, delta_head+sizeof(delta_head));
 }
 
 int unpack_object_header(struct packed_git *p,
@@ -1186,7 +1179,7 @@ struct delta_base_cache_entry {
 	struct delta_base_cache_key key;
 	struct list_head lru;
 	void *data;
-	unsigned long size;
+	size_t size;
 	enum object_type type;
 };
 
@@ -1257,7 +1250,7 @@ static void detach_delta_base_cache_entry(struct delta_base_cache_entry *ent)
 }
 
 static void *cache_or_unpack_entry(struct repository *r, struct packed_git *p,
-				   off_t base_offset, unsigned long *base_size,
+				   off_t base_offset, size_t *base_size,
 				   enum object_type *type)
 {
 	struct delta_base_cache_entry *ent;
@@ -1290,8 +1283,8 @@ void clear_delta_base_cache(void)
 }
 
 static void add_delta_base_cache(struct packed_git *p, off_t base_offset,
-				 void *base, unsigned long base_size,
-				 unsigned long delta_base_cache_limit,
+				 void *base, size_t base_size,
+				 size_t delta_base_cache_limit,
 				 enum object_type type)
 {
 	struct delta_base_cache_entry *ent;
@@ -1346,8 +1339,8 @@ int packed_object_info_with_index_pos(struct packed_git *p, off_t obj_offset,
 	 * a "real" type later if the caller is interested.
 	 */
 	if (oi->contentp) {
-		*oi->contentp = cache_or_unpack_entry(p->repo, p, obj_offset, oi->sizep,
-						      &type);
+		*oi->contentp = cache_or_unpack_entry(p->repo, p, obj_offset,
+						      oi->sizep, &type);
 		if (!*oi->contentp)
 			type = OBJ_BAD;
 	} else if (oi->sizep || oi->typep || oi->delta_base_oid) {
@@ -1363,18 +1356,13 @@ int packed_object_info_with_index_pos(struct packed_git *p, off_t obj_offset,
 				ret = -1;
 				goto out;
 			}
-			/*
-			 * Use size_t variant to avoid die() on >4GB deltas.
-			 * oi->sizep is unsigned long, so truncation may occur,
-			 * but streaming code uses its own size_t tracking.
-			 */
-			size = get_size_from_delta_sz(p, &w_curs, tmp_pos);
+			size = get_size_from_delta(p, &w_curs, tmp_pos);
 			if (size == 0) {
 				ret = -1;
 				goto out;
 			}
 		}
-		*oi->sizep = (unsigned long)size;
+		*oi->sizep = size;
 	}
 
 	if (oi->disk_sizep || (oi->mtimep && p->is_cruft)) {
@@ -1467,7 +1455,7 @@ int packed_object_info(struct packed_git *p, off_t obj_offset,
 static void *unpack_compressed_entry(struct packed_git *p,
 				    struct pack_window **w_curs,
 				    off_t curpos,
-				    unsigned long size)
+				    size_t size)
 {
 	int st;
 	git_zstream stream;
@@ -1522,11 +1510,11 @@ int do_check_packed_object_crc;
 struct unpack_entry_stack_ent {
 	off_t obj_offset;
 	off_t curpos;
-	unsigned long size;
+	size_t size;
 };
 
 void *unpack_entry(struct repository *r, struct packed_git *p, off_t obj_offset,
-		   enum object_type *final_type, unsigned long *final_size)
+		   enum object_type *final_type, size_t *final_size)
 {
 	struct pack_window *w_curs = NULL;
 	off_t curpos = obj_offset;
@@ -1643,7 +1631,7 @@ void *unpack_entry(struct repository *r, struct packed_git *p, off_t obj_offset,
 		void *delta_data;
 		void *base = data;
 		void *external_base = NULL;
-		unsigned long delta_size, base_size = size;
+		size_t delta_size, base_size = size;
 		int i;
 		off_t base_obj_offset = obj_offset;
 
@@ -1696,10 +1684,8 @@ void *unpack_entry(struct repository *r, struct packed_git *p, off_t obj_offset,
 			      (uintmax_t)curpos, p->pack_name);
 			data = NULL;
 		} else {
-			unsigned long sz;
 			data = patch_delta(base, base_size, delta_data,
-					   delta_size, &sz);
-			size = sz;
+					   delta_size, &size);
 
 			/*
 			 * We could not apply the delta; warn the user, but
