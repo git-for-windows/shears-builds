@@ -1647,6 +1647,8 @@ static int grep_source_1(struct grep_opt *opt, struct grep_source *gs, int colle
 
 	bol = gs->buf;
 	left = gs->size;
+	if (left && gs->buf[left-1] == '\n')
+		left--;
 	while (left) {
 		const char *eol;
 		int hit;
@@ -1931,9 +1933,11 @@ void grep_source_clear_data(struct grep_source *gs)
 static int grep_source_load_oid(struct grep_source *gs)
 {
 	enum object_type type;
+	size_t size_st = 0;
 
 	gs->buf = odb_read_object(gs->repo->objects, gs->identifier,
-				  &type, &gs->size);
+				  &type, &size_st);
+	gs->size = cast_size_t_to_ulong(size_st);
 	if (!gs->buf)
 		return error(_("'%s': unable to read %s"),
 			     gs->name,
