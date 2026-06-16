@@ -75,14 +75,17 @@ int fetch_object_info(const enum protocol_version version, struct object_info_ar
 
 		string_list_split(&object_info_values, reader->line, " ", -1);
 		if (0 <= size_index) {
+			unsigned long sz;
 			if (!strcmp(object_info_values.items[1 + size_index].string, ""))
 				die("object-info: server does not recognize object %s",
 				    object_info_values.items[0].string);
 
-			if (strtoul_ul(object_info_values.items[1 + size_index].string, 10, object_info_data[i].sizep))
+			if (strtoul_ul(object_info_values.items[1 + size_index].string,
+				       10, &sz))
 				die("object-info: ref %s has invalid size %s",
 				    object_info_values.items[0].string,
 				    object_info_values.items[1 + size_index].string);
+			*object_info_data[i].sizep = sz;
 		}
 
 		string_list_clear(&object_info_values, 0);
