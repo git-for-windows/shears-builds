@@ -2351,15 +2351,31 @@ void ref_store_release(struct ref_store *ref_store)
 
 struct ref_store *get_main_ref_store(struct repository *r)
 {
+	enum ref_storage_format format;
+
 	if (r->refs_private)
 		return r->refs_private;
 
 	if (!r->gitdir)
 		BUG("attempting to get main_ref_store outside of repository");
 
-	r->refs_private = ref_store_init(r, r->ref_storage_format,
-					 r->gitdir, REF_STORE_ALL_CAPS);
+	/*
+	 * When constructing the reference backend we'll end up reading the Git
+	 * configuration. This means we'll also try to evaluate "onbranch"
+	 * conditions.
+	 *
+	 * We cannot read branches when constructing the refdb, so it is not
+	 * possible to evaluate those conditions in the first place. To gate
+	 * their evaluation we check whether or not the reference storage
+	 * format has been configured -- we thus have to temporarily set it to
+	 * UNKNOWN here so that we don't end up recursing.
+	 */
+	format = r->ref_storage_format;
+	r->ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN;
+	r->refs_private = ref_store_init(r, format, r->gitdir, REF_STORE_ALL_CAPS);
 	r->refs_private = maybe_debug_wrap_ref_store(r->gitdir, r->refs_private);
+	r->ref_storage_format = format;
+
 	return r->refs_private;
 }
 
@@ -3555,8 +3571,6 @@ void refs_compute_filesystem_location(const char *gitdir, const char *payload,
 				      bool *is_worktree, struct strbuf *refdir,
 				      struct strbuf *ref_common_dir)
 {
-	struct strbuf sb = STRBUF_INIT;
-
 	*is_worktree = get_common_dir_noenv(ref_common_dir, gitdir);
 
 	if (!payload) {
@@ -3570,8 +3584,8 @@ void refs_compute_filesystem_location(const char *gitdir, const char *payload,
 	}
 
 	if (!is_absolute_path(payload)) {
-		strbuf_addf(&sb, "%s/%s", ref_common_dir->buf, payload);
-		strbuf_realpath(ref_common_dir, sb.buf, 1);
+		strbuf_addf(ref_common_dir, "/%s", payload);
+		strbuf_realpath(ref_common_dir, ref_common_dir->buf, 1);
 	} else {
 		strbuf_realpath(ref_common_dir, payload, 1);
 	}
@@ -3584,6 +3598,4 @@ void refs_compute_filesystem_location(const char *gitdir, const char *payload,
 			BUG("worktree path does not contain slash");
 		strbuf_addf(refdir, "/worktrees/%s", wt_id + 1);
 	}
-
-	strbuf_release(&sb);
 }
