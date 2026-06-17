@@ -300,7 +300,7 @@ int parse_loose_header(const char *hdr, struct object_info *oi)
 	}
 
 	if (oi->sizep)
-		*oi->sizep = cast_size_t_to_ulong(size);
+		*oi->sizep = size;
 
 	/*
 	 * The length must be followed by a zero byte
@@ -315,6 +315,173 @@ int parse_loose_header(const char *hdr, struct object_info *oi)
 	return 0;
 }
 
+<<<<<<< HEAD
+=======
+static int read_object_info_from_path(struct odb_source *source,
+				      const char *path,
+				      const struct object_id *oid,
+				      struct object_info *oi,
+				      enum object_info_flags flags)
+{
+	struct odb_source_files *files = odb_source_files_downcast(source);
+	int ret;
+	int fd;
+	unsigned long mapsize;
+	void *map = NULL;
+	git_zstream stream, *stream_to_end = NULL;
+	char hdr[MAX_HEADER_LEN];
+	size_t size_scratch;
+	enum object_type type_scratch;
+	struct stat st;
+
+	/*
+	 * If we don't care about type or size, then we don't
+	 * need to look inside the object at all. Note that we
+	 * do not optimize out the stat call, even if the
+	 * caller doesn't care about the disk-size, since our
+	 * return value implicitly indicates whether the
+	 * object even exists.
+	 */
+	if (!oi || (!oi->typep && !oi->sizep && !oi->contentp)) {
+		struct stat st;
+
+		if ((!oi || (!oi->disk_sizep && !oi->mtimep)) && (flags & OBJECT_INFO_QUICK)) {
+			ret = quick_has_loose(files->loose, oid) ? 0 : -1;
+			goto out;
+		}
+
+		if (lstat(path, &st) < 0) {
+			ret = -1;
+			goto out;
+		}
+
+		if (oi) {
+			if (oi->disk_sizep)
+				*oi->disk_sizep = st.st_size;
+			if (oi->mtimep)
+				*oi->mtimep = st.st_mtime;
+		}
+
+		ret = 0;
+		goto out;
+	}
+
+	fd = git_open(path);
+	if (fd < 0) {
+		if (errno != ENOENT)
+			error_errno(_("unable to open loose object %s"), oid_to_hex(oid));
+		ret = -1;
+		goto out;
+	}
+
+	if (fstat(fd, &st)) {
+		close(fd);
+		ret = -1;
+		goto out;
+	}
+
+	mapsize = xsize_t(st.st_size);
+	if (!mapsize) {
+		close(fd);
+		ret = error(_("object file %s is empty"), path);
+		goto out;
+	}
+
+	map = xmmap(NULL, mapsize, PROT_READ, MAP_PRIVATE, fd, 0);
+	close(fd);
+	if (!map) {
+		ret = -1;
+		goto out;
+	}
+
+	if (oi->disk_sizep)
+		*oi->disk_sizep = mapsize;
+	if (oi->mtimep)
+		*oi->mtimep = st.st_mtime;
+
+	stream_to_end = &stream;
+
+	switch (unpack_loose_header(&stream, map, mapsize, hdr, sizeof(hdr))) {
+	case ULHR_OK:
+		if (!oi->sizep)
+			oi->sizep = &size_scratch;
+		if (!oi->typep)
+			oi->typep = &type_scratch;
+
+		if (parse_loose_header(hdr, oi) < 0) {
+			ret = error(_("unable to parse %s header"), oid_to_hex(oid));
+			goto corrupt;
+		}
+
+		if (*oi->typep < 0)
+			die(_("invalid object type"));
+
+		if (oi->contentp) {
+			*oi->contentp = unpack_loose_rest(&stream, hdr, *oi->sizep, oid);
+			if (!*oi->contentp) {
+				ret = -1;
+				goto corrupt;
+			}
+		}
+
+		break;
+	case ULHR_BAD:
+		ret = error(_("unable to unpack %s header"),
+			    oid_to_hex(oid));
+		goto corrupt;
+	case ULHR_TOO_LONG:
+		ret = error(_("header for %s too long, exceeds %d bytes"),
+			    oid_to_hex(oid), MAX_HEADER_LEN);
+		goto corrupt;
+	}
+
+	ret = 0;
+
+corrupt:
+	if (ret && (flags & OBJECT_INFO_DIE_IF_CORRUPT))
+		die(_("loose object %s (stored in %s) is corrupt"),
+		    oid_to_hex(oid), path);
+
+out:
+	if (stream_to_end)
+		git_inflate_end(stream_to_end);
+	if (map)
+		munmap(map, mapsize);
+	if (oi) {
+		if (oi->sizep == &size_scratch)
+			oi->sizep = NULL;
+		if (oi->typep == &type_scratch)
+			oi->typep = NULL;
+		if (oi->delta_base_oid)
+			oidclr(oi->delta_base_oid, source->odb->repo->hash_algo);
+		if (!ret)
+			oi->whence = OI_LOOSE;
+	}
+
+	return ret;
+}
+
+int odb_source_loose_read_object_info(struct odb_source *source,
+				      const struct object_id *oid,
+				      struct object_info *oi,
+				      enum object_info_flags flags)
+{
+	static struct strbuf buf = STRBUF_INIT;
+
+	/*
+	 * The second read shouldn't cause new loose objects to show up, unless
+	 * there was a race condition with a secondary process. We don't care
+	 * about this case though, so we simply skip reading loose objects a
+	 * second time.
+	 */
+	if (flags & OBJECT_INFO_SECOND_READ)
+		return -1;
+
+	odb_loose_path(source, &buf, oid);
+	return read_object_info_from_path(source, buf.buf, oid, oi, flags);
+}
+
+>>>>>>> f3aeae983a
 static void hash_object_body(const struct git_hash_algo *algo, struct git_hash_ctx *c,
 			     const void *buf, size_t len,
 			     struct object_id *oid,
@@ -932,7 +1099,7 @@ int force_object_loose(struct odb_source *source,
 	struct odb_source_files *files = odb_source_files_downcast(source);
 	const struct git_hash_algo *compat = source->odb->repo->compat_hash_algo;
 	void *buf;
-	unsigned long len;
+	size_t len;
 	struct object_info oi = OBJECT_INFO_INIT;
 	struct object_id compat_oid;
 	enum object_type type;
@@ -1616,7 +1783,7 @@ int read_loose_object(struct repository *repo,
 	unsigned long mapsize;
 	git_zstream stream;
 	char hdr[MAX_HEADER_LEN];
-	unsigned long *size = oi->sizep;
+	size_t *size = oi->sizep;
 
 	fd = git_open(path);
 	if (fd >= 0)
@@ -1694,3 +1861,150 @@ struct odb_transaction *odb_transaction_files_begin(struct odb_source *source)
 
 	return &transaction->base;
 }
+<<<<<<< HEAD
+=======
+
+struct odb_source_loose *odb_source_loose_new(struct odb_source *source)
+{
+	struct odb_source_loose *loose;
+	CALLOC_ARRAY(loose, 1);
+	loose->source = source;
+	return loose;
+}
+
+void odb_source_loose_free(struct odb_source_loose *loose)
+{
+	if (!loose)
+		return;
+	odb_source_loose_clear_cache(loose);
+	loose_object_map_clear(&loose->map);
+	free(loose);
+}
+
+struct odb_loose_read_stream {
+	struct odb_read_stream base;
+	git_zstream z;
+	enum {
+		ODB_LOOSE_READ_STREAM_INUSE,
+		ODB_LOOSE_READ_STREAM_DONE,
+		ODB_LOOSE_READ_STREAM_ERROR,
+	} z_state;
+	void *mapped;
+	unsigned long mapsize;
+	char hdr[32];
+	int hdr_avail;
+	int hdr_used;
+};
+
+static ssize_t read_istream_loose(struct odb_read_stream *_st, char *buf, size_t sz)
+{
+	struct odb_loose_read_stream *st =
+		container_of(_st, struct odb_loose_read_stream, base);
+	size_t total_read = 0;
+
+	switch (st->z_state) {
+	case ODB_LOOSE_READ_STREAM_DONE:
+		return 0;
+	case ODB_LOOSE_READ_STREAM_ERROR:
+		return -1;
+	default:
+		break;
+	}
+
+	if (st->hdr_used < st->hdr_avail) {
+		size_t to_copy = st->hdr_avail - st->hdr_used;
+		if (sz < to_copy)
+			to_copy = sz;
+		memcpy(buf, st->hdr + st->hdr_used, to_copy);
+		st->hdr_used += to_copy;
+		total_read += to_copy;
+	}
+
+	while (total_read < sz) {
+		int status;
+
+		st->z.next_out = (unsigned char *)buf + total_read;
+		st->z.avail_out = sz - total_read;
+		status = git_inflate(&st->z, Z_FINISH);
+
+		total_read = st->z.next_out - (unsigned char *)buf;
+
+		if (status == Z_STREAM_END) {
+			git_inflate_end(&st->z);
+			st->z_state = ODB_LOOSE_READ_STREAM_DONE;
+			break;
+		}
+		if (status != Z_OK && (status != Z_BUF_ERROR || total_read < sz)) {
+			git_inflate_end(&st->z);
+			st->z_state = ODB_LOOSE_READ_STREAM_ERROR;
+			return -1;
+		}
+	}
+	return total_read;
+}
+
+static int close_istream_loose(struct odb_read_stream *_st)
+{
+	struct odb_loose_read_stream *st =
+		container_of(_st, struct odb_loose_read_stream, base);
+
+	if (st->z_state == ODB_LOOSE_READ_STREAM_INUSE)
+		git_inflate_end(&st->z);
+	munmap(st->mapped, st->mapsize);
+	return 0;
+}
+
+int odb_source_loose_read_object_stream(struct odb_read_stream **out,
+					struct odb_source *source,
+					const struct object_id *oid)
+{
+	struct object_info oi = OBJECT_INFO_INIT;
+	struct odb_loose_read_stream *st;
+	unsigned long mapsize;
+	void *mapped;
+
+	mapped = odb_source_loose_map_object(source, oid, &mapsize);
+	if (!mapped)
+		return -1;
+
+	/*
+	 * Note: we must allocate this structure early even though we may still
+	 * fail. This is because we need to initialize the zlib stream, and it
+	 * is not possible to copy the stream around after the fact because it
+	 * has self-referencing pointers.
+	 */
+	CALLOC_ARRAY(st, 1);
+
+	switch (unpack_loose_header(&st->z, mapped, mapsize, st->hdr,
+				    sizeof(st->hdr))) {
+	case ULHR_OK:
+		break;
+	case ULHR_BAD:
+	case ULHR_TOO_LONG:
+		goto error;
+	}
+
+	oi.sizep = &st->base.size;
+	oi.typep = &st->base.type;
+
+	if (parse_loose_header(st->hdr, &oi) < 0 || st->base.type < 0)
+		goto error;
+
+	st->mapped = mapped;
+	st->mapsize = mapsize;
+	st->hdr_used = strlen(st->hdr) + 1;
+	st->hdr_avail = st->z.total_out;
+	st->z_state = ODB_LOOSE_READ_STREAM_INUSE;
+	st->base.close = close_istream_loose;
+	st->base.read = read_istream_loose;
+
+	*out = &st->base;
+
+	return 0;
+error:
+	git_inflate_end(&st->z);
+	munmap(mapped, mapsize);
+	free(st);
+	return -1;
+}
+>>>>>>> f3aeae983a
