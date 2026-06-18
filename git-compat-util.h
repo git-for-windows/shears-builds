@@ -158,9 +158,11 @@ static inline int is_xplatform_dir_sep(int c)
 /* pull in Windows compatibility stuff */
 #include "compat/win32/path-utils.h"
 #include "compat/mingw.h"
+#include "compat/win32/fscache.h"
 #elif defined(_MSC_VER)
 #include "compat/win32/path-utils.h"
 #include "compat/msvc.h"
+#include "compat/win32/fscache.h"
 #endif
 
 /* used on Mac OS X */
@@ -261,6 +263,13 @@ static inline int git_offset_1st_component(const char *path)
 #define fspathncmp git_fspathncmp
 #endif
 
+#ifndef warn_about_git_lfs_on_windows7
+static inline void warn_about_git_lfs_on_windows7(int exit_code UNUSED,
+						  const char *argv0 UNUSED)
+{
+}
+#endif
+
 #ifndef is_valid_path
 #define is_valid_path(path) 1
 #endif
@@ -346,8 +355,26 @@ static inline int git_has_dir_sep(const char *path)
 #define has_dir_sep(path) git_has_dir_sep(path)
 #endif
 
+#ifndef is_mount_point
+#define is_mount_point is_mount_point_via_stat
+#endif
+
+#ifndef create_symlink
+struct index_state;
+static inline int git_create_symlink(struct index_state *index UNUSED,
+				     const char *target, const char *link)
+{
+	return symlink(target, link);
+}
+#define create_symlink git_create_symlink
+#endif
+
 #ifndef query_user_email
 #define query_user_email() NULL
+#endif
+
+#ifndef platform_strbuf_realpath
+#define platform_strbuf_realpath(resolved, path) NULL
 #endif
 
 #ifdef __TANDEM
@@ -597,16 +624,22 @@ static inline bool strip_suffix(const char *str, const char *suffix,
    * the stack overflow can occur.
    */
 #define DEFAULT_MAX_ALLOWED_TREE_DEPTH 512
-#elif defined(GIT_WINDOWS_NATIVE) && defined(__clang__) && defined(__aarch64__)
+#elif defined(GIT_WINDOWS_NATIVE) && defined(__clang__)
   /*
-   * Similar to Visual C, it seems that on Windows/ARM64 the clang-based
-   * builds have a smaller stack space available. When running out of
-   * that stack space, a `STATUS_STACK_OVERFLOW` is produced. When the
+   * Similar to Visual C, it seems that clang-based builds on Windows
+   * have a smaller stack space available. When running out of that
+   * stack space, a `STATUS_STACK_OVERFLOW` is produced. When the
    * Git command was run from an MSYS2 Bash, this unfortunately results
    * in an exit code 127. Let's prevent that by lowering the maximal
-   * tree depth; This value seems to be low enough.
+   * tree depth; Unfortunately, it seems that the exact limit differs
+   * for aarch64 vs x86_64, and the difference is too large to simply
+   * use a single limit.
    */
+#if defined(__aarch64__)
 #define DEFAULT_MAX_ALLOWED_TREE_DEPTH 1280
+#else
+#define DEFAULT_MAX_ALLOWED_TREE_DEPTH 1152
+#endif
 #else
 #define DEFAULT_MAX_ALLOWED_TREE_DEPTH 2048
 #endif
@@ -1063,6 +1096,45 @@ static inline int is_missing_file_error(int errno_)
 {
 	return (errno_ == ENOENT || errno_ == ENOTDIR);
 }
+
+/*
+ * Enable/disable a read-only cache for file system data on platforms that
+ * support it.
+ *
+ * Implementing a live-cache is complicated and requires special platform
+ * support (inotify, ReadDirectoryChangesW...). enable_fscache shall be used
+ * to mark sections of git code that extensively read from the file system
+ * without modifying anything. Implementations can use this to cache e.g. stat
+ * data or even file content without the need to synchronize with the file
+ * system.
+ */
+
+ /* opaque fscache structure */
+struct fscache;
+
+#ifndef enable_fscache
+#define enable_fscache(x) /* noop */
+#endif
+
+#ifndef disable_fscache
+#define disable_fscache() /* noop */
+#endif
+
+#ifndef is_fscache_enabled
+#define is_fscache_enabled(path) (0)
+#endif
+
+#ifndef flush_fscache
+#define flush_fscache() /* noop */
+#endif
+
+#ifndef getcache_fscache
+#define getcache_fscache() (NULL) /* noop */
+#endif
+
+#ifndef merge_fscache
+#define merge_fscache(dest) /* noop */
+#endif
 
 int cmd_main(int, const char **);
 
