@@ -699,15 +699,6 @@ static inline size_t st_left_shift(size_t a, unsigned shift)
 	return a << shift;
 }
 
-static inline unsigned long cast_size_t_to_ulong(size_t a)
-{
-	if (a != (unsigned long)a)
-		die("object too large to read on this platform: %"
-		    PRIuMAX" is cut off to %lu",
-		    (uintmax_t)a, (unsigned long)a);
-	return (unsigned long)a;
-}
-
 static inline uint32_t cast_size_t_to_uint32_t(size_t a)
 {
 	if (a != (uint32_t)a)
@@ -1134,9 +1125,6 @@ struct fscache;
 
 #ifndef enable_fscache
 #define enable_fscache(x) /* noop */
-#endif
-#ifndef flush_fscache
-#define flush_fscache() /* noop */
 #endif
 
 #ifndef disable_fscache

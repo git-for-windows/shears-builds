@@ -269,8 +269,7 @@ test_expect_success EXPENSIVE,SIZE_T_IS_64BIT,!LONG_IS_64BIT \
 	test_cmp expect actual
 '
 
-test_expect_success EXPENSIVE,SIZE_T_IS_64BIT \
-		'files over 4GB hash correctly via --stdin' '
+test_expect_success EXPENSIVE,SIZE_T_IS_64BIT \' '
 	{ test -f big || test-tool genzeros $((5*1024*1024*1024)) >big; } &&
 	test_oid large5GB >expect &&
 	git hash-object --stdin <big >actual &&
@@ -296,6 +295,5 @@ test_expect_success EXPENSIVE,SIZE_T_IS_64BIT \
 	git hash-object -- big >actual &&
 	test_cmp expect actual
 '
-
 
 test_done
