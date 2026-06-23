@@ -14,9 +14,6 @@ int fscache_enable(size_t initial_size);
 void fscache_disable(void);
 #define disable_fscache() fscache_disable()
 
-void fscache_flush(void);
-#define flush_fscache() fscache_flush()
-
 int fscache_enabled(const char *path);
 #define is_fscache_enabled(path) fscache_enabled(path)
 
