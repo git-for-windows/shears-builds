@@ -124,7 +124,7 @@ struct packfile_store {
 	 * that packs that contain a lot of accessed objects will be located
 	 * towards the front.
 	 *
-	 * This is usually desireable, but there are exceptions. One exception
+	 * This is usually desirable, but there are exceptions. One exception
 	 * is when the looking up multiple objects in a loop for each packfile.
 	 * In that case, we may easily end up with an infinite loop as the
 	 * packfiles get reordered to the front repeatedly.
@@ -402,7 +402,8 @@ uint32_t get_pack_fanout(struct packed_git *p, uint32_t value);
 
 struct object_database;
 
-unsigned char *use_pack(struct packed_git *, struct pack_window **, off_t, unsigned long *);
+unsigned char *use_pack(struct packed_git *, struct pack_window **, off_t,
+			size_t *);
 void close_pack_windows(struct packed_git *);
 void close_pack(struct packed_git *);
 void unuse_pack(struct pack_window **);
