@@ -8,7 +8,7 @@ export GIT_TEST_DEFAULT_INITIAL_BRANCH_NAME
 . ./test-lib.sh
 . "$TEST_DIRECTORY"/lib-terminal.sh
 
-PATH=$PWD:$PATH
+PATH=$PWD$PATH_SEP$PATH
 TEST_ROOT="$(pwd)"
 
 write_script <<\EOF "$TEST_ROOT/rot13.sh"
@@ -854,6 +854,23 @@ test_expect_success 'invalid process filter must fail (and not hang!)' '
 		cp "$TEST_ROOT/test.o" test.r &&
 		test_must_fail git add . 2>git-stderr.log &&
 		grep "expected git-filter-server" git-stderr.log
+	)
+'
+
+test_expect_success 'missing process filter with space in path does not die' '
+	test_config_global filter.protocol.process "/non existent/tool" &&
+	test_config_global filter.protocol.required true &&
+	rm -rf repo &&
+	mkdir repo &&
+	(
+		cd repo &&
+		git init &&
+
+		echo "*.r filter=protocol" >.gitattributes &&
+
+		cp "$TEST_ROOT/test.o" test.r &&
+		test_must_fail git add . 2>git-stderr.log &&
+		test_grep "clean filter.*protocol.*failed" git-stderr.log
 	)
 '
 

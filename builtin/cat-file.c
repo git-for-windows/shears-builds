@@ -163,11 +163,8 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 		if (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
 			die("git cat-file: could not get object info");
 
-		if (use_mailmap && (type == OBJ_COMMIT || type == OBJ_TAG)) {
-			size_t s = size;
-			buf = replace_idents_using_mailmap(buf, &s);
-			size = s;
-		}
+		if (use_mailmap && (type == OBJ_COMMIT || type == OBJ_TAG))
+			buf = replace_idents_using_mailmap(buf, &size);
 
 		printf("%"PRIuMAX"\n", (uintmax_t)size);
 		ret = 0;
@@ -222,11 +219,8 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 		if (!buf)
 			die("Cannot read object %s", obj_name);
 
-		if (use_mailmap) {
-			size_t s = size;
-			buf = replace_idents_using_mailmap(buf, &s);
-			size = s;
-		}
+		if (use_mailmap)
+			buf = replace_idents_using_mailmap(buf, &size);
 
 		/* otherwise just spit out the data */
 		break;
@@ -269,11 +263,8 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 		buf = odb_read_object_peeled(the_repository->objects, &oid,
 					     exp_type_id, &size, NULL);
 
-		if (use_mailmap) {
-			size_t s = size;
-			buf = replace_idents_using_mailmap(buf, &s);
-			size = s;
-		}
+		if (use_mailmap)
+			buf = replace_idents_using_mailmap(buf, &size);
 		break;
 	}
 	default:
@@ -340,7 +331,7 @@ static int expand_atom(struct strbuf *sb, const char *atom, int len,
 {
 	if (is_atom("objectname", atom, len)) {
 		if (!data->mark_query)
-			strbuf_addstr(sb, oid_to_hex(&data->oid));
+			strbuf_add_oid_hex(sb, &data->oid);
 	} else if (is_atom("objecttype", atom, len)) {
 		if (data->mark_query)
 			data->info.typep = &data->type;
@@ -350,12 +341,12 @@ static int expand_atom(struct strbuf *sb, const char *atom, int len,
 		if (data->mark_query)
 			data->info.sizep = &data->size;
 		else
-			strbuf_addf(sb, "%"PRIuMAX , (uintmax_t)data->size);
+			strbuf_add_uint(sb, data->size);
 	} else if (is_atom("objectsize:disk", atom, len)) {
 		if (data->mark_query)
 			data->info.disk_sizep = &data->disk_size;
 		else
-			strbuf_addf(sb, "%"PRIuMAX, (uintmax_t)data->disk_size);
+			strbuf_add_uint(sb, data->disk_size);
 	} else if (is_atom("rest", atom, len)) {
 		if (data->mark_query)
 			data->split_on_whitespace = 1;
@@ -365,8 +356,7 @@ static int expand_atom(struct strbuf *sb, const char *atom, int len,
 		if (data->mark_query)
 			data->info.delta_base_oid = &data->delta_base_oid;
 		else
-			strbuf_addstr(sb,
-				      oid_to_hex(&data->delta_base_oid));
+			strbuf_add_oid_hex(sb, &data->delta_base_oid);
 	} else if (is_atom("objectmode", atom, len)) {
 		if (!data->mark_query && !(S_IFINVALID == data->mode))
 			strbuf_addf(sb, "%06o", data->mode);
@@ -452,11 +442,8 @@ static void print_object_or_die(struct batch_options *opt, struct expand_data *d
 		if (!contents)
 			die("object %s disappeared", oid_to_hex(oid));
 
-		if (use_mailmap) {
-			size_t s = size;
-			contents = replace_idents_using_mailmap(contents, &s);
-			size = s;
-		}
+		if (use_mailmap)
+			contents = replace_idents_using_mailmap(contents, &size);
 
 		if (type != data->type)
 			die("object %s changed type!?", oid_to_hex(oid));
@@ -556,15 +543,13 @@ static void batch_object_write(const char *obj_name,
 		}
 
 		if (use_mailmap && (data->type == OBJ_COMMIT || data->type == OBJ_TAG)) {
-			size_t s = data->size;
 			char *buf = NULL;
 
 			buf = odb_read_object(the_repository->objects, &data->oid,
 					      &data->type, &data->size);
 			if (!buf)
 				die(_("unable to read %s"), oid_to_hex(&data->oid));
-			buf = replace_idents_using_mailmap(buf, &s);
-			data->size = s;
+			buf = replace_idents_using_mailmap(buf, &data->size);
 
 			free(buf);
 		}
@@ -900,8 +885,9 @@ static void batch_each_object(struct batch_options *opt,
 	 */
 	odb_prepare_alternates(the_repository->objects);
 	for (source = the_repository->objects->sources; source; source = source->next) {
-		int ret = odb_source_loose_for_each_object(source, NULL, batch_one_object_oi,
-							   &payload, &opts);
+		struct odb_source_files *files = odb_source_files_downcast(source);
+		int ret = odb_source_for_each_object(&files->loose->base, NULL, batch_one_object_oi,
+						     &payload, &opts);
 		if (ret)
 			break;
 	}
@@ -939,6 +925,7 @@ static int batch_objects(struct batch_options *opt)
 	struct strbuf input = STRBUF_INIT;
 	struct strbuf output = STRBUF_INIT;
 	struct expand_data data = EXPAND_DATA_INIT;
+	struct repo_config_values *cfg = repo_config_values(the_repository);
 	int save_warning;
 	int retval = 0;
 
@@ -1011,8 +998,8 @@ static int batch_objects(struct batch_options *opt)
 	 * warn) ends up dwarfing the actual cost of the object lookups
 	 * themselves. We can work around it by just turning off the warning.
 	 */
-	save_warning = warn_on_object_refname_ambiguity;
-	warn_on_object_refname_ambiguity = 0;
+	save_warning = cfg->warn_on_object_refname_ambiguity;
+	cfg->warn_on_object_refname_ambiguity = 0;
 
 	if (opt->batch_mode == BATCH_MODE_QUEUE_AND_DISPATCH) {
 		batch_objects_command(opt, &output, &data);
@@ -1040,7 +1027,7 @@ static int batch_objects(struct batch_options *opt)
  cleanup:
 	strbuf_release(&input);
 	strbuf_release(&output);
-	warn_on_object_refname_ambiguity = save_warning;
+	cfg->warn_on_object_refname_ambiguity = save_warning;
 	return retval;
 }
 
