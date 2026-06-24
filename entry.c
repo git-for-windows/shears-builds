@@ -49,10 +49,23 @@ static void create_directories(const char *path, int path_len,
 		 */
 		if (mkdir(buf, 0777)) {
 			if (errno == EEXIST && state->force &&
-			    !unlink_or_warn(buf) && !mkdir(buf, 0777))
+			    !unlink_or_warn(buf) && !mkdir(buf, 0777)) {
+				flush_fscache();
 				continue;
+			}
 			die_errno("cannot create directory at '%s'", buf);
 		}
+
+		/*
+		 * Flush the lstat cache of directory listings so that
+		 * subsequent has_dirs_only_path() calls see the
+		 * just-created directory. Without this, the Windows
+		 * fscache returns stale ENOENT for the new directory,
+		 * causing the next entry sharing this parent to
+		 * incorrectly hit the mkdir/unlink recovery path
+		 * above, which then fails with "Directory not empty".
+		 */
+		flush_fscache();
 	}
 	free(buf);
 }
@@ -322,7 +335,7 @@ static int write_entry(struct cache_entry *ce, char *path, struct conv_attrs *ca
 		if (!has_symlinks || to_tempfile)
 			goto write_file_entry;
 
-		ret = symlink(new_blob, path);
+		ret = create_symlink(state->istate, new_blob, path);
 		free(new_blob);
 		if (ret)
 			return error_errno("unable to create symlink %s", path);
@@ -409,6 +422,9 @@ static int write_entry(struct cache_entry *ce, char *path, struct conv_attrs *ca
 	}
 
 finish:
+	/* Flush cached lstat in fscache after writing to disk. */
+	flush_fscache();
+
 	if (state->refresh_cache) {
 		if (!fstat_done && lstat(ce->name, &st) < 0)
 			return error_errno("unable to stat just-written file %s",
@@ -441,7 +457,8 @@ static int check_path(const char *path, int len, struct stat *st, int skiplen)
 static void mark_colliding_entries(const struct checkout *state,
 				   struct cache_entry *ce, struct stat *st)
 {
-	int trust_ino = check_stat;
+	struct repo_config_values *cfg = repo_config_values(the_repository);
+	int trust_ino = cfg->check_stat;
 
 #if defined(GIT_WINDOWS_NATIVE) || defined(__CYGWIN__)
 	trust_ino = 0;

@@ -1,5 +1,3 @@
-#define USE_THE_REPOSITORY_VARIABLE
-
 #include "../git-compat-util.h"
 #include "../abspath.h"
 #include "../chdir-notify.h"
@@ -288,7 +286,7 @@ static int should_write_log(struct reftable_ref_store *refs, const char *refname
 {
 	enum log_refs_config log_refs_cfg = refs->log_all_ref_updates;
 	if (log_refs_cfg == LOG_REFS_UNSET)
-		log_refs_cfg = is_bare_repository() ? LOG_REFS_NONE : LOG_REFS_NORMAL;
+		log_refs_cfg = is_bare_repository(refs->base.repo) ? LOG_REFS_NONE : LOG_REFS_NORMAL;
 
 	switch (log_refs_cfg) {
 	case LOG_REFS_NONE:
@@ -379,6 +377,8 @@ static struct ref_store *reftable_be_init(struct repository *repo,
 
 	mask = umask(0);
 	umask(mask);
+
+	reftable_set_alloc(malloc, realloc, free);
 
 	refs_compute_filesystem_location(gitdir, payload, &is_worktree, &refdir,
 					 &ref_common_dir);

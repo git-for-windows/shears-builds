@@ -479,6 +479,9 @@ GIT_TEST_NAME_HASH_VERSION=<int>, when set, causes 'git pack-objects' to
 assume '--name-hash-version=<n>'.
 
 
+GIT_TEST_FSCACHE=<boolean> exercises the uncommon fscache code path
+which adds a cache below mingw's lstat and dirent implementations.
+
 Naming Tests
 ------------
 
@@ -972,7 +975,7 @@ see test-lib-functions.sh for the full list and their options.
  - test_lazy_prereq <prereq> <script>
 
    Declare the way to determine if a test prerequisite <prereq> is
-   satisified or not, but delay the actual determination until the
+   satisfied or not, but delay the actual determination until the
    prerequisite is actually used by "test_have_prereq" or the
    three-arg form of the test_expect_* functions.  For example, this
    is how the SYMLINKS prerequisite is declared to see if the platform
