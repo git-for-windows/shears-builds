@@ -178,7 +178,7 @@ static int open_loose_object(struct odb_source_loose *loose,
 	static struct strbuf buf = STRBUF_INIT;
 	int fd;
 
-	*path = odb_loose_path(loose->source, &buf, oid);
+	*path = odb_loose_path(loose, &buf, oid);
 	fd = git_open(*path);
 	if (fd >= 0)
 		return fd;
@@ -189,7 +189,7 @@ static int open_loose_object(struct odb_source_loose *loose,
 static int quick_has_loose(struct odb_source_loose *loose,
 			   const struct object_id *oid)
 {
-	return !!oidtree_contains(odb_source_loose_cache(loose->source, oid), oid);
+	return !!oidtree_contains(odb_source_loose_cache(&loose->base, oid), oid);
 }
 
 /*
@@ -2205,22 +2205,6 @@ struct odb_transaction *odb_transaction_files_begin(struct odb_source *source)
 	return &transaction->base;
 }
 
-struct odb_source_loose *odb_source_loose_new(struct odb_source *source)
-{
-	struct odb_source_loose *loose;
-	CALLOC_ARRAY(loose, 1);
-	loose->source = source;
-	return loose;
-}
-
-void odb_source_loose_free(struct odb_source_loose *loose)
-{
-	if (!loose)
-		return;
-	odb_source_loose_clear_cache(loose);
-	loose_object_map_clear(&loose->map);
-	free(loose);
-}
 
 struct odb_loose_read_stream {
 	struct odb_read_stream base;
