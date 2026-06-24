@@ -38,7 +38,7 @@ int is_nonbare_repository_dir(struct strbuf *path);
 #define READ_GITFILE_ERR_TOO_LARGE 8
 #define READ_GITFILE_ERR_MISSING 9
 #define READ_GITFILE_ERR_IS_A_DIR 10
-void read_gitfile_error_die(int error_code, const char *path, const char *dir);
+void read_gitfile_error_die(int error_code, const char *path);
 const char *read_gitfile_gently(const char *path, int *return_error_code);
 #define read_gitfile(path) read_gitfile_gently((path), NULL)
 const char *resolve_gitdir_gently(const char *suspect, int *return_error_code);
@@ -236,6 +236,26 @@ void clear_repository_format(struct repository_format *format);
 int verify_repository_format(const struct repository_format *format,
 			     struct strbuf *err);
 
+enum apply_repository_format_flags {
+	/*
+	 * Honor environment variables when applying the repository format to
+	 * the repository. For now, this only covers environment variables that
+	 * relate to the object database.
+	 */
+	APPLY_REPOSITORY_FORMAT_HONOR_ENV = (1 << 0),
+};
+
+/*
+ * Apply the given repository format to the repo. This initializes extensions
+ * and basic data structures required for normal operation. Returns 0 on
+ * success, a negative error code when the format is not valid as determined by
+ * `verify_repository_format()`.
+ */
+int apply_repository_format(struct repository *repo,
+			    const struct repository_format *format,
+			    enum apply_repository_format_flags flags,
+			    struct strbuf *err);
+
 const char *get_template_dir(const char *option_template);
 
 #define INIT_DB_QUIET      (1 << 0)
@@ -272,6 +292,12 @@ enum sharedrepo {
 int git_config_perm(const char *var, const char *value);
 
 struct startup_info {
+	/*
+	 * Whether the user is asking us to treat the repository as bare via
+	 * `git --bare`, even if it's not.
+	 */
+	bool force_bare_repository;
+
 	int have_repository;
 	const char *prefix;
 	const char *original_cwd;
