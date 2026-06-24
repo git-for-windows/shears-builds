@@ -11,6 +11,13 @@
 #include "packfile.h"
 #include "promisor-remote.h"
 
+static int promised_object_cb(const struct object_id *oid UNUSED,
+			      struct object_info *oi UNUSED,
+			      void *payload UNUSED)
+{
+	return 1;
+}
+
 /*
  * For partial clones, we don't want to have to do a regular connectivity check
  * because we have to enumerate and exclude all promisor objects (slow), and
@@ -30,25 +37,28 @@ static int check_connected_promisor(oid_iterate_fn fn,
 				    void *cb_data,
 				    const struct object_id **oid)
 {
+	struct odb_for_each_object_options opts = {
+		.flags = ODB_FOR_EACH_OBJECT_PROMISOR_ONLY,
+		.prefix_hex_len = the_repository->hash_algo->hexsz,
+	};
+	int err;
+
 	odb_reprepare(the_repository->objects);
 	do {
-		struct packed_git *p;
+		opts.prefix = *oid;
 
-		repo_for_each_pack(the_repository, p) {
-			if (!p->pack_promisor)
-				continue;
-			if (find_pack_entry_one(*oid, p))
-				goto promisor_pack_found;
-		}
+		err = odb_for_each_object_ext(the_repository->objects,
+					      NULL, promised_object_cb,
+					      NULL, &opts);
+		if (err < 0)
+			return err;
 
 		/*
 		 * We have found an object that is not part of a promisor pack,
 		 * and thus we cannot skip the full connectivity check.
 		 */
-		return 0;
-
-promisor_pack_found:
-		;
+		if (err > 0)
+			return 0;
 	} while ((*oid = fn(cb_data)) != NULL);
 
 	return 1;
