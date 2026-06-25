@@ -712,6 +712,7 @@ builtin_sources = [
   'builtin/stash.c',
   'builtin/stripspace.c',
   'builtin/submodule--helper.c',
+  'builtin/survey.c',
   'builtin/symbolic-ref.c',
   'builtin/tag.c',
   'builtin/unpack-file.c',
@@ -1313,15 +1314,16 @@ elif host_machine.system() == 'windows'
     'lib/compat/winansi.c',
     'lib/compat/win32/dirent.c',
     'lib/compat/win32/flush.c',
+    'lib/compat/win32/fscache.c',
     'lib/compat/win32/path-utils.c',
     'lib/compat/win32/pthread.c',
     'lib/compat/win32/syslog.c',
+    'lib/compat/win32/wsl.c',
     'lib/compat/win32mmap.c',
   ]
 
   libgit_c_args += [
     '-DDETECT_MSYS_TTY',
-    '-DENSURE_MSYSTEM_IS_SET',
     '-DNATIVE_CRLF',
     '-DNOGDI',
     '-DNO_POSIX_GOODIES',
@@ -1330,6 +1332,18 @@ elif host_machine.system() == 'windows'
     '-D_CONSOLE_DETECT_MSYS_TTY',
     '-D__USE_MINGW_ANSI_STDIO=0',
   ]
+
+  msystem = get_option('msystem')
+  if msystem != ''
+    mingw_prefix = get_option('mingw_prefix')
+    if mingw_prefix == ''
+      mingw_prefix = '/' + msystem.to_lower()
+    endif
+    libgit_c_args += [
+      '-DENSURE_MSYSTEM_IS_SET="' + msystem + '"',
+      '-DMINGW_PREFIX="' + mingw_prefix + '"'
+    ]
+  endif
 
   libgit_dependencies += compiler.find_library('ntdll')
   libgit_include_directories += 'lib/compat/win32'
