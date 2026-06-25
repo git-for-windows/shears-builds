@@ -1516,6 +1516,7 @@ int refresh_index(struct index_state *istate, unsigned int flags,
 	typechange_fmt = in_porcelain ? "T\t%s\n" : "%s: needs update\n";
 	added_fmt      = in_porcelain ? "A\t%s\n" : "%s: needs update\n";
 	unmerged_fmt   = in_porcelain ? "U\t%s\n" : "%s: needs merge\n";
+	enable_fscache(0);
 	/*
 	 * Use the multi-threaded preload_index() to refresh most of the
 	 * cache entries quickly then in the single threaded loop below,
@@ -1610,6 +1611,7 @@ int refresh_index(struct index_state *istate, unsigned int flags,
 	display_progress(progress, istate->cache_nr);
 	stop_progress(&progress);
 	trace_performance_leave("refresh index");
+	disable_fscache();
 	return has_errors;
 }
 
@@ -3459,7 +3461,7 @@ int index_name_is_other(struct index_state *istate, const char *name,
 }
 
 void *read_blob_data_from_index(struct index_state *istate,
-				const char *path, unsigned long *size)
+				const char *path, size_t *size)
 {
 	int pos, len;
 	size_t sz;
@@ -3490,7 +3492,7 @@ void *read_blob_data_from_index(struct index_state *istate,
 		return NULL;
 	}
 	if (size)
-		*size = cast_size_t_to_ulong(sz);
+		*size = sz;
 	return data;
 }
 
