@@ -134,6 +134,13 @@ int is_bare_repository(void)
 	return is_bare_repository_cfg && !repo_get_work_tree(the_repository);
 }
 
+const char *repo_excludes_file(struct repository *repo)
+{
+	if (!excludes_file)
+		excludes_file = xdg_config_home("ignore");
+	return excludes_file;
+}
+
 int have_git_dir(void)
 {
 	return startup_info->have_repository
