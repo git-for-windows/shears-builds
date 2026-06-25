@@ -102,6 +102,7 @@ struct repo_config_values {
 	int protect_ntfs;
 	int ignore_case;
 	int trust_executable_bit;
+	char *excludes_file;
 
 	/* section "sparse" config values */
 	int sparse_expect_files_outside_of_patterns;
@@ -159,9 +160,21 @@ int repo_ignore_case(struct repository *repo);
  */
 int repo_trust_executable_bit(struct repository *repo);
 
+const char *repo_excludes_file(struct repository *repo);
+
 void repo_config_values_init(struct repo_config_values *cfg);
 
 int is_bare_repository(struct repository *repo);
+
+/*
+ * Frees memory allocated for dynamically loaded configuration values
+ * inside `repo_config_values`.
+ *
+ * Note: `excludes_file` is currently the only heap-allocated field in
+ * this struct. As other dynamically allocated variables are migrated,
+ * their FREE_AND_NULL() calls should be appended here.
+ */
+void repo_config_values_clear(struct repository *repo);
 
 /*
  * TODO: All the below state either explicitly or implicitly relies on
@@ -227,7 +240,6 @@ extern char *git_log_output_encoding;
 
 extern char *editor_program;
 extern char *askpass_program;
-extern char *excludes_file;
 
 /*
  * The character that begins a commented line in user-editable file
