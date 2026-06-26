@@ -100,7 +100,7 @@ test_expect_success 'git survey (default)' '
 	do
 		for metric in "COUNT" "DISK SIZE" "INFLATED SIZE"
 		do
-			grep "TOP $type BY $metric" out || return 1
+			test_grep "TOP $type BY $metric" out || return 1
 		done || return 1
 	done
 '
