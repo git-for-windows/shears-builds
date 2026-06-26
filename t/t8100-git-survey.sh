@@ -12,7 +12,7 @@ export TEST_PASSES_SANITIZE_LEAK
 
 test_expect_success 'git survey -h shows experimental warning' '
 	test_expect_code 129 git survey -h >usage &&
-	grep "EXPERIMENTAL!" usage
+	test_grep "EXPERIMENTAL!" usage
 '
 
 test_expect_success 'create a semi-interesting repo' '
