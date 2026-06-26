@@ -27,7 +27,7 @@ test_expect_success 'create a semi-interesting repo' '
 
 test_expect_success 'git survey --progress' '
 	GIT_PROGRESS_DELAY=0 git survey --all-refs --progress >out 2>err &&
-	grep "Preparing object walk" err
+	test_grep "Preparing object walk" err
 '
 
 approximate_sizes() {
