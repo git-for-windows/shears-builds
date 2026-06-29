@@ -1,0 +1,642 @@
+  1:  d14c7fe505bb7812792d57c84326fc7e75c2df52 <   -:  ---------------------------------------- ci(dockerized): reduce the PID limit for private repositories
+  2:  af27e7705bc950d8145e4dbdf6ddcc79c1b7e004 <   -:  ---------------------------------------- mingw: skip symlink type auto-detection for network share targets
+  3:  66899ccc92b20c1520ef3e15823d26caf181597a <   -:  ---------------------------------------- unix-socket: avoid leak when initialization fails
+  4:  785f0eb4670487c13ddaa1cf156bbd14cb2fac17 <   -:  ---------------------------------------- grep: prevent `^$` false match at end of file
+  5:  374678ac54bdba0da2c59ee9bfbcb1e10e1f4e0a <   -:  ---------------------------------------- t9350: point out that refs are not updated correctly
+  6:  c50d941eedec481d3a15dcc966e96438b7a8c6e5 <   -:  ---------------------------------------- transport-helper: add trailing --
+  7:  882f0abd39d30a50db05fc355b54e994ad5e28d3 <   -:  ---------------------------------------- remote-helper: check helper status after import/export
+  8:  40dea9ccbf3367c96c85b341ed7a5154b117cc02 <   -:  ---------------------------------------- ci: bump actions/checkout from 6 to 7
+  9:  b520203b3dfdf86e24740e887dac290191bf120c <   -:  ---------------------------------------- Always auto-gc after calling a fast-import transport
+ 10:  16eafc78863b44b75a0c15ef87ea8e63912aab4c <   -:  ---------------------------------------- mingw: demonstrate a `git add` issue with NTFS junctions
+ 11:  8f9894bac147d17635f6e1b12e4fb4bceebcc02e <   -:  ---------------------------------------- strbuf_realpath(): use platform-dependent API if available
+ 12:  c66c364c96acbeb49209acbbe70c98e06cf28927 <   -:  ---------------------------------------- mingw: include the Python parts in the build
+ 13:  35e672749bede4db0b25c13324e0c4f2744389bd <   -:  ---------------------------------------- mingw: prevent regressions with "drive-less" absolute paths
+ 14:  97557f9351ce5f1d56af347a955b5d6610f9b417 <   -:  ---------------------------------------- transport: optionally disable side-band-64k
+ 15:  59f7d97419261ed086c387b1aa49666b1bff42c1 <   -:  ---------------------------------------- mingw: fix fatal error working on mapped network drives on Windows
+ 16:  aa65e17e53095787a8c955f5b485052c04cda558 <   -:  ---------------------------------------- clink.pl: fix MSVC compile script to handle libcurl-d.lib
+ 17:  955b4cc78535d0574bd806e56c1e733d1f6f314d <   -:  ---------------------------------------- mingw: implement a platform-specific `strbuf_realpath()`
+ 18:  db9c85d928ada38e123af1b141e908c08b14143c <   -:  ---------------------------------------- ci(vs-build): adapt to Visual Studio 2026 default on windows-latest
+ 19:  17464001909961fcc262d3f4b2e925fa8f84d7ba <   -:  ---------------------------------------- vcpkg_install: detect lack of Git
+ 20:  40b9c78d20b33c35305433245a123134ab32e38f <   -:  ---------------------------------------- t5505/t5516: allow running without `.git/branches/` in the templates
+ 21:  34e9d7f3e7fa8e98e4b599238e7a6255f62727fc <   -:  ---------------------------------------- vcpkg_install: add comment regarding slow network connections
+ 22:  cb7a30db0f2b4a81d8bf5da0c4e34f85d3e66a51 <   -:  ---------------------------------------- http: use new "best effort" strategy for Secure Channel revoke checking
+ 23:  0350f6c4f8f32eca4f093220875f7165457003ca <   -:  ---------------------------------------- t5505/t5516: fix white-space around redirectors
+ 24:  dc7d5567462223db7801cb7ef2a9e1d8978e40ce <   -:  ---------------------------------------- t3701: verify that we can add *lots* of files interactively
+ 25:  806f5912b34a4a29c6f129df15ecf12b5d65f8eb <   -:  ---------------------------------------- commit: accept "scissors" with CR/LF line endings
+ 26:  66b8a42041c52bbbde5233c7f663c9c829f54a6f <   -:  ---------------------------------------- t0014: fix indentation
+ 27:  3dfcb745f89c07c7055efb1f05fd455f47b5e7d1 <   -:  ---------------------------------------- git-gui: accommodate for intent-to-add files
+ 28:  1ee8fa8ffc0dd6335eed41211454e59ce15ce7f2 <   -:  ---------------------------------------- vcbuild: install ARM64 dependencies when building ARM64 binaries
+ 29:  c595f1b86fea052a2514a47feec77e07e18ed35e <   -:  ---------------------------------------- vcbuild: add an option to install individual 'features'
+ 30:  5c06fe1d73ae1018fcd3039ad3813175d0a16a9d <   -:  ---------------------------------------- cmake: allow building for Windows/ARM64
+ 31:  c0966a9c298c521e7392e15f0a2e708fdf50138d <   -:  ---------------------------------------- ci(vs-build) also build Windows/ARM64 artifacts
+ 32:  9b4aa71a615f0318abe79a1e8272c6189f424cbd <   -:  ---------------------------------------- vcbuild: stop hard-coding OpenSSL as a dependency
+ 33:  ef39dd2fe7d1678ca4178315b634e7a30dc8f60c <   -:  ---------------------------------------- cmake(): allow setting HOST_CPU for cross-compilation
+ 34:  728344be1a9eb6a9c4c795f73a8813b4177eef2f <   -:  ---------------------------------------- mingw: allow for longer paths in `parse_interpreter()`
+ 35:  d76effc5b4179f7eef4145219374701f0a6fbc1c <   -:  ---------------------------------------- compat/vcbuild: document preferred way to build in Visual Studio
+ 36:  b61056e5e915ffa4d2d719f4668b443059a7fb36 <   -:  ---------------------------------------- http: optionally send SSL client certificate
+  -:  ---------------------------------------- >   1:  da0cdf9dc1a49cacab2cafa39a9f2253d6712bc8 parseopt: extract subcommand handling from parse_options_step()
+  -:  ---------------------------------------- >   2:  78a6303552adc8179f08839e209a81155af19d90 help: make autocorrect handling reusable
+  -:  ---------------------------------------- >   3:  a4e62f995bb4f4a221c47898120b9152b842fa91 help: move tty check for autocorrection to autocorrect.c
+  -:  ---------------------------------------- >   4:  8fd1a7cd29734849bafc1b559fa3e879daeca831 autocorrect: use mode and delay instead of magic numbers
+  -:  ---------------------------------------- >   5:  01e68aca69017f3a8d65e6e1d4ddd0d4a4bdc558 autocorrect: rename AUTOCORRECT_SHOW to AUTOCORRECT_HINT
+  -:  ---------------------------------------- >   6:  0df5897d286706992a48ccbffa0ce6acf2cbca8b autocorrect: provide config resolution API
+  -:  ---------------------------------------- >   7:  b9e6a2d30afc65eaf8b5002fa8e098d789291975 parseopt: autocorrect mistyped subcommands
+  -:  ---------------------------------------- >   8:  22188044a9f50a0c5581999b908ff30be393d887 parseopt: enable subcommand autocorrection for git-remote and git-notes
+  -:  ---------------------------------------- >   9:  d4ad16d56ff6f540988925ea271546853fb7c282 parseopt: add tests for subcommand autocorrection
+  -:  ---------------------------------------- >  10:  67e653a65fc63ae383e7814681878930f1e6c97a doc: document autocorrect API
+  -:  ---------------------------------------- >  11:  438afb06644ae75037eb76ec8296de007e6844be SQUASH???
+  -:  ---------------------------------------- >  12:  df67d73ca3268eec5c924d6fe9d2c050ce23f3b1 config: retry acquiring config.lock, configurable via core.configLockTimeout
+  -:  ---------------------------------------- >  13:  4b0a8b2506494323ae5c209ee7df6c08fec3831d remote: qualify "git pull" advice for non-upstream compareBranches
+  -:  ---------------------------------------- >  14:  0d208eafd1731ce535235e7dbd3bcf7ba44b6836 config: refactor include_by_gitdir() into include_by_path()
+  -:  ---------------------------------------- >  15:  8ab3dff1f1fb800fdc82c20f2526b8a55b4d37b5 config: add "worktree" and "worktree/i" includeIf conditions
+  -:  ---------------------------------------- >  16:  30eb1e6579559f5fc3127b32c5e9b55b5b418cd6 commit: allow -m/-F for all kinds of --fixup
+  -:  ---------------------------------------- >  17:  f1c098502df421cb0c96bb168044c278ef9d7990 commit: allow -c/-C for all kinds of --fixup
+  -:  ---------------------------------------- >  18:  4ed1ffe680d1ad0fe7436c9816262b6abb518629 t5710: simplify 'mkdir X' followed by 'git -C X init'
+  -:  ---------------------------------------- >  19:  ee7ea4907ccef604f764df5e223640ad04192f6d urlmatch: change 'allow_globs' arg to bool
+  -:  ---------------------------------------- >  20:  58880c82feb460015153575dc02b9959e4d8a8a0 urlmatch: add url_normalize_pattern() helper
+  -:  ---------------------------------------- >  21:  53951298515ad26728175182c9103eea71885220 promisor-remote: add 'local_name' to 'struct promisor_info'
+  -:  ---------------------------------------- >  22:  78e0d9b0e4649659cc38545450174d293cb1ec0c promisor-remote: introduce promisor.acceptFromServerUrl
+  -:  ---------------------------------------- >  23:  5dd8043581ca331dcb59ab721aefb5881128e124 promisor-remote: trust known remotes matching acceptFromServerUrl
+  -:  ---------------------------------------- >  24:  7a56394fc6c28572925b00c4fe3b1ff78b5f4322 promisor-remote: auto-configure unknown remotes
+  -:  ---------------------------------------- >  25:  8f32e6f343b451f04e57dfda31bef04cb23f65a1 doc: promisor: improve acceptFromServer entry
+  -:  ---------------------------------------- >  26:  413d51724f1315f314870702ea7967ecda5f41ba prio-queue: use cascade-down for faster extract-min
+  -:  ---------------------------------------- >  27:  bb88a926f48667eebc60573de1ffd98b156deec4 http: preserve wwwauth_headers across redirects
+  -:  ---------------------------------------- >  28:  d4615639c465a4ad191656558dca34d80b264775 rebase: skip branch symref aliases
+  -:  ---------------------------------------- >  29:  c746f45476146c15791e714246651534619b74ae doc: link to config for git-replay(1)
+  -:  ---------------------------------------- >  30:  2f169b5c22a641cad83b4be657e7265959d60dd8 doc: replay: improve config description
+  -:  ---------------------------------------- >  31:  6fa17cca7c72df1c717027887749e8fb73338339 doc: replay: use a nested description list
+  -:  ---------------------------------------- >  32:  60575c76a5943246fdc36a6ef036e0b6b85d4147 doc: replay: move “default” to the right-hand side
+  -:  ---------------------------------------- >  33:  3c5783698854b56376b775af5053ae6fbe825cc0 prio-queue: rename .nr to .nr_ and add accessor helpers
+  -:  ---------------------------------------- >  34:  9f75e7a150edfe931391047bf84c697b4b15c4c4 prio-queue: fold lazy_queue into prio_queue for automatic get+put fusion
+  -:  ---------------------------------------- >  35:  79ab4e6cd2eb3439cebd0615521b7ff752b1e591 doc: interpret-trailers: stop fixating on RFC 822
+  -:  ---------------------------------------- >  36:  5cbdf84ca9347857d8550b245ad85514a1c87ba8 doc: interpret-trailers: replace “lines” with “metadata”
+  -:  ---------------------------------------- >  37:  f1a41814daa7995666fe5abcdd237595548946b5 doc: interpret-trailers: use “metadata” in Name as well
+  -:  ---------------------------------------- >  38:  206bf41d09a4cb0acd9fead20c28b68760d1da0c doc: interpret-trailers: not just for commit messages
+  -:  ---------------------------------------- >  39:  b63052380db0feaa42f7c840922161f6ff153593 doc: interpret-trailers: explain the format after the intro
+  -:  ---------------------------------------- >  40:  3a333ba1a036575fbe14bebffb190df75e28404d doc: interpret-trailers: explain key format
+  -:  ---------------------------------------- >  41:  36d5a3a1958e7151a29d6f1b164a43d723a37a78 doc: interpret-trailers: add key format example
+  -:  ---------------------------------------- >  42:  d0a474d8d61616341482dcab7acb6b996a5fa5d4 doc: interpret-trailers: join new-trailers again
+  -:  ---------------------------------------- >  43:  53fcba2c4f80142cf2c9429d9eea225ba9fb091c doc: interpret-trailers: commit to “trailer block” term
+  -:  ---------------------------------------- >  44:  06447e2cbd8d4fe80801dae0bc0e216a5e376d65 doc: interpret-trailers: document comment line treatment
+  -:  ---------------------------------------- >  45:  9bef2cf33111dc844e46a8a19c266320774f4bd6 builtin/init: stop modifying global `git_work_tree_cfg` variable
+  -:  ---------------------------------------- >  46:  65eb5b989aa6d7f764d097c6759f6b6189eb0d27 builtin/init: simplify logic to configure worktree
+  -:  ---------------------------------------- >  47:  85f5f504f046bccf86b78ba02064a4b013d7264f setup: remove global `git_work_tree_cfg` variable
+  -:  ---------------------------------------- >  48:  f12d73132ea23788167a6b21fad63d85c76fa863 builtin/init: stop modifying `is_bare_repository_cfg`
+  -:  ---------------------------------------- >  49:  7ff3a5895b6bf4c14d361e4c845d2de7e4006259 environment: split up concerns of `is_bare_repository_cfg`
+  -:  ---------------------------------------- >  50:  2e1d55626f06be7b9374c0a6f579959d750f0cfb environment: stop using `the_repository` in `is_bare_repository()`
+  -:  ---------------------------------------- >  51:  1ceee7431b40aba69707835b9b65b0ed7a9cb973 treewide: drop USE_THE_REPOSITORY_VARIABLE
+  -:  ---------------------------------------- >  52:  3b54f679e546cef26e107bcd6917bfc07fadceea MyFirstContribution: mention trimming quoted text in replies
+  -:  ---------------------------------------- >  53:  71386c21dfb7cea181df6707c34cd79b10fc0a2b environment: move 'protect_hfs' and 'protect_ntfs' into 'repo_config_values'
+  -:  ---------------------------------------- >  54:  acfdb54eb359c9912fb74ec260f00d73e0b2d785 t5334: expose shared `nth_line()` helper
+  -:  ---------------------------------------- >  55:  8e519b87565a8689d509693a049bc6dad632dbb3 midx: pass custom '--base' through incremental writes
+  -:  ---------------------------------------- >  56:  6afc679fa62362ddaab955778d973c85a6cbf004 midx-write: include packs above custom incremental base
+  -:  ---------------------------------------- >  57:  ad2e20d8aab0d4d43fbac407736f05a94e65c49b ref-filter: restore prefix-scoped iteration
+  -:  ---------------------------------------- >  58:  5bd39784cda151203aa6d97e24c21bf7fddc11de commit-reach: reject cycles in contains walk
+  -:  ---------------------------------------- >  59:  ca96eeee79bc231f8096d9e9d0b501e0495e2db7 ref-filter: memoize --contains with generations
+  -:  ---------------------------------------- >  60:  ff3ba7d158765f02effa417feca0a7e0089116c4 commit-reach: die on contains walk errors
+  -:  ---------------------------------------- >  61:  304003b68b25ebf01dae9d1f4791b97672ff705f t/README: document test_grep helper
+  -:  ---------------------------------------- >  62:  8de6104de709ad606c49ef946e165e7e438dff77 t: fix grep assertions missing file arguments
+  -:  ---------------------------------------- >  63:  5a7b31a8f7ae9253bc8bd4aa27b638c76ae2fa76 t: extract chainlint's parser into shared module
+  -:  ---------------------------------------- >  64:  ee98f4be26e3193f4f70043869be645950f87faf t: fix Lexer line count for $() inside double-quoted strings
+  -:  ---------------------------------------- >  65:  cd352cab5b90dffbb90669c7e6deded0a8956d35 t: convert grep assertions to test_grep
+  -:  ---------------------------------------- >  66:  f1b0af0c6132048f1f3bc0f27cb6455d00ed9491 t: add greplint to detect bare grep assertions
+  -:  ---------------------------------------- >  67:  da80feb5be9076bb56af0681d684c36028f92ae6 merge-ort: propagate callback errors from traverse_trees_wrapper()
+  -:  ---------------------------------------- >  68:  159e4d903458ac3ec0aa944aefeadbaf9e83b73c merge-ort: drop unnecessary show_all_errors from collect_merge_info()
+  -:  ---------------------------------------- >  69:  83ae606c9838b06bde36479756de2ab75b6fbb96 merge-ort: free diff pairs queue in clear_or_reinit_internal_opts()
+  -:  ---------------------------------------- >  70:  43a5fa7f5a9b7c44dd958a21368d690fa55d4f50 merge-ort: abort merge when trees have duplicate entries
+  -:  ---------------------------------------- >  71:  0c8eb46fbbfc48065bc93dcc4c9901031615516c cache-tree: fix verify_cache() to catch non-adjacent D/F conflicts
+  -:  ---------------------------------------- >  72:  60eb74a526d46a803221820b615f001784241323 xdiff: support external hunks via xpparam_t
+  -:  ---------------------------------------- >  73:  bb4bd350bae26f0151171b96f3383fee7bb18666 userdiff: add diff.<driver>.process config
+  -:  ---------------------------------------- >  74:  2d52e53be5fc601ac256b8c165ed7865236c5b33 sub-process: separate process lifecycle from hashmap management
+  -:  ---------------------------------------- >  75:  d09a6a2ef3d829296617ca9b9b010e4fee60e73a diff: add long-running diff process via diff.<driver>.process
+  -:  ---------------------------------------- >  76:  ac69d22b32daf8370799692bf47d998b3882d9e3 diff: bypass diff process with --no-ext-diff and in format-patch
+  -:  ---------------------------------------- >  77:  5533580575b06689132aae65de8faa3ded1634ca blame: consult diff process for no-hunk detection
+  -:  ---------------------------------------- >  78:  800581cd44e1d164e53f624257fcc0ceb937d154 cat-file: speed up default format
+  -:  ---------------------------------------- >  79:  16b2924aab52141bedd6612dfad16280181321c7 MyFirstContribution: recommend shallow threading of cover letters
+  -:  ---------------------------------------- >  80:  efe4ac70647c62152c37f2f247404c9dfd494ed5 MyFirstContribution: recommend the use of b4
+  -:  ---------------------------------------- >  81:  84b2ff7f2f708b8343d684ab57c72c1367de01e6 b4: introduce configuration for the Git project
+  -:  ---------------------------------------- >  82:  54a441bcea885c13c7a8a80bc3bbcfb1ace9f8a9 read_gitfile(): simplify NOT_A_REPO error message
+ 37:  758e5fb5a029f040bddbd64421f8f9140185f668 !  83:  d1b74b6b988e71d78d05a3fd6f186025e3f692ba hash-object: demonstrate a >4GB/LLP64 problem
+    @@ Commit message
+     
+         Signed-off-by: Philip Oakley <philipoakley@iee.email>
+         Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+    +    Signed-off-by: Junio C Hamano <gitster@pobox.com>
+     
+      ## t/t1007-hash-object.sh ##
+     @@ t/t1007-hash-object.sh: test_expect_success 'setup' '
+ 38:  acdc5d7999af61b6e92aa3bcac4a29fa9d89fd0c !  84:  a39fda4fca37c1b8700ccfe0f9d0194445373b97 object-file.c: use size_t for header lengths
+    @@ Commit message
+     
+         Signed-off-by: Philip Oakley <philipoakley@iee.email>
+         Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+    +    Signed-off-by: Junio C Hamano <gitster@pobox.com>
+     
+      ## object-file.c ##
+     @@ object-file.c: int parse_loose_header(const char *hdr, struct object_info *oi)
+    @@ object-file.h: int finalize_object_file_flags(struct repository *repo,
+      		       const struct object_id *oid, char *hdr,
+      		       int hdrlen, const void *buf, unsigned long len,
+     
+    + ## odb/source-files.c ##
+    +@@ odb/source-files.c: static int odb_source_files_freshen_object(struct odb_source *source,
+    + }
+    + 
+    + static int odb_source_files_write_object(struct odb_source *source,
+    +-					 const void *buf, unsigned long len,
+    ++					 const void *buf, size_t len,
+    + 					 enum object_type type,
+    + 					 struct object_id *oid,
+    + 					 struct object_id *compat_oid,
+    +
+    + ## odb/source-inmemory.c ##
+    +@@ odb/source-inmemory.c: static int odb_source_inmemory_count_objects(struct odb_source *source,
+    + }
+    + 
+    + static int odb_source_inmemory_write_object(struct odb_source *source,
+    +-					    const void *buf, unsigned long len,
+    ++					    const void *buf, size_t len,
+    + 					    enum object_type type,
+    + 					    struct object_id *oid,
+    + 					    struct object_id *compat_oid UNUSED,
+    +
+      ## odb/source-loose.c ##
+    +@@ odb/source-loose.c: static int odb_source_loose_freshen_object(struct odb_source *source,
+    + }
+    + 
+    + static int odb_source_loose_write_object(struct odb_source *source,
+    +-					 const void *buf, unsigned long len,
+    ++					 const void *buf, size_t len,
+    + 					 enum object_type type, struct object_id *oid,
+    + 					 struct object_id *compat_oid_in,
+    + 					 enum odb_write_object_flags flags)
+     @@ odb/source-loose.c: static int odb_source_loose_write_object(struct odb_source *source,
+      	const struct git_hash_algo *compat = source->odb->repo->compat_hash_algo;
+      	struct object_id compat_oid;
+    @@ odb/source-loose.c: static int odb_source_loose_write_object(struct odb_source *
+      
+      	/* Generate compat_oid */
+      	if (compat) {
+    +
+    + ## odb/source.h ##
+    +@@ odb/source.h: struct odb_source {
+    + 	 * return 0 on success, a negative error code otherwise.
+    + 	 */
+    + 	int (*write_object)(struct odb_source *source,
+    +-			    const void *buf, unsigned long len,
+    ++			    const void *buf, size_t len,
+    + 			    enum object_type type,
+    + 			    struct object_id *oid,
+    + 			    struct object_id *compat_oid,
+ 39:  72e90be7c28cc46f1888684d3468bdc278d623da <   -:  ---------------------------------------- CMake: default Visual Studio generator has changed
+ 40:  7809b68267cfe0bf35e71a47fa79e2dc1b777d03 !  85:  58823d431061b82a9cd02a1623aff6fe93a51446 hash algorithms: use size_t for section lengths
+    @@ Commit message
+     
+         Signed-off-by: Philip Oakley <philipoakley@iee.email>
+         Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+    +    Signed-off-by: Junio C Hamano <gitster@pobox.com>
+     
+      ## object-file.c ##
+     @@ object-file.c: int parse_loose_header(const char *hdr, struct object_info *oi)
+    @@ t/t1007-hash-object.sh: test_expect_success '--stdin outside of repository (uses
+      '
+      
+     -test_expect_failure EXPENSIVE,SIZE_T_IS_64BIT,!LONG_IS_64BIT \
+    -+test_expect_success EXPENSIVE,SIZE_T_IS_64BIT,!LONG_IS_64BIT \
+    ++test_expect_success EXPENSIVE,SIZE_T_IS_64BIT \
+      		'files over 4GB hash literally' '
+      	test-tool genzeros $((5*1024*1024*1024)) >big &&
+      	test_oid large5GB >expect &&
+ 41:  2527673ea208aa791670eff8928231a8de0fd13f <   -:  ---------------------------------------- .gitignore: add Visual Studio CMakeSetting.json file
+ 42:  9bacd42bb98f79e4c7a93cbfef8cd4b944059de3 !  86:  9729b5e2f209ff982cf536773bc223d149910968 hash-object --stdin: verify that it works with >4GB/LLP64
+    @@ Commit message
+     
+         Signed-off-by: Philip Oakley <philipoakley@iee.email>
+         Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+    +    Signed-off-by: Junio C Hamano <gitster@pobox.com>
+     
+      ## t/t1007-hash-object.sh ##
+    -@@ t/t1007-hash-object.sh: test_expect_success EXPENSIVE,SIZE_T_IS_64BIT,!LONG_IS_64BIT \
+    +@@ t/t1007-hash-object.sh: test_expect_success EXPENSIVE,SIZE_T_IS_64BIT \
+      	test_cmp expect actual
+      '
+      
+    -+test_expect_success EXPENSIVE,SIZE_T_IS_64BIT,!LONG_IS_64BIT \
+    ++test_expect_success EXPENSIVE,SIZE_T_IS_64BIT \
+     +		'files over 4GB hash correctly via --stdin' '
+     +	{ test -f big || test-tool genzeros $((5*1024*1024*1024)) >big; } &&
+     +	test_oid large5GB >expect &&
+ 43:  85b91d43ec4b00b1c554341cdc8ad4577b7abc3d <   -:  ---------------------------------------- subtree: update `contrib/subtree` `test` target
+ 44:  b3bfe91a08871f4c2e74d4a86ecb0860872d4f17 <   -:  ---------------------------------------- CMakeLists: add default "x64-windows" arch for Visual Studio
+ 45:  3a16614deb9b249abcf86026cafeabe0c5ca53a3 !  87:  2fefea368287f225c1b050453fe16149ab4eae8f hash-object: add another >4GB/LLP64 test case
+    @@ Commit message
+     
+         Signed-off-by: Philip Oakley <philipoakley@iee.email>
+         Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+    +    Signed-off-by: Junio C Hamano <gitster@pobox.com>
+     
+      ## t/t1007-hash-object.sh ##
+    -@@ t/t1007-hash-object.sh: test_expect_success EXPENSIVE,SIZE_T_IS_64BIT,!LONG_IS_64BIT \
+    +@@ t/t1007-hash-object.sh: test_expect_success EXPENSIVE,SIZE_T_IS_64BIT \
+      	test_cmp expect actual
+      '
+      
+    -+test_expect_success EXPENSIVE,SIZE_T_IS_64BIT,!LONG_IS_64BIT \
+    ++test_expect_success EXPENSIVE,SIZE_T_IS_64BIT \
+     +		'files over 4GB hash correctly' '
+     +	{ test -f big || test-tool genzeros $((5*1024*1024*1024)) >big; } &&
+     +	test_oid large5GB >expect &&
+ 46:  c3b7537347bb8b046916ee36c51a4a65906f32f1 <   -:  ---------------------------------------- ci: run `contrib/subtree` tests in CI builds
+ 47:  60c70711e2fbfe18396af4ffc4c683806d0fdf5b <   -:  ---------------------------------------- CMake: show Win32 and Generator_platform build-option values
+ 48:  9f841f9ed09bae8c272a52351c2486ebfc1add99 !  88:  d99e13d0bec75820f48924d3489394172b7a4be2 hash-object: add a >4GB/LLP64 test case using filtered input
+    @@ Commit message
+     
+         Signed-off-by: Philip Oakley <philipoakley@iee.email>
+         Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+    +    Signed-off-by: Junio C Hamano <gitster@pobox.com>
+     
+      ## t/t1007-hash-object.sh ##
+    -@@ t/t1007-hash-object.sh: test_expect_success EXPENSIVE,SIZE_T_IS_64BIT,!LONG_IS_64BIT \
+    +@@ t/t1007-hash-object.sh: test_expect_success EXPENSIVE,SIZE_T_IS_64BIT \
+      	test_cmp expect actual
+      '
+      
+     +# This clean filter does nothing, other than excercising the interface.
+     +# We ensure that cleaning doesn't mangle large files on 64-bit Windows.
+    -+test_expect_success EXPENSIVE,SIZE_T_IS_64BIT,!LONG_IS_64BIT \
+    ++test_expect_success EXPENSIVE,SIZE_T_IS_64BIT \
+     +		'hash filtered files over 4GB correctly' '
+     +	{ test -f big || test-tool genzeros $((5*1024*1024*1024)) >big; } &&
+     +	test_oid large5GB >expect &&
+ 49:  8e5f3642ec764b548ba31780c6f43bead681f685 <   -:  ---------------------------------------- setup: properly use "%(prefix)/" when in WSL
+ 50:  97ca3a4c4d77e6e7204c791e560b7a35aea3ef1f <   -:  ---------------------------------------- Add config option `windows.appendAtomically`
+ 51:  3247bed431d1c29ef7b4a0dbc02ef6aeaaded588 <   -:  ---------------------------------------- MinGW: link as terminal server aware
+ 52:  963d5504ddaa744e51ba019da95718aabfaeb567 <   -:  ---------------------------------------- compat/mingw.c: do not warn when failing to get owner
+ 53:  53344ce8b09f3e0427a5a5a9edfcc45d2e755e95 <   -:  ---------------------------------------- mingw: $env:TERM="xterm-256color" for newer OSes
+ 54:  086ff422a4bf26ad6c0ac575238921db470013ab <   -:  ---------------------------------------- winansi: check result and Buffer before using Name
+ 55:  9b74743998388b990f3028ef8245b77b849349a4 <   -:  ---------------------------------------- mingw: change core.fsyncObjectFiles = 1 by default
+ 56:  c45087d9c8b5cc99fdcb310ea46ba9e4086d7181 <   -:  ---------------------------------------- Fix Windows version resources
+ 57:  fa6db0ac358af146302eac0bda9b1169e7f0f02e <   -:  ---------------------------------------- windows: skip linking `git-<command>` for built-ins
+ 58:  471141c902ef6f92fba2b483c29fe318497b0bf9 <   -:  ---------------------------------------- mingw: stop hard-coding `CC = gcc`
+ 59:  e7adae611cde90224d511adbb33fe680ae2eac02 <   -:  ---------------------------------------- mingw: drop the -D_USE_32BIT_TIME_T option
+ 60:  d746cbb224bd3dc7613420189fea3e8512f6b8c1 <   -:  ---------------------------------------- mingw: only use -Wl,--large-address-aware for 32-bit builds
+ 61:  e929281a1898166ea1f6e2b6be9567e5cfa6637d <   -:  ---------------------------------------- mingw: avoid over-specifying `--pic-executable`
+ 62:  98d857f6059a40417aee7f86d064a340766b922f <   -:  ---------------------------------------- mingw: set the prefix and HOST_CPU as per MSYS2's settings
+ 63:  62c761be3e6438f6cb9fcb494153fda2a60bf7c0 <   -:  ---------------------------------------- mingw: only enable the MSYS2-specific stuff when compiling in MSYS2
+ 64:  dfd9bd25beaa274a4c7bd062afc9116d96f8844b <   -:  ---------------------------------------- mingw: rely on MSYS2's metadata instead of hard-coding it
+ 65:  055cc8ac1cb86070cb2742033761dd86e0d898b4 <   -:  ---------------------------------------- mingw: always define `ETC_*` for MSYS2 environments
+ 66:  1bd0017c9f0da344c1b7f082b92794c8a04cc479 <   -:  ---------------------------------------- max_tree_depth: lower it for clang builds in general on Windows
+ 67:  33bceade86efbd66a7b97366f573554df221d185 <   -:  ---------------------------------------- mingw: ensure valid CTYPE
+ 68:  ad1a5846dba0b93899d879ff9b1c9a5968dbea8e <   -:  ---------------------------------------- mingw: allow `git.exe` to be used instead of the "Git wrapper"
+ 69:  d2a75266b3f7ebbb1ba03a3ac6685c9b791db94a <   -:  ---------------------------------------- status: fix for old-style submodules with commondir
+ 70:  dec44cab1fe29ee47e223b1259794e91b0c3a85f <   -:  ---------------------------------------- mingw: ignore HOMEDRIVE/HOMEPATH if it points to Windows' system directory
+ 71:  584f7dfb51ee73435af13bf56631f799e62b75a6 <   -:  ---------------------------------------- clink.pl: fix libexpatd.lib link error when using MSVC
+ 72:  363e250c5a79705ebf64faecfd5fed6526dd47cc <   -:  ---------------------------------------- Makefile: clean up .ilk files when MSVC=1
+ 73:  e42bbf4cdd7539efeaa30397103d718e5ec39ecc <   -:  ---------------------------------------- vcbuild: add support for compiling Windows resource files
+ 74:  fd68f01479e84656cbeeb475173d581cbedfe849 <   -:  ---------------------------------------- config.mak.uname: add git.rc to MSVC builds
+ 75:  b653fa2f6ff50e9878763cb32dd8730c52d30e40 <   -:  ---------------------------------------- clink.pl: ignore no-stack-protector arg on MSVC=1 builds
+ 76:  af005e2d46597907e2bf8f5eb279cceb78cfdede <   -:  ---------------------------------------- clink.pl: move default linker options for MSVC=1 builds
+ 77:  3e13c06d8e921845164a7d4f28d591b0366ec77c <   -:  ---------------------------------------- cmake: install headless-git.
+ 78:  568835296efe951b56c4589cda45b7260c5faa30 <   -:  ---------------------------------------- git.rc: include winuser.h
+ 79:  110cf4d45cc3349a05a5a56fa83614dbd15f8d39 <   -:  ---------------------------------------- http: optionally load libcurl lazily
+ 80:  0b68eb732187d674496c0064c32de69d830dea7b <   -:  ---------------------------------------- http: support lazy-loading libcurl also on Windows
+ 81:  934b065682dc5aecdd7380d657df283625cd8ece <   -:  ---------------------------------------- http: when loading libcurl lazily, allow for multiple SSL backends
+ 82:  ea73840f84b71745617a4eaa97a50f474165ed10 <   -:  ---------------------------------------- mingw: do load libcurl dynamically by default
+ 83:  ddacb5732dd9c924be5ec9ded43432de66526c8b <   -:  ---------------------------------------- Add a GitHub workflow to verify that Git/Scalar work in Nano Server
+ 84:  c1086c70876706e165d25f63a16409d6bfe11814 <   -:  ---------------------------------------- mingw: suggest `windows.appendAtomically` in more cases
+ 85:  66569311fc976ace0db23f8296379883aff50ad9 <   -:  ---------------------------------------- win32: use native ANSI sequence processing, if possible
+ 86:  d5ce4776985457695d230f2819bf29cd8853b4fb <   -:  ---------------------------------------- revision: create mark_trees_uninteresting_dense()
+ 87:  67ecfcf672d4f0f66c648754ce32fb4d5532300b <   -:  ---------------------------------------- common-main.c: fflush stdout buffer upon exit
+ 88:  eeac35b8975af2c931e37a5f11fd1a624fc6af5f <   -:  ---------------------------------------- t5601/t7406(mingw): do run tests with symlink support
+ 89:  ff08a3c207c5942ff8906037978eec71ca986cbc <   -:  ---------------------------------------- Fallback to AppData if XDG_CONFIG_HOME is unset
+ 90:  7d5245b203b147ae6c5042862cfdaceaeeb5ea8d <   -:  ---------------------------------------- run-command: be helpful with Git LFS fails on Windows 7
+ 91:  4df70a418185b03a0eeeea53e325e12087394af5 <   -:  ---------------------------------------- survey: stub in new experimental 'git-survey' command
+ 92:  f5aa03afb40fd0de819b0bda67a94ad9a566cefe <   -:  ---------------------------------------- survey: add command line opts to select references
+ 93:  35ecab67a8b5b1f784b2a39e853cdcea61578976 <   -:  ---------------------------------------- survey: start pretty printing data in table form
+ 94:  098aeda49f8abde9ad061dfb2bcc698833c09c13 <   -:  ---------------------------------------- survey: add object count summary
+ 95:  d2d7657abf5fd9ebffdf643b06d27480774c9b31 <   -:  ---------------------------------------- survey: summarize total sizes by object type
+ 96:  9929c61b17beda2976b719187dae98e828cf473f <   -:  ---------------------------------------- survey: show progress during object walk
+ 97:  cd19a009291b67ebd28a83825a2973d8ab2decf2 <   -:  ---------------------------------------- survey: add ability to track prioritized lists
+ 98:  6be9db76cb486aee185b663d04f92473fbd42f94 <   -:  ---------------------------------------- survey: add report of "largest" paths
+ 99:  e69d05fc863e0b159ee2b066a5ce5812123a9053 <   -:  ---------------------------------------- survey: add --top=<N> option and config
+100:  66e1be9d87d4ecdb14832cface75d797694233a5 <   -:  ---------------------------------------- mingw: make sure `errno` is set correctly when socket operations fail
+101:  8ea36b6e24fdaa4acd9e0ba6fc626099396fa5f2 <   -:  ---------------------------------------- survey: clearly note the experimental nature in the output
+102:  fa66c2aae52287648bf1af415f23eff3647cf508 <   -:  ---------------------------------------- t5563: verify that NTLM authentication works
+103:  f801035f9c88c3463e68055d2d302a43595a480d <   -:  ---------------------------------------- compat/mingw: handle WSA errors in strerror
+104:  4ca4b4c343f96c71b47048b24bb69ec2ab828c7b <   -:  ---------------------------------------- http: disallow NTLM authentication by default
+105:  b9111c10b807b43864ddba1fec9ef1f8bff2d348 <   -:  ---------------------------------------- compat/mingw: drop outdated comment
+106:  03398c03d8a196b59d0cbdf98df8564306cf2747 <   -:  ---------------------------------------- http: warn if might have failed because of NTLM
+107:  95af445a4c7defa0d44a4c3b66474e27b0602ba7 <   -:  ---------------------------------------- t0301: actually test credential-cache on Windows
+108:  51703f57afa4894a3bef2cc3765cffd7e6b3962b <   -:  ---------------------------------------- credential: advertise NTLM suppression and allow helpers to re-enable
+109:  8215d0dcbd5ece7a8e9c3c8984f17ebfdba3ebbe <   -:  ---------------------------------------- credential-cache: handle ECONNREFUSED gracefully
+110:  2f664933b8ebc9613570ff2f1b09fb8e3f5d08cb <   -:  ---------------------------------------- reftable: do make sure to use custom allocators
+111:  8cf83e2b7cf9359df13ccd04e7ed7e8f48a215d7 <   -:  ---------------------------------------- check-whitespace: avoid alerts about upstream commits
+112:  d02d96a0a42db024f0356714684139f42077757d <   -:  ---------------------------------------- t/t5571-prep-push-hook.sh: Add test with writing to stderr
+113:  4729347c272dbacb6c6d42f4b7120f4bea4a5ec0 <   -:  ---------------------------------------- mingw: Support `git_terminal_prompt` with more terminals
+114:  e38ec6f2fcc6bab1bc8977ef06c023b57f5f92cd <   -:  ---------------------------------------- compat/terminal.c: only use the Windows console if bash 'read -r' fails
+115:  201144e24ceed4d681c5b5da1b6de82ceaa86a7e <   -:  ---------------------------------------- mingw (git_terminal_prompt): do fall back to CONIN$/CONOUT$ method
+116:  80eee1e377744079529ce238c4155b1e112a94f4 <   -:  ---------------------------------------- dir: do not traverse mount points
+117:  e36e8b3d12cc7d6e6a47f606c93661f8b7f86876 <   -:  ---------------------------------------- win32: thread-utils: handle multi-socket systems
+118:  daa7cb8c6949021bde97db36b7e8965ab5509147 <   -:  ---------------------------------------- t5563: add tests for http.emptyAuth with Negotiate
+119:  696cadb11928e4673927475ac565006fe2f914ed <   -:  ---------------------------------------- entry: flush fscache after creating directories and writing files
+120:  2425a004482367be159bbb55f58f0309abd51dd3 <   -:  ---------------------------------------- ci(macos): skip the `git p4` tests
+121:  edef24d123a8e9ea87634d4578f4045fcee899e8 <   -:  ---------------------------------------- Win32: symlink: move phantom symlink creation to a separate function
+122:  6f26c2e8793d1b8f21905232099bfd080fb6dced <   -:  ---------------------------------------- mingw: introduce code to detect whether we're inside a Windows container
+123:  7742d6ef4f1945f5d85e9edc26967ae89632aca7 <   -:  ---------------------------------------- Introduce helper to create symlinks that knows about index_state
+124:  1d0d2dacf7d421d3d7434e375d90c9c7420515b0 <   -:  ---------------------------------------- mingw: when running in a Windows container, try to rename() harder
+125:  3b0859ec4c759acb9bef60b6aeb578e58856046c <   -:  ---------------------------------------- mingw: allow to specify the symlink type in .gitattributes
+126:  6efb3e079442d82cb19f2869aaf974539ec9b67d <   -:  ---------------------------------------- mingw: move the file_attr_to_st_mode() function definition
+127:  00cc0722110252a8a37686ac3df7ac5816ef729f <   -:  ---------------------------------------- Win32: symlink: add test for `symlink` attribute
+128:  0aec489a8c1739858fa05c54673ca1f3db98f4ff <   -:  ---------------------------------------- mingw: Windows Docker volumes are *not* symbolic links
+129:  9c7424bc590b2101b2cbc88f0c977164ce9ba68b <   -:  ---------------------------------------- clean: do not traverse mount points
+130:  a373517b84f2f84065de668b1078ca7149f3f781 <   -:  ---------------------------------------- mingw: work around rename() failing on a read-only file
+131:  ad463707f64a8d7d18b59ef2c8f23e8c7a6dfb5f <   -:  ---------------------------------------- clean: remove mount points when possible
+132:  08aa7f0d9cfe4ef3f22230dd61f398d799409a5b <   -:  ---------------------------------------- diff-delta: widen struct delta_index size fields to size_t
+133:  f547327db3b5b4f18b520ff494df3c197c48f519 <   -:  ---------------------------------------- delta: widen create_delta_index() parameter to size_t
+134:  f9115fb91950a5caf1697cd25760016f3193753e <   -:  ---------------------------------------- pack-objects: widen delta-cache accounting to size_t
+135:  e3eeda3e61879dda4301751bfd2bfe862e4b9293 <   -:  ---------------------------------------- pack-objects: widen free_unpacked() return to size_t
+136:  d6a088d6a5a663bb396b5e5bd7c42712305ddfb1 <   -:  ---------------------------------------- pack-objects: widen mem_usage and try_delta out-param to size_t
+137:  d0c026839565f0990fdc653df2bce12fa2602759 <   -:  ---------------------------------------- delta: widen create_delta() and diff_delta() to size_t
+138:  b314d6dd593f26e327976b88a6c1603dd1b182dd <   -:  ---------------------------------------- mingw: optionally enable wsl compability file mode bits
+139:  f9b8367afb5465a98a6c1c7ddc73c3417f73117c <   -:  ---------------------------------------- Refuse to follow invalid paths in `.git` files
+140:  a3d106d0733a40191d82ab82c200325309bc5c89 <   -:  ---------------------------------------- packfile, git-zlib: widen use_pack() and zstream avail fields to size_t
+141:  f7abcba1da8d4bf75b846970370fc90a0f014cbe <   -:  ---------------------------------------- archive-zip: widen zlib_deflate_raw()'s maxsize local to size_t
+142:  b114b4c9a9d903b7f0a0a654e35022d651eb53d4 <   -:  ---------------------------------------- diff: widen deflate_it()'s bound local from int to size_t
+143:  b191f55bf058f37c54b7e33804971e18a1a64600 <   -:  ---------------------------------------- http-push: widen start_put()'s size local from ssize_t to size_t
+144:  214e5aa23129ae4f9add984852706648c2794014 <   -:  ---------------------------------------- t/helper/test-pack-deltas: widen do_compress()'s maxsize local to size_t
+145:  574d35e4830ae888665499bfa14fcd17780d02fe <   -:  ---------------------------------------- git-zlib: widen git_deflate_bound() to size_t
+146:  877b9f12b494ba061ffceb11d7024b5c24ddfcb4 <   -:  ---------------------------------------- diff: stop truncating the deflated-binary-diff size on Windows
+147:  b0ab6b32386c9873cc6bb24ed6ee208138d2faa2 <   -:  ---------------------------------------- convert: widen gather_convert_stats() helpers to size_t
+148:  c8099977f077ea20565498d19392bcffaa928f05 <   -:  ---------------------------------------- read-cache: stop truncating index blob sizes on Windows
+149:  d7b636ef9bb08285b109525d755e134a286f4d8a <   -:  ---------------------------------------- xdiff-interface: widen buffer_is_binary() size parameter to size_t
+150:  1d1c735e9357057d955f2b15e25bd075b24612f3 <   -:  ---------------------------------------- combine-diff: stop truncating combined-diff blob sizes on Windows
+151:  8588db3b06c92ccc9d8576c7767bab8859df2ed6 <   -:  ---------------------------------------- pack-bitmap: stop truncating blob sizes used by --filter=blob:limit
+152:  83f79b2e0d9ad68ac78a1d3a29a892ae2a02cfd3 <   -:  ---------------------------------------- tree-walk: drop link_len cast in get_tree_entry_follow_symlinks()
+153:  4887591eb64abd7be38d553e3ae485cbebe09aff <   -:  ---------------------------------------- tree-walk: widen init_tree_desc() and init_tree_desc_gently() to size_t
+154:  b9a3a29c77615874824379f2bf8f216987b99752 <   -:  ---------------------------------------- diff: widen textconv_object() size out-param to size_t
+155:  7c524788d9ead18793c970b53d20724e026bb9f8 <   -:  ---------------------------------------- pack-objects: drop the two tree-walk casts in the preferred-base path
+156:  3fbab767c1c2cd33ed9e8bef621e5e4543f868b5 <   -:  ---------------------------------------- diffcore: widen struct diff_filespec.size to size_t
+157:  23707afec8c2bfaa002993b3db1092cc1a414b7f <   -:  ---------------------------------------- diff-delta: widen sizeof_delta_index() return to size_t
+158:  b0482ec1e6df662ed2b11f1b3f15544694470b69 <   -:  ---------------------------------------- tree: widen struct tree.size and parse_tree_buffer() to size_t
+159:  1a8ee4a3c1b9400446315cd9905349b3393ed2ff <   -:  ---------------------------------------- commit: widen the commit-buffer API to size_t
+160:  ae5ac8f25891b5adcd26a5bfee7c8c5dc6fce0ca <   -:  ---------------------------------------- blame: widen find_line_starts() len parameter to size_t
+161:  38e4d605834e7f4f2e8222536faf7180e1fdfa78 <   -:  ---------------------------------------- grep: widen struct grep_source.size and grep_buffer() to size_t
+162:  663a6fb19a335256587981658ba740323b19476c <   -:  ---------------------------------------- fast-export: drop the export_blob() size cast and widen anonymize_blob()
+163:  f91302cf373e1cfc2b0fc5f3bb3e1dd6d271ba16 <   -:  ---------------------------------------- repo: drop the inflated-size cast in count_objects()
+164:  b0512d0ba7c692d7a4b23f2ea61f4979c04a7ba1 <   -:  ---------------------------------------- unpack-objects: widen the size-passing infrastructure to size_t
+165:  b2c46367fff6ceffdb0eb0efa7f281fd47894926 <   -:  ---------------------------------------- pack-objects: drop cast_size_t_to_ulong shims in get_delta()
+166:  a79a24207f5584043ccceb9a6355e78f8993c723 <   -:  ---------------------------------------- pack-objects: drop cast_size_t_to_ulong shims in try_delta()
+167:  2299301931b7c41a36feb9f815c5323e8a9fd333 <   -:  ---------------------------------------- pack-objects: drop the last size shim in write_no_reuse_object()
+168:  9550ed9d680b73e7084597b6d899c9954769b44d <   -:  ---------------------------------------- blame: widen struct blame_scoreboard.final_buf_size to size_t
+169:  5eced98fb8cdcb475a87857b118e692876d04594 <   -:  ---------------------------------------- fast-import: drop the six size casts in the object-read paths
+170:  c0930a734b0c8eecc3e4a12343222a46e45509fb <   -:  ---------------------------------------- t/helper/test-pack-deltas: drop the delta_size cast in write_ref_delta()
+171:  cbebf58c1dbf06419be27d4a9014f160e989506e <   -:  ---------------------------------------- Drop the `cast_size_t_to_ulong()` helper
+172:  994857099b419e67ca4939b1a3bd85e5096ba308 <   -:  ---------------------------------------- coverity: skip building with Rust, for now
+173:  52951256a32763796eed2eec5944358e7bc273ac <   -:  ---------------------------------------- Win32: make FILETIME conversion functions public
+174:  1fbc5755a16a3750f09fd732fc791801557ac6b0 <   -:  ---------------------------------------- Win32: dirent.c: Move opendir down
+175:  e47f876710052de15b2f99b22ad33a68e8e1512b <   -:  ---------------------------------------- mingw: make the dirent implementation pluggable
+176:  789cce32c31a02b3df8c29347008814671186171 <   -:  ---------------------------------------- Win32: make the lstat implementation pluggable
+177:  828fba0ac29da16d06b10d71e23de5c7caf6e2b7 <   -:  ---------------------------------------- mingw: add infrastructure for read-only file system level caches
+178:  f721b719f2a52ff6447e8bc36726737cda6a016a <   -:  ---------------------------------------- mingw: add a cache below mingw's lstat and dirent implementations
+179:  76033a2fc418ba0deefe27703c23199a26df8e97 <   -:  ---------------------------------------- fscache: load directories only once
+180:  57f194147dfc1848e22425ef5ac59884af490dd0 <   -:  ---------------------------------------- fscache: add key for GIT_TRACE_FSCACHE
+181:  34867a3d2da51e7d08028a1f8a128a5163a14631 <   -:  ---------------------------------------- git-gui--askyesno: fix funny text wrapping
+182:  dae97862a116d8f26a4d4f7d405976fe8b5f4a9f <   -:  ---------------------------------------- fscache: remember not-found directories
+183:  97841aadc545fcbb06fe16f4815840cf00de1b8c <   -:  ---------------------------------------- git-gui--askyesno (mingw): use Git for Windows' icon, if available
+184:  3f6cb81b350615894080b2bf0b68c497af3f3691 <   -:  ---------------------------------------- fscache: add a test for the dir-not-found optimization
+185:  a2acda400247ceec7fbbbff6ffc9c930ae511f35 <   -:  ---------------------------------------- add: use preload-index and fscache for performance
+186:  60a91f2e096c08383276e9b4938ca23e745f43fa <   -:  ---------------------------------------- dir.c: make add_excludes aware of fscache during status
+187:  781696d08901fee956f2ffdfecff7cf53dd154f5 <   -:  ---------------------------------------- fscache: make fscache_enabled() public
+188:  a9cb81ef1033e5425cd3e12d4ffc55e7e9b9d72b <   -:  ---------------------------------------- dir.c: regression fix for add_excludes with fscache
+189:  d967a001f0b14314326e80512a39f973d104eca3 <   -:  ---------------------------------------- fetch-pack.c: enable fscache for stats under .git/objects
+190:  7cd9b48cf6b51a7ac376fefd7e8bd943b21b3b6a <   -:  ---------------------------------------- checkout.c: enable fscache for checkout again
+191:  045ecbb1e4f66e7b483e76befceb38962c4263f2 <   -:  ---------------------------------------- Enable the filesystem cache (fscache) in refresh_index().
+192:  633549aac9db078ed8b0f352831453d025b0102d <   -:  ---------------------------------------- fscache: use FindFirstFileExW to avoid retrieving the short name
+193:  ffc2bcb2e17338ccc82e395a8eba6203fdc46029 <   -:  ---------------------------------------- fscache: add GIT_TEST_FSCACHE support
+194:  930225d61d93625c9d01dda2585b9123d55bdb8a <   -:  ---------------------------------------- fscache: add fscache hit statistics
+195:  bf04a41e9175507d3e422a9c4a6fe67cee8f51ad <   -:  ---------------------------------------- unpack-trees: enable fscache for sparse-checkout
+196:  e3fc2874a442991298e8807606fe9cdc4e0cb924 <   -:  ---------------------------------------- status: disable and free fscache at the end of the status command
+197:  cb4b2b646f91c664c0c5d65947f54252d3206e68 <   -:  ---------------------------------------- mem_pool: add GIT_TRACE_MEMPOOL support
+198:  33c9b6639b6104fa67b109a941954d45483435c6 <   -:  ---------------------------------------- fscache: fscache takes an initial size
+199:  2c8b97f399028d086eb0c2065c882340a8868129 <   -:  ---------------------------------------- fscache: update fscache to be thread specific instead of global
+200:  7591efa5867faf8b7cbaca7567e4d3d6fb501cc5 <   -:  ---------------------------------------- fscache: teach fscache to use mempool
+201:  3eda567412cdc36da2126dff029d89ea540374ee <   -:  ---------------------------------------- fscache: make fscache_enable() thread safe
+202:  dfbce1b2a6923ff4ccb592cf1f48163167e12a1d <   -:  ---------------------------------------- fscache: teach fscache to use NtQueryDirectoryFile
+203:  5164e8b2986585cea18f6cd372b04a0855e4cefa <   -:  ---------------------------------------- fscache: remember the reparse tag for each entry
+204:  292e0c17a9f663a4595a8cfdcd111a3026355da2 <   -:  ---------------------------------------- fscache: Windows Docker volumes are *not* symbolic links
+205:  98f89dbc9b6a996ab9a664d68e59387e615546ce <   -:  ---------------------------------------- fscache: optionally enable wsl compability file mode bits
+206:  2c42f6329291985c582ce9184e20d81ca71696ca <   -:  ---------------------------------------- fscache: implement an FSCache-aware is_mount_point()
+207:  e9e642f4e7c10ae7281f6ed4b32cf16615431a79 <   -:  ---------------------------------------- clean: make use of FSCache
+208:  84a8e06f0fd58d7ed4a6570f062a6480c6d0f306 <   -:  ---------------------------------------- pack-objects (mingw): demonstrate a segmentation fault with large deltas
+209:  9b7881da2408e400edd19c6b142d8b255d53665b <   -:  ---------------------------------------- mingw: support long paths
+210:  acd19f67922a71daa48c5b22d5dd3371d8b08d8f <   -:  ---------------------------------------- win32(long path support): leave drive-less absolute paths intact
+211:  3830de6aa0bb1b19046c0016c06a911559d1baea <   -:  ---------------------------------------- compat/fsmonitor/fsm-*-win32: support long paths
+212:  73ae0c926ebd5dbd695dfc3df7f3caaaed71fcfe <   -:  ---------------------------------------- clean: suggest using `core.longPaths` if paths are too long to remove
+213:  277c715f3fe79e6729c859ec5e2943f65bf71e66 <   -:  ---------------------------------------- mingw: explicitly specify with which cmd to prefix the cmdline
+214:  dd2878982bb7be42ff1ff064477ba96b4b844f0b <   -:  ---------------------------------------- mingw: when path_lookup() failed, try BusyBox
+215:  5fbb8d2f17df67a9d6928e4d11103e36572fc1ff <   -:  ---------------------------------------- test-tool: learn to act as a drop-in replacement for `iconv`
+216:  c9f34f8585537d61e538c7d72e8c3e760b8eaa77 <   -:  ---------------------------------------- tests(mingw): if `iconv` is unavailable, use `test-helper --iconv`
+217:  7cd1dffa8c42378bc10eae7af213e88f569b692c <   -:  ---------------------------------------- gitattributes: mark .png files as binary
+218:  d48d1985063639129d3ae8af12bdb9e8cbaccfe5 <   -:  ---------------------------------------- tests: move test PNGs into t/lib-diff/
+219:  044182f9ebcd6bd056743334f94ed6cafc0b6e8c <   -:  ---------------------------------------- tests: only override sort & find if there are usable ones in /usr/bin/
+220:  2c48841d0cc9d168f473d88fda793d61ec5837be <   -:  ---------------------------------------- tests: use the correct path separator with BusyBox
+221:  0fd4359429a26a6a6592a581040b2b58580686c8 <   -:  ---------------------------------------- mingw: only use Bash-ism `builtin pwd -W` when available
+222:  67df04adc185cf7231f4695548f7cf084168a032 <   -:  ---------------------------------------- tests (mingw): remove Bash-specific pwd option
+223:  af4f1d47367573a743c82763bb3b7e7b5ff0c4ca <   -:  ---------------------------------------- test-lib: add BUSYBOX prerequisite
+224:  d586260bd42bd1d306b716e6699934060075069c <   -:  ---------------------------------------- t5003: use binary file from t/lib-diff/
+225:  39ea2c0879df291fbf821f02651886c62622279a <   -:  ---------------------------------------- t5532: workaround for BusyBox on Windows
+226:  95bb69c747aaf9beb4ebe61f3d3f161b278bcb28 <   -:  ---------------------------------------- t5605: special-case hardlink test for BusyBox-w32
+227:  53cbcfc17f80aae68855103bbd3b601c1f351f41 <   -:  ---------------------------------------- t5813: allow for $PWD to be a Windows path
+228:  a6aa3c8abd801fed16503730d01cbfbab78fcd7c <   -:  ---------------------------------------- t9200: skip tests when $PWD contains a colon
+229:  c831b769ef13139604b252ac679a75deecfa3d9e <   -:  ---------------------------------------- Partially un-revert "editor: save and reset terminal after calling EDITOR"
+230:  369e48920caaaa6f59860eca9c0520fbc98f3699 <   -:  ---------------------------------------- reset: reinstate support for the deprecated --stdin option
+231:  efc43440190b6e9c15e0247cf0d66a0e61995638 <   -:  ---------------------------------------- Describe Git for Windows' architecture
+232:  0e7582c1e92908382586e37871a012fb7c8daacd <   -:  ---------------------------------------- Add an AGENTS.md file to help with AI-assisted debugging/development
+233:  790003f54c00005ea595cbb6f811f6a2dc9dcadc <   -:  ---------------------------------------- Modify the Code of Conduct for Git for Windows
+234:  9511b9f8934ceed559f4dd0839d8d173fbf0cf05 <   -:  ---------------------------------------- CONTRIBUTING.md: add guide for first-time contributors
+235:  ab988e9ea67c547e22e2710384abc49e4ca1068f <   -:  ---------------------------------------- README.md: Add a Windows-specific preamble
+236:  bdbc5a58ffd152ab8b2ebe0964df453b3b529f91 <   -:  ---------------------------------------- Add a GitHub workflow to monitor component updates
+237:  3913a2a81aadc6e9a76a89ccd117d6ee06ac8bef <   -:  ---------------------------------------- Add an issue template
+238:  2d5aad5fbb04fdd67a52ab81d1980c1c21bebc78 <   -:  ---------------------------------------- fsmonitor: reintroduce core.useBuiltinFSMonitor
+239:  463c3232ea2446763455800837e89f900a24af17 <   -:  ---------------------------------------- dependabot: help keeping GitHub Actions versions up to date
+240:  e47c424c74110c801dae5b972cb8b8f2d3263888 <   -:  ---------------------------------------- Modify the GitHub Pull Request template (to reflect Git for Windows)
+241:  bf2f042476b0a90c9f0dc32fca05800648309bb9 <   -:  ---------------------------------------- SECURITY.md: document Git for Windows' policies
+242:  a0840aac4845e33a6ca9cf3e817859c86da602ed <   -:  ---------------------------------------- ci: only run the expensive tests in the Windows tests for now
+  -:  ---------------------------------------- >  89:  e2fb4ba003dac9c71b78b997fb90aac10c11c2df packfile: rename `struct packfile_store` to `odb_source_packed`
+  -:  ---------------------------------------- >  90:  cf86a18ac3b4e49f49c2c19351de109064999827 packfile: split out packfile list logic
+  -:  ---------------------------------------- >  91:  c71a1214156374b7b8c3c9158aa27e94e70df6c9 packfile: move packed source into "odb/" subsystem
+  -:  ---------------------------------------- >  92:  3ac21e6d825a642dcab826772b495f492148299c odb/source-packed: store pointer to "files" instead of generic source
+  -:  ---------------------------------------- >  93:  0de2467e6c35930cf2530a213082829c8b86970d odb/source-packed: start converting to a proper `struct odb_source`
+  -:  ---------------------------------------- >  94:  4f35c8b060085835150ab605207f6669e58a8d94 odb/source-packed: wire up `close()` callback
+  -:  ---------------------------------------- >  95:  9ea4ef8586d8fa74bf45c1dd8da2256099abebbd odb/source-packed: wire up `reprepare()` callback
+  -:  ---------------------------------------- >  96:  77e175c6d03a26e97deb2a7bc707894eb45ced26 packfile: use higher-level interface to implement `has_object_pack()`
+  -:  ---------------------------------------- >  97:  64136a82075331d98fd1315fa957f69acb49885c odb/source-packed: wire up `read_object_info()` callback
+  -:  ---------------------------------------- >  98:  83f3a2b91b44d4a39bce371a7580b0ad853df8a2 odb/source-packed: wire up `read_object_stream()` callback
+  -:  ---------------------------------------- >  99:  7ed53cde288a1e5558acac33f2d89f17b81618e2 odb/source-packed: wire up `for_each_object()` callback
+  -:  ---------------------------------------- > 100:  6b7484fcb683211eafd82a7ba4b4470d553a62b6 odb/source-packed: wire up `count_objects()` callback
+  -:  ---------------------------------------- > 101:  3c0f7b732e37b885009cdc64a13541591ebab00e odb/source-packed: wire up `find_abbrev_len()` callback
+  -:  ---------------------------------------- > 102:  98189bdd0a789115e3bb5ec5d5312ce71d6f59b0 odb/source-packed: wire up `freshen_object()` callback
+  -:  ---------------------------------------- > 103:  f236b0c38d11b97930608384eaddd210f74fc7ab odb/source-packed: stub out remaining functions
+  -:  ---------------------------------------- > 104:  7fa8c61afe29bfb82066c81a82ed6393f34dd704 midx: refactor interfaces to work on "packed" source
+  -:  ---------------------------------------- > 105:  1bba3c035d2283456edcb159e965b8be2015e114 odb/source-packed: drop pointer to "files" parent source
+  -:  ---------------------------------------- > 106:  4a59ffe84961f6a3de29b302bcef188583a29dfa builtin/refs: drop `the_repository`
+  -:  ---------------------------------------- > 107:  52fb7f94fcc20199cc7dc23db8d7f71ec37b80f8 builtin/refs: add "delete" subcommand
+  -:  ---------------------------------------- > 108:  8b3bc491d883ff53b47ac589d6ecba93944b0d40 builtin/refs: add "update" subcommand
+  -:  ---------------------------------------- > 109:  e993bd4b59834a157e878d8ad6c97ee6076198d8 builtin/refs: add "create" subcommand
+  -:  ---------------------------------------- > 110:  7d6f98431e09d4434313540c81b52578a61a41e5 builtin/refs: add "rename" subcommand
+  -:  ---------------------------------------- > 111:  d0c6ecea230aed04ad703502b43c9b313ccfc95d SubmittingPatches: encourage trailer use for substantial help
+  -:  ---------------------------------------- > 112:  b7f68ff5c92e40157da2afeecba13bf6f4fdd6db SubmittingPatches: discourage common Linux trailers
+  -:  ---------------------------------------- > 113:  6d2665156748bde12274cfb3aea24bca68d7ac0c SubmittingPatches: document Based-on-patch-by trailer
+  -:  ---------------------------------------- > 114:  89d86442441d354abddf53d06d440bc06500c738 SubmittingPatches: be consistent with trailer markup
+  -:  ---------------------------------------- > 115:  55113123f5a830e5d4f1b728668a90a0e6ca7193 SubmittingPatches: note that trailer order matters
+  -:  ---------------------------------------- > 116:  3e09c9e8207eb425ce45863da6bbfe11cd49a765 fetch: fixup set_head advice for warn-if-not-branch
+  -:  ---------------------------------------- > 117:  54c9d481011b095561099393ac3ef4828de4a329 doc: explain fetchRemoteHEADWarn advice
+  -:  ---------------------------------------- > 118:  f8a7bbf09d4d8b4f29f689afd77e7c75b0f0cb37 t5510: cleanup remote in followRemoteHEAD dangling ref test
+  -:  ---------------------------------------- > 119:  b4154d85de799e8bcebae9850bb892da59b78e86 fetch: rename function report_set_head
+  -:  ---------------------------------------- > 120:  c6ac26e0137c0443c5840d6485216a60e3d3c5a2 fetch: return 0 on known git_fetch_config
+  -:  ---------------------------------------- > 121:  85ef88dc5511750218588dcc56b76b1b4ab67e7d fetch: refactor do_fetch handling of followRemoteHEAD
+  -:  ---------------------------------------- > 122:  7d00999b10579708fc3c2512cb0a55eff4e7565f fetch: add configuration variable fetch.followRemoteHEAD
+  -:  ---------------------------------------- > 123:  1a81aa364af949ea16127417926a7e1595ecc2b9 fetch: fixup a misaligned comment
+  -:  ---------------------------------------- > 124:  5abac96b4be55831c9aa5135ded30a907f76018c environment: move ignore_case into repo_config_values
+  -:  ---------------------------------------- > 125:  e6a79c9eb88e9bb07af94cc35dfdb392de56456a config: use repo_ignore_case() to access core.ignorecase
+  -:  ---------------------------------------- > 126:  8a4686020d7d8e7f43c4c7f98727e615c95329c7 read-cache: remove redundant extern declarations
+  -:  ---------------------------------------- > 127:  b34f771192d7fe5547787976e3440ee385019545 read-cache: move 'ce_mode_from_stat()' to 'read-cache.c'
+  -:  ---------------------------------------- > 128:  008d78d1404ad45bcd3b22b7076f084ed7bb37ed environment: move trust_executable_bit into repo_config_values
+  -:  ---------------------------------------- > 129:  440158567fc89b050459638d07e804b3bbc7e09a lib-log-graph: move check_graph function
+  -:  ---------------------------------------- > 130:  28308a0fe68e7b54ae948c8a29c96290b6f04fba revision: add peek functions for lookahead
+  -:  ---------------------------------------- > 131:  b47195814718e030b6a6f80579881a4cc844bad6 graph: indent visual root in graph
+  -:  ---------------------------------------- > 132:  a472af8bfdebe98e4e48a76b83e5424708cb42ef environment: use 'repo->initialized' for repo_protect_hfs() and repo_protect_ntfs()
+  -:  ---------------------------------------- > 133:  6ffee1b5816be108d73bcd86c954d4dae79ef9f4 meson: wire up USE_NSEC build knob
+  -:  ---------------------------------------- > 134:  5fe19d285c832b12de1479c78231d53842b44583 SubmittingPatches: address design critiques
+  -:  ---------------------------------------- > 135:  7f5550445099f501dd16299c49f59a0dd949d237 completion: hide dotfiles for selected path completion
+  -:  ---------------------------------------- > 136:  2cc01b9c55de08d03f30e7ec43236aa08a829dc0 completion: hide dotfiles by default for path completion
+  -:  ---------------------------------------- > 137:  7bcc64be776baf9b8b22e8352b7c1e0d5da66cfe doc: encourage review replies before rerolling
+  -:  ---------------------------------------- > 138:  477172636160c9729a2c4ae4aca4b3bcf0d4d83a doc: advise batching patch rerolls
+  -:  ---------------------------------------- > 139:  00f7a12211f7ef4f5d308efe7648a688fe6b13f1 t/perf: drop p5311's lookup-table permutation
+  -:  ---------------------------------------- > 140:  0a374511064bad27f707cb9f03448fb8aa25791f pack-objects: support reachability bitmaps with `--path-walk`
+  -:  ---------------------------------------- > 141:  264efee401e04de50055d1519dda1fbd1e02428f pack-objects: extract `record_tree_depth()` helper
+  -:  ---------------------------------------- > 142:  7e6de2ac62817199a2c8dd464f9e33ae0b4966e3 pack-objects: support `--delta-islands` with `--path-walk`
+  -:  ---------------------------------------- > 143:  304812ed33dec7ea7e68928feab38199d796ea25 log: improve --follow following renames for non-linear history
+  -:  ---------------------------------------- > 144:  27bba4258b9e4bd7a0313e3bb4cce8aeba268712 odb/source: generalize `reprepare()` callback
+  -:  ---------------------------------------- > 145:  b7fe8f06728f4d39d9b84454588185b384695902 odb: introduce `odb_prepare()`
+  -:  ---------------------------------------- > 146:  66666f2d091f29957fce9436227a44be83dcc7a4 t/helper: prepare "test-example-tap.c" for introduction of "lib/"
+  -:  ---------------------------------------- > 147:  9759608622f9b8ee7202679a470d3531267de7d8 Move libgit.a sources into separate "lib/" directory
+  -:  ---------------------------------------- > 148:  10c2678a2bfbd2a3e8d0a3623d1b71b6cc916253 sequencer: factor out parsing of todo commands
+  -:  ---------------------------------------- > 149:  6f34e5f9e3b664fcd65a2a0695dff16b0ee04b35 status: improve rebase todo list parsing
+  -:  ---------------------------------------- > 150:  60cafea9078097f051f39c234fb6aa8f6051b2bd path: extract format_path() and use in rev-parse
+  -:  ---------------------------------------- > 151:  1efca6d0b2304360901dccfcbd5ea4f276ecf8c9 repo: add path.commondir with absolute and relative suffix formatting
+  -:  ---------------------------------------- > 152:  3ac28d832aefe06e0fb9390d3e20a9c32350e052 repo: add path.gitdir with absolute and relative suffix formatting
+  -:  ---------------------------------------- > 153:  5dea8b690b50a4f4d11ddc8f2f6cd24a816102ad gpg-interface: fix strip_cr_before_lf to only remove CR before LF
+  -:  ---------------------------------------- > 154:  1b9f137b439a441a91791653746412354da4e844 packfile: thread odb_source_packed through packed_object_info()
+  -:  ---------------------------------------- > 155:  695797490e7313abe2bbb9aefd3487e8c4a7b383 odb: make backend-specific fields optional
+  -:  ---------------------------------------- > 156:  1bdb8c34f218b2267c1f1690fddf73f2b18ef777 odb: add `source` field to struct object_info_source
+  -:  ---------------------------------------- > 157:  4f48d2a241037fbc6bd4bd968ce77681d5b0e610 treewide: convert users of `whence` to the new source field
+  -:  ---------------------------------------- > 158:  f3bae0b86d1efe8c5dfdb5b6feb261762efa58fa odb: drop `whence` field from object info
+  -:  ---------------------------------------- > 159:  59e8a22602709e8e84ef93ba2145f85e4bbfdf6c odb: document object info fields
+  -:  ---------------------------------------- > 160:  738f8baafe7b0bc9d908b072c5a9b3d5347cff11 object-file: rename files transaction prepare function
+  -:  ---------------------------------------- > 161:  bd0ca589723b00b1764203897a19a359996593e6 object-file: propagate files transaction errors
+  -:  ---------------------------------------- > 162:  1bfc358fd8a686929329517b62a8534825facd3e odb/transaction: propagate begin errors
+  -:  ---------------------------------------- > 163:  a72d74fa595c8bf1ecd843fc3c611ad6f8b4bbc5 odb/transaction: propagate commit errors
+  -:  ---------------------------------------- > 164:  ffab7256ac96a97aa275d2b92e5f9681eeae2820 odb/transaction: add transaction env interface
+  -:  ---------------------------------------- > 165:  fa7dbe2e4f8154ff0026382e4d47e4d176455407 builtin/receive-pack: stage incoming objects via ODB transactions
+  -:  ---------------------------------------- > 166:  f4914a86e11be463819175ce769c3b689bbb9994 branch: expose helpers for finding the remote owning a tracking ref
+  -:  ---------------------------------------- > 167:  8b13e2d194d5e1c2280d33de6b64c778a9cfa2ff checkout: extend --track with a "fetch" mode to refresh start-point
+  -:  ---------------------------------------- > 168:  82a974308c5b2bfc593331bf40df4b0d63800eb9 branch: add --forked filter for --list mode
+  -:  ---------------------------------------- > 169:  aaf5816f00ed850db5307f72f5d79a16f49b9dc8 branch: convert delete_branches() to a flags argument
+  -:  ---------------------------------------- > 170:  cdce9f3c8bc5adc6eff95e0edd3c8c7f13dbe251 branch: let delete_branches skip unmerged branches on bulk refusal
+  -:  ---------------------------------------- > 171:  28827a87561fc65972e34feae74cf16e367c41dc branch: prepare delete_branches for a bulk caller
+  -:  ---------------------------------------- > 172:  7b6e901ec88737b56014be7fc20a371aaa182b02 branch: add --delete-merged <branch>
+  -:  ---------------------------------------- > 173:  365384b1db8fc46f391b2a77835869720c7cfc57 branch: add branch.<name>.deleteMerged opt-out
+  -:  ---------------------------------------- > 174:  4a48af9c27feb6cd1a733430dc7f84d0cf3936f9 branch: add --dry-run for --delete-merged
+  -:  ---------------------------------------- > 175:  d45f956f2022a90d39b1ce82aea668cce73f1d75 odb/source-packed: extract logic to skip certain packs
+  -:  ---------------------------------------- > 176:  8ed957112de135f449698e9408f2582eabb9401e odb/source-packed: support flags when iterating an object prefix
+  -:  ---------------------------------------- > 177:  0a7f3389f4c16da05a1113ef0829a352af62dcbe connected: split out promisor-based connectivity check
+  -:  ---------------------------------------- > 178:  66ee9cb93086b27721a36e2ba877921dcf177d91 connected: search promisor objects generically
+  -:  ---------------------------------------- > 179:  0cef08d2caabb83dad02844387db435cf9afa0d5 transport-helper: fix memory leak of helper on disconnect
+  -:  ---------------------------------------- > 180:  5d8a6969a007b51d69a26f420378402338908fad git-compat-util: add strtoul_szt() with error handling
+  -:  ---------------------------------------- > 181:  2eec59f0c46c814db0aadf35d647782d22ba6423 cat-file: declare loop counter inside for()
+  -:  ---------------------------------------- > 182:  3a4ad6120ed5540ce50b332b5d5989eaea78762a t1006: split test utility functions into new "lib-cat-file.sh"
+  -:  ---------------------------------------- > 183:  dbd7fa08859471ca31fbf6144b89fcb0fce4f0d7 fetch-pack: prepare function to be moved
+  -:  ---------------------------------------- > 184:  547f2d7d49e8d3bbd2477f854e94e0485e389aff fetch-pack: move function to connect.c
+  -:  ---------------------------------------- > 185:  ace68b4b2691ddd90957bc4d53c7815906d90965 connect: refactor packet writing
+  -:  ---------------------------------------- > 186:  27b5a37fe9caaaa8cb5ac7a15a0c728366806aa5 fetch-pack: move fetch initialization
+  -:  ---------------------------------------- > 187:  ba9a3c483965a0a7e174c27f5a20b9ee206262a3 serve: advertise object-info feature
+  -:  ---------------------------------------- > 188:  cf5d1e8159ee476f0d2c8beb89628f835a270a2c transport: add client support for object-info
+  -:  ---------------------------------------- > 189:  1b2b551b5ee593f0a3a569e3ff05c1bcadda6d77 cat-file: add remote-object-info to batch-command
+  -:  ---------------------------------------- > 190:  8cdf01a4208d36c9763dcd4885240db621cc9b63 cat-file: validate remote atoms with allow_list
+  -:  ---------------------------------------- > 191:  686196f6495d438aba9400749218a1664d31d543 cat-file: make remote-object-info allow-list dynamic
+  -:  ---------------------------------------- > 192:  633e50c30656f3fc66ed7a54e746a843b1dd7c5a replay: add helper to put entry into mapped_commits
+  -:  ---------------------------------------- > 193:  7b77b482bbd2c12c60ec2f6c868118c081aff166 replay: better explain how pick_regular_commit() picks a base
+  -:  ---------------------------------------- > 194:  94d7ae4f3802bcd84893f32696f40a193e1a8434 replay: offer an option to linearize the commit topology
+  -:  ---------------------------------------- > 195:  35b6b8256cb793a7f5d4903635038b5002f338f6 setup: inline `check_and_apply_repository_format()`
+  -:  ---------------------------------------- > 196:  93c4361c41c3ac554ce8f61d8551d272d39ccd79 setup: stop applying repository format twice
+  -:  ---------------------------------------- > 197:  7d9ffe68f2fc525c676a71996550bc9a4d350d11 setup: don't apply "GIT_REFERENCE_BACKEND" without a repository
+  -:  ---------------------------------------- > 198:  1f43ff2c7e4c1575960ad3b1338922d7fa837c0c refs: unregister reference stores from "chdir_notify"
+  -:  ---------------------------------------- > 199:  5bf546755c0a9d758773538d1bd730785189c9d7 chdir-notify: drop unused `chdir_notify_reparent()`
+  -:  ---------------------------------------- > 200:  432b2e4f9ebd2cbafab641619067dce4d3f223bc repository: free main reference database
+  -:  ---------------------------------------- > 201:  a9e4ce0aec738ca3047d77f3781159424703a2a3 refs: move parsing of "core.logAllRefUpdates" back into ref stores
+  -:  ---------------------------------------- > 202:  f016ec17fbbde5ae7d208f0585bc02eb63416a53 refs/files: lazy-load configuration to fix chicken-and-egg
+  -:  ---------------------------------------- > 203:  44f46f2be5b6fb47733e495be3de21eeec4c7ede reftable: split up write options
+  -:  ---------------------------------------- > 204:  79fa75d499d767540fae8d85ab62391cae6591f9 refs/reftable: lazy-load configuration to fix chicken-and-egg
+  -:  ---------------------------------------- > 205:  d6522d01dfd147d18246d308dd6ea24b32d095d2 refs: protect against chicken-and-egg recursion
+  -:  ---------------------------------------- > 206:  3e27fcda238ff5e585c6fde018afe4dd7ffb6631 fixup??? Move libgit.a sources into separate "lib/" directory
+  -:  ---------------------------------------- > 207:  1a9c49e4bb07bd26d2f591c746ab9c9c82423533 repack: unconditionally exclude non-kept packs
+  -:  ---------------------------------------- > 208:  d65798abb799bdf6915501ca274fc85cbc35d69f repack: extract `locate_existing_pack()` helper
+  -:  ---------------------------------------- > 209:  3e38d04bd41791c8f50e008adb5cb09f876d4edf repack: mark geometric progression of packs as retained
+  -:  ---------------------------------------- > 210:  5ff781e9fa3cfea4ac008c7e0e06a5f720b78060 repack: teach MIDX retention about geometric rollups
+  -:  ---------------------------------------- > 211:  4adadb015781bdfec02120f9b1fa5a606d8c7cfd repack: delete geometric packs via existing_packs
+  -:  ---------------------------------------- > 212:  9dc0bf0e006ef8cf6f49ffafe40295e9803018db repack-geometry: drop unused redundant-pack removal
+  -:  ---------------------------------------- > 213:  806cd59ba235c0b19261019c039a22392cc6fc04 pack-objects: extract `stdin_packs_add_all_pack_entries()`
+  -:  ---------------------------------------- > 214:  ec0165a0cd79f6391dbb546a065db1695db0aa91 pack-objects: introduce '--stdin-packs=follow-reachable'
+  -:  ---------------------------------------- > 215:  e6a6b7e9fce005463ddbda3d21173fab0114a200 pack-objects: support '--refs-snapshot' with 'follow-reachable'
+  -:  ---------------------------------------- > 216:  a53c3b6193d783f1dd2bd283782b1c3033ef0b3e repack: support combining '--geometric' with '--cruft'
+  -:  ---------------------------------------- > 217:  eaad121fefb3c5845a52aba8952435096a172154 t3420-rebase-autostash: don't try to grep non-existing files
+  -:  ---------------------------------------- > 218:  2faf0f0256cbf4cef447202276ca57d36e1d9380 branch: suggest <remote>/<branch> on upstream slip
+  -:  ---------------------------------------- > 219:  a85a43c4802c124a504c42c63129a97d7f8346c1 push: suggest <remote> <branch> for a slash slip
+  -:  ---------------------------------------- > 220:  8bf08c50e9c1f6bde4acc6adee5b215f44f45178 environment: move excludes_file into repo_config_values
+  -:  ---------------------------------------- > 221:  6fa5fbaf2fc88582d070adc2b0e765682206a984 diff: rename and group the line-range filter for clarity
+  -:  ---------------------------------------- > 222:  5a508c13ac159a6c8e938ba6ce544a33f234e58b diff: simplify the line-range filter by classifying removals immediately
+  -:  ---------------------------------------- > 223:  7555510bf32835fae50363b86a8a667c1b681803 diff: emit -L hunk headers via xdiff's formatter
+  -:  ---------------------------------------- > 224:  56cf30f68c6ab06e34c295c62b081da8904b1c41 diff: extract a line-range diff helper for reuse
+  -:  ---------------------------------------- > 225:  660aae7323bca80e4441479ccd3b83e60dc16477 line-log: support diff stat formats with -L
+  -:  ---------------------------------------- > 226:  54438a56a4edb4c70459180f37af3e43e5d7e6a3 diff: support --check with -L line ranges
+  -:  ---------------------------------------- > 227:  f67c51df064d2b64b257bd8c17d757cc0ce1b7fc diffcore-pickaxe: scope -G to the -L tracked range
+  -:  ---------------------------------------- > 228:  8e31645f78812eb000fb2cf3cd7c4fee24ac6fe1 history: extract helper for a commit's parent tree
+  -:  ---------------------------------------- > 229:  aa88b8b590b762ec21fa212e84a4cf8f9f248d3d history: give commit_tree_ext a message template
+  -:  ---------------------------------------- > 230:  eb5cd8dca60418903f196a1789868413e6af1ab7 history: add squash subcommand to fold a range
+  -:  ---------------------------------------- > 231:  9958841876dfd1f06dc47d7c75c4c2ee3940b460 history: re-edit a squash with every message
+  -:  ---------------------------------------- > 232:  c6fb3b9c3ec6ca16ba2fbed154b41b22e5a088f0 reftable: fix unlikely leak on API error
+  -:  ---------------------------------------- > 233:  c8ea1a507e8146a3d6f5f22c24f8092b3a782716 Documentation/technical: add paint-down-to-common doc
+  -:  ---------------------------------------- > 234:  84666b8b56bf712038e5776530db4c6dc3537517 t6600: add test cases for side-exhaustion edge cases
+  -:  ---------------------------------------- > 235:  2ce8c8fd5bc091e656dc41be80275b2356730462 t6099, t6600: add side-exhaustion regression tests
+  -:  ---------------------------------------- > 236:  b91091809a3c3d3a1fe7bad3e846eac42aeece9c commit-reach: add trace2 instrumentation to paint_down_to_common()
+  -:  ---------------------------------------- > 237:  842f49ea74716b7d0d1389f2779026c22f127013 commit-reach: introduce struct paint_state with per-side counters
+  -:  ---------------------------------------- > 238:  68e974fb4e5e14aacdf58db21130dd308949f997 commit-reach: remove unused nonstale_queue dedup wrappers
+  -:  ---------------------------------------- > 239:  a7bfa408638f5e6d4417b80358df1d204fcb7431 commit-reach: terminate merge-base walk when one paint side is exhausted
+  -:  ---------------------------------------- > 240:  1b5c5b120fefc01672c62f5f3eb341e6a360f55a commit-reach: move min_generation check into paint_queue_get()
+  -:  ---------------------------------------- > 241:  636e098435dd72e23eeaa3b57f2972c2f8f66a86 SQUASH??? bare grep !???
+  -:  ---------------------------------------- > 242:  a672972443c844edb69ee5c9ee1365a9d2d43857 meson: support building fuzzers with libFuzzer
+  -:  ---------------------------------------- > 243:  7020a1037144fb71e52457cd779658c1f8b7cb3c oss-fuzz: add fuzzer for parsing reftables
+  -:  ---------------------------------------- > 244:  5b6022ad4aa693a94888aa0c398e52508c82f773 reftable/basics: fix OOB read on binary search of empty range
+  -:  ---------------------------------------- > 245:  426b9aa1319072bf33906df140d0b411210e784e reftable/record: don't abort when decoding invalid ref value type
+  -:  ---------------------------------------- > 246:  a36e915e6a15875a80e3980b26674f2f1c4c5836 t/unit-tests: introduce test helper to write reftable blocks
+  -:  ---------------------------------------- > 247:  541c9d131679204bf59617ff43681d19cf6c0d27 reftable/block: fix OOB write with bogus inflated log size
+  -:  ---------------------------------------- > 248:  a1ff7ed956c060c49f7a6a9d977a37eece1361f8 reftable/block: fix OOB read with bogus block size
+  -:  ---------------------------------------- > 249:  54e1285ea86b79d0d809b45c58f4ffdf071ca0e7 reftable/block: fix OOB read with bogus restart count
+  -:  ---------------------------------------- > 250:  7aef22450573e8d4202f181a4e44b1244b0ab585 reftable/block: fix use of uninitialized memory when binsearch fails
+  -:  ---------------------------------------- > 251:  789f99c0dd0f1dbaa216273c5188ef2644367e77 reftable/block: fix OOB read with bogus restart offset
+  -:  ---------------------------------------- > 252:  83b2233d245130923c6a525ac03ed3c3cd5acebc reftable/table: fix NULL pointer access when seeking to bogus offsets
+  -:  ---------------------------------------- > 253:  f4e163f4f622b9beb0cc842909c8ffd976182036 reftable/table: fix OOB read on truncated table
+  -:  ---------------------------------------- > 254:  5dd3c1ac803e4f05e245ef64dfca04409d494f32 read-cache: split out function to drop unmerged entries to stage 0
+  -:  ---------------------------------------- > 255:  d11ea3b0ddd423e99ede4e22b10829ff418f1156 reset: drop `USE_THE_REPOSITORY_VARIABLE`
+  -:  ---------------------------------------- > 256:  ea828566b0da00e7046276c84818cf92df7c70ca reset: rename `reset_head()`
+  -:  ---------------------------------------- > 257:  e479bc30ff6d5efb3210cc7022336a0842543e6a reset: modernize flags passed to `reset_working_tree()`
+  -:  ---------------------------------------- > 258:  ace88b14eb19d98b897845c76e874903294d4d25 reset: introduce dry-run mode
+  -:  ---------------------------------------- > 259:  2d8ec059d9336f38bfcc2e327711d7c5b4cff907 reset: introduce ability to skip updating HEAD
+  -:  ---------------------------------------- > 260:  d3e805d062f7f873f4dcc9dfec3d64099b76996d reset: allow the caller to specify the current HEAD object
+  -:  ---------------------------------------- > 261:  2bcb3a41f0dd74ccf589a917403967f24141e4eb reset: stop assuming that the caller passes in a clean index
+  -:  ---------------------------------------- > 262:  3b86f350a29d8f73c9fdc74ccb0b965fb487375c replay: expose `replay_result_queue_update()`
+  -:  ---------------------------------------- > 263:  b0856e20f880793b123970edf2fa2cc8471a8d1a builtin/history: split handling of ref updates into two phases
+  -:  ---------------------------------------- > 264:  7b3074ebae76363aa84d1fa2d2af8680b4d0b4b9 builtin/history: implement "drop" subcommand
+  -:  ---------------------------------------- > 265:  ebb4d2ffa34e8c37796cc1be14216af5b91869aa history: streamline message preparation and plug file stream leak
+  -:  ---------------------------------------- > 266:  b415a3fba8aee9fc044609344abfdf022e567e5a ### match next
