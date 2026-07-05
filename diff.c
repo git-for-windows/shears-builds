@@ -7139,6 +7139,7 @@ static int diff_get_patch_id(struct diff_options *options, struct object_id *oid
 		flush_one_hunk(oid, &ctx);
 	}
 
+	git_hash_discard(&ctx);
 	return 0;
 }
 
