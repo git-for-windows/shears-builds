@@ -2970,7 +2970,7 @@ lib/gettext.sp lib/gettext.s lib/gettext.o: EXTRA_CPPFLAGS = \
 http-push.sp lib/http.sp lib/http-walker.sp remote-curl.sp imap-send.sp: SP_EXTRA_FLAGS += \
 	-DCURL_DISABLE_TYPECHECK
 
-pack-revindex.sp: SP_EXTRA_FLAGS += -Wno-memcpy-max-count
+lib/pack-revindex.sp: SP_EXTRA_FLAGS += -Wno-memcpy-max-count
 
 ifdef NO_EXPAT
 lib/http-walker.sp lib/http-walker.s lib/http-walker.o: EXTRA_CPPFLAGS = -DNO_EXPAT
