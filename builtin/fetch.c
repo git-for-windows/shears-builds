@@ -111,6 +111,7 @@ struct fetch_config {
 	int recurse_submodules;
 	int parallel;
 	int submodule_fetch_jobs;
+	int submodule_errors;
 };
 
 static int git_fetch_config(const char *k, const char *v,
@@ -150,6 +151,19 @@ static int git_fetch_config(const char *k, const char *v,
 		return 0;
 	} else if (!strcmp(k, "fetch.recursesubmodules")) {
 		fetch_config->recurse_submodules = parse_fetch_recurse_submodules_arg(k, v);
+		return 0;
+	}
+
+	if (!strcmp(k, "fetch.submoduleerrors")) {
+		if (!v)
+			return config_error_nonbool(k);
+		else if (!strcasecmp(v, "fail"))
+			fetch_config->submodule_errors = SUBMODULE_ERRORS_FAIL;
+		else if (!strcasecmp(v, "warn"))
+			fetch_config->submodule_errors = SUBMODULE_ERRORS_WARN;
+		else
+			die(_("invalid value for '%s': '%s'"),
+			    "fetch.submoduleErrors", v);
 		return 0;
 	}
 
@@ -2242,6 +2256,8 @@ static void add_options_to_argv(struct strvec *argv,
 		strvec_push(argv, "--no-recurse-submodules");
 	else if (config->recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		strvec_push(argv, "--recurse-submodules=on-demand");
+	if (config->submodule_errors == SUBMODULE_ERRORS_WARN)
+		strvec_push(argv, "--submodule-errors=warn");
 	if (tags == TAGS_SET)
 		strvec_push(argv, "--tags");
 	else if (tags == TAGS_UNSET)
@@ -2501,6 +2517,19 @@ static int fetch_one(struct remote *remote, int argc, const char **argv,
 	return exit_code;
 }
 
+static int option_parse_submodule_errors(const struct option *opt,
+					  const char *arg, int unset)
+{
+	int *v = opt->value;
+	if (unset || !strcasecmp(arg, "fail"))
+		*v = SUBMODULE_ERRORS_FAIL;
+	else if (!strcasecmp(arg, "warn"))
+		*v = SUBMODULE_ERRORS_WARN;
+	else
+		die(_("invalid value for '%s': '%s'"), "--submodule-errors", arg);
+	return 0;
+}
+
 int cmd_fetch(int argc,
 	      const char **argv,
 	      const char *prefix,
@@ -2515,6 +2544,7 @@ int cmd_fetch(int argc,
 		.recurse_submodules = RECURSE_SUBMODULES_DEFAULT,
 		.parallel = 1,
 		.submodule_fetch_jobs = -1,
+		.submodule_errors = SUBMODULE_ERRORS_FAIL,
 	};
 	const char *submodule_prefix = "";
 	const char *bundle_uri;
@@ -2529,6 +2559,7 @@ int cmd_fetch(int argc,
 	int max_jobs = -1;
 	int recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
 	int recurse_submodules_default = RECURSE_SUBMODULES_ON_DEMAND;
+	int submodule_errors_cli = -1; /* -1: not set on command line */
 	int fetch_write_commit_graph = -1;
 	int stdin_refspecs = 0;
 	int negotiate_only = 0;
@@ -2565,6 +2596,10 @@ int cmd_fetch(int argc,
 		OPT_CALLBACK_F(0, "recurse-submodules", &recurse_submodules_cli, N_("on-demand"),
 			    N_("control recursive fetching of submodules"),
 			    PARSE_OPT_OPTARG, option_fetch_parse_recurse_submodules),
+		OPT_CALLBACK_F(0, "submodule-errors", &submodule_errors_cli,
+			    N_("(fail|warn)"),
+			    N_("control how submodule fetch errors are handled"),
+			    0, option_parse_submodule_errors),
 		OPT_BOOL(0, "dry-run", &dry_run,
 			 N_("dry run")),
 		OPT_BOOL(0, "porcelain", &porcelain, N_("machine-readable output")),
@@ -2653,6 +2688,9 @@ int cmd_fetch(int argc,
 
 	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
 		config.recurse_submodules = recurse_submodules_cli;
+
+	if (submodule_errors_cli != -1)
+		config.submodule_errors = submodule_errors_cli;
 
 	if (negotiate_only) {
 		switch (recurse_submodules_cli) {
@@ -2871,7 +2909,8 @@ int cmd_fetch(int argc,
 					  config.recurse_submodules,
 					  recurse_submodules_default,
 					  verbosity < 0,
-					  max_children);
+					  max_children,
+					  config.submodule_errors);
 		trace2_region_leave_printf("fetch", "recurse-submodule", the_repository, "%s", submodule_prefix);
 		strvec_clear(&options);
 	}
