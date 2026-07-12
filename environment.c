@@ -464,8 +464,8 @@ int git_default_core_config(const char *var, const char *value,
 	}
 
 	if (!strcmp(var, "core.askpass")) {
-		FREE_AND_NULL(askpass_program);
-		return git_config_string(&askpass_program, var, value);
+		FREE_AND_NULL(cfg->askpass_program);
+		return git_config_string(&cfg->askpass_program, var, value);
 	}
 
 	if (!strcmp(var, "core.excludesfile")) {
@@ -726,6 +726,7 @@ void repo_config_values_init(struct repo_config_values *cfg)
 	cfg->excludes_file = NULL;
 	cfg->editor_program = NULL;
 	cfg->pager_program = NULL;
+	cfg->askpass_program = NULL;
 	cfg->apply_sparse_checkout = 0;
 	cfg->branch_track = BRANCH_TRACK_REMOTE;
 	cfg->trust_ctime = 1;
@@ -744,4 +745,5 @@ void repo_config_values_clear(struct repo_config_values *cfg)
 	FREE_AND_NULL(cfg->excludes_file);
 	FREE_AND_NULL(cfg->editor_program);
 	FREE_AND_NULL(cfg->pager_program);
+	FREE_AND_NULL(cfg->askpass_program);
 }
