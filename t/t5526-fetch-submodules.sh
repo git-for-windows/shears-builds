@@ -1408,7 +1408,7 @@ test_expect_success '--submodule-errors=fail overrides warn config for fetch --a
 	git -C env_override/clone config fetch.submoduleErrors warn &&
 	test_must_fail git -C env_override/clone fetch --all --recurse-submodules \
 		--submodule-errors=fail 2>err &&
-	grep "Errors during submodule fetch" err
+	test_grep "Errors during submodule fetch" err
 '
 
 test_expect_success 'fetch.submoduleErrors=warn: inaccessible submodule is non-fatal' '
