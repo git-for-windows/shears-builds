@@ -1,0 +1,7 @@
+class Foo {
+    init(RIGHT: Int) {
+        let value = RIGHT
+        // a comment
+        print(ChangeMe)
+    }
+}
