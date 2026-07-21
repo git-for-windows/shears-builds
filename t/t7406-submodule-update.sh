@@ -256,6 +256,27 @@ test_expect_success 'submodule update --remote should fetch upstream changes' '
 	)
 '
 
+test_expect_success 'submodule update --remote resolves URL rewrites' '
+	test_config_global "url.$(pwd)/.insteadOf" local: &&
+	mkdir aliased-super aliased-submodule &&
+	(
+		cd aliased-submodule &&
+		git init &&
+		echo line >file &&
+		git add file &&
+		git commit -m "Initial commit"
+	) &&
+	(
+		cd aliased-super &&
+		git init &&
+		git submodule add local:aliased-submodule submodule &&
+		git submodule update --force submodule &&
+		git -C submodule remote rename origin upstream &&
+		git -C submodule remote add fork user@host &&
+		git submodule update --remote submodule
+	)
+'
+
 test_expect_success 'submodule update --remote should fetch upstream changes with .' '
 	(
 		cd super &&
