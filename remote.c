@@ -309,8 +309,11 @@ static struct rewrite *make_rewrite(struct rewrites *r,
 
 static void rewrites_release(struct rewrites *r)
 {
-	for (int i = 0; i < r->rewrite_nr; i++)
+	for (int i = 0; i < r->rewrite_nr; i++) {
 		free((char *)r->rewrite[i]->base);
+		free(r->rewrite[i]->instead_of);
+		free(r->rewrite[i]);
+	}
 	free(r->rewrite);
 	memset(r, 0, sizeof(*r));
 }
@@ -469,13 +472,13 @@ static int handle_config(const char *key, const char *value,
 				return config_error_nonbool(key);
 			rewrite = make_rewrite(&remote_state->rewrites, name,
 					       namelen);
-			add_instead_of(rewrite, xstrdup(value));
+			add_instead_of(rewrite, value);
 		} else if (!strcmp(subkey, "pushinsteadof")) {
 			if (!value)
 				return config_error_nonbool(key);
 			rewrite = make_rewrite(&remote_state->rewrites_push,
 					       name, namelen);
-			add_instead_of(rewrite, xstrdup(value));
+			add_instead_of(rewrite, value);
 		}
 	}
 
