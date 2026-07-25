@@ -50,6 +50,7 @@ int fetch_object_info(const enum protocol_version version, struct object_info_ar
 		      const int stateless_rpc, const int fd_out)
 {
 	int size_index = -1;
+	int type_index = -1;
 
 	switch (version) {
 	case protocol_v2:
@@ -101,8 +102,13 @@ int fetch_object_info(const enum protocol_version version, struct object_info_ar
 			for (size_t j = 0; j < args->oids->nr; j++)
 				object_info_data[j].sizep =
 					xcalloc(1, sizeof(*object_info_data[j].sizep));
+		} else if (!strcmp(reader->line, "type")) {
+			type_index = (int)i;
+			for (size_t j = 0; j < args->oids->nr; j++)
+				object_info_data[j].typep =
+					xcalloc(1, sizeof(*object_info_data[j].typep));
 		} else {
-			BUG("only size is supported");
+			BUG("unexpected object-info option: %s", reader->line);
 		}
 	}
 
@@ -147,6 +153,10 @@ int fetch_object_info(const enum protocol_version version, struct object_info_ar
 			die("object-info: ref %s has invalid size %s",
 			    object_info_values.items[0].string,
 			    object_info_values.items[size_index + 1].string);
+
+		if (type_index >= 0)
+			*object_info_data[i].typep =
+				type_from_string(object_info_values.items[type_index + 1].string);
 
 		string_list_clear(&object_info_values, 0);
 	}
