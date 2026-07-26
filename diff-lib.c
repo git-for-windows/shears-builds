@@ -528,6 +528,11 @@ static int oneway_diff(const struct cache_entry * const *src,
 	if (tree == o->df_conflict_entry)
 		tree = NULL;
 
+	if (revs->diffopt.prefix &&
+	    strncmp((idx ? idx : tree)->name, revs->diffopt.prefix,
+		    revs->diffopt.prefix_length))
+		return 0;
+
 	if (ce_path_match(revs->diffopt.repo->index,
 			  idx ? idx : tree,
 			  &revs->prune_data, NULL)) {
