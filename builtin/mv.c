@@ -22,6 +22,7 @@
 #include "string-list.h"
 #include "parse-options.h"
 #include "read-cache-ll.h"
+#include "symlinks.h"
 
 #include "setup.h"
 #include "strvec.h"
@@ -443,6 +444,40 @@ dir_check:
 			bad = _("destination directory does not exist");
 			goto act_on_entry;
 		}
+		if (has_symlink_leading_path(dst, strlen(dst))) {
+			bad = _("destination is beyond a symbolic link");
+			goto act_on_entry;
+		}
+
+		/*
+		 * If we are going to move SRC to DST on disk, DST's leading
+		 * directories must already exist.
+		 */
+		if (!(modes[i] & (INDEX | SPARSE | SKIP_WORKTREE_DIR)) &&
+		    !(dst_mode & (SKIP_WORKTREE_DIR | SPARSE))) {
+			char *dst_dir = xstrdup(dst);
+			char *slash = strrchr(dst_dir, '/');
+
+			if (slash) {
+				struct stat dir_st;
+
+				*slash = '\0';
+				if (lstat(dst_dir, &dir_st) < 0) {
+					/*
+					 * other errors fall through to rename(),
+					 * which reports them
+					 */
+					if (errno == ENOENT || errno == ENOTDIR)
+						bad = _("destination directory does not exist");
+				} else if (!S_ISDIR(dir_st.st_mode)) {
+					bad = _("destination is not a directory");
+				}
+			}
+			free(dst_dir);
+
+			if (bad)
+				goto act_on_entry;
+		}
 
 		if (ignore_sparse &&
 		    (dst_mode & (SKIP_WORKTREE_DIR | SPARSE)) &&
@@ -549,7 +584,7 @@ remove_entry:
 		    rename(src, dst) < 0) {
 			if (ignore_errors)
 				continue;
-			die_errno(_("renaming '%s' failed"), src);
+			die_errno(_("renaming '%s' to '%s' failed"), src, dst);
 		}
 		if (submodule_gitfiles[i]) {
 			if (!update_path_in_gitmodules(src, dst))
