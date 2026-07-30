@@ -1760,6 +1760,13 @@ enum discovery_result discover_git_directory_reason(struct strbuf *commondir,
 	return result;
 }
 
+static void get_object_directories(char **object_directory,
+				   char **alternate_object_directories)
+{
+	*object_directory = xstrdup_or_null(getenv(DB_ENVIRONMENT));
+	*alternate_object_directories = xstrdup_or_null(getenv(ALTERNATE_DB_ENVIRONMENT));
+}
+
 int apply_repository_format(struct repository *repo,
 			    const struct repository_format *format,
 			    enum apply_repository_format_flags flags,
@@ -1779,8 +1786,9 @@ int apply_repository_format(struct repository *repo,
 	if (flags & APPLY_REPOSITORY_FORMAT_HONOR_ENV) {
 		const char *shallow_file;
 
-		object_directory = xstrdup_or_null(getenv(DB_ENVIRONMENT));
-		alternate_object_directories = xstrdup_or_null(getenv(ALTERNATE_DB_ENVIRONMENT));
+		get_object_directories(&object_directory,
+				       &alternate_object_directories);
+
 		shallow_file = getenv(GIT_SHALLOW_FILE_ENVIRONMENT);
 		if (shallow_file)
 			set_alternate_shallow_file(repo, shallow_file);
@@ -1788,8 +1796,6 @@ int apply_repository_format(struct repository *repo,
 
 	repo->bare_cfg = format->is_bare;
 	repo_set_hash_algo(repo, format->hash_algo);
-	repo->objects = odb_new(repo, object_directory,
-				alternate_object_directories);
 	repo_set_compat_hash_algo(repo, format->compat_hash_algo);
 	repo_set_ref_storage_format(repo,
 				    format->ref_storage_format,
@@ -1804,6 +1810,10 @@ int apply_repository_format(struct repository *repo,
 		xstrdup_or_null(format->partial_clone);
 	repo->repository_format_precious_objects =
 		format->precious_objects;
+
+	if (!(flags & APPLY_REPOSITORY_FORMAT_SKIP_ODB_CREATION))
+		repo->objects = odb_new(repo, object_directory,
+					alternate_object_directories);
 
 	free(alternate_object_directories);
 	free(object_directory);
@@ -2653,25 +2663,37 @@ static int create_default_files(struct repository *repo,
 	return reinit;
 }
 
-static void create_object_directory(struct repository *repo)
+static void create_object_database(struct repository *repo)
 {
-	struct strbuf path = STRBUF_INIT;
-	size_t baselen;
+	char *object_directory, *alternate_object_directories;
 
-	strbuf_addstr(&path, repo_get_object_directory(repo));
-	baselen = path.len;
+	get_object_directories(&object_directory, &alternate_object_directories);
 
-	safe_create_dir(repo, path.buf, 1);
+	/*
+	 * Create the "objects" directory in the common directory. This is done
+	 * so that the repository can be discovered regardless of the backend
+	 * used.
+	 *
+	 * Note that we only do this in case the object directory wasn't
+	 * overwritten via an environment variable. If it _is_ being overridden
+	 * then we skip this step, as the repository won't be discoverable
+	 * anyway without the environment variable.
+	 */
+	if (!object_directory) {
+		struct strbuf objects_dir = STRBUF_INIT;
+		repo_common_path_append(repo, &objects_dir, "objects");
+		safe_create_dir(repo, objects_dir.buf, 1);
+		strbuf_release(&objects_dir);
+	}
 
-	strbuf_setlen(&path, baselen);
-	strbuf_addstr(&path, "/pack");
-	safe_create_dir(repo, path.buf, 1);
+	repo->objects = odb_new(repo, object_directory,
+				alternate_object_directories);
 
-	strbuf_setlen(&path, baselen);
-	strbuf_addstr(&path, "/info");
-	safe_create_dir(repo, path.buf, 1);
+	if (odb_source_create_on_disk(repo->objects->sources) < 0)
+		die("failed creating object database");
 
-	strbuf_release(&path);
+	free(alternate_object_directories);
+	free(object_directory);
 }
 
 static void separate_git_dir(struct repository *repo,
@@ -2867,9 +2889,10 @@ int init_db(struct repository *repo,
 	 */
 	read_and_verify_repository_format(&repo_fmt, repo_get_git_dir(repo), NULL);
 	repository_format_configure(&repo_fmt, hash, ref_storage_format);
-	if (apply_repository_format(repo, &repo_fmt, APPLY_REPOSITORY_FORMAT_HONOR_ENV, &err) < 0)
+	if (apply_repository_format(repo, &repo_fmt,
+				    APPLY_REPOSITORY_FORMAT_HONOR_ENV |
+				    APPLY_REPOSITORY_FORMAT_SKIP_ODB_CREATION, &err) < 0)
 		die("%s", err.buf);
-	startup_info->have_repository = 1;
 
 	/*
 	 * Ensure `core.hidedotfiles` is processed. This must happen after we
@@ -2885,7 +2908,9 @@ int init_db(struct repository *repo,
 
 	if (!(flags & INIT_DB_SKIP_REFDB))
 		create_reference_database(repo, initial_branch, flags & INIT_DB_QUIET);
-	create_object_directory(repo);
+	create_object_database(repo);
+
+	startup_info->have_repository = 1;
 
 	if (repo_settings_get_shared_repository(repo)) {
 		char buf[10];
