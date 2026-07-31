@@ -12,13 +12,16 @@
 static void send_object_info_request(const int fd_out, struct object_info_args *args)
 {
 	struct strbuf req_buf = STRBUF_INIT;
+	struct string_list_item *item;
 
 	write_command_and_capabilities(&req_buf, "object-info", args->server_options);
 
-	if (unsorted_string_list_has_string(args->object_info_options, "size"))
-		packet_buf_write(&req_buf, "size");
-	else if (args->object_info_options->nr)
-		BUG("only size should be in object_info_options");
+	/*
+	 * The list has already been checked to only contain valid and
+	 * supported fields, so just request everything remaining on it.
+	 */
+	for_each_string_list_item(item, args->object_info_options)
+		packet_buf_write(&req_buf, "%s", item->string);
 
 	if (args->oids)
 		for (size_t i = 0; i < args->oids->nr; i++)
