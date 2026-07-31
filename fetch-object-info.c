@@ -12,13 +12,16 @@
 static void send_object_info_request(const int fd_out, struct object_info_args *args)
 {
 	struct strbuf req_buf = STRBUF_INIT;
+	struct string_list_item *item;
 
 	write_command_and_capabilities(&req_buf, "object-info", args->server_options);
 
-	if (unsorted_string_list_has_string(args->object_info_options, "size"))
-		packet_buf_write(&req_buf, "size");
-	else if (args->object_info_options->nr)
-		BUG("only size should be in object_info_options");
+	/*
+	 * The list has already been checked to only contain valid and
+	 * supported fields, so just request everything remaining on it.
+	 */
+	for_each_string_list_item(item, args->object_info_options)
+		packet_buf_write(&req_buf, "%s", item->string);
 
 	if (args->oids)
 		for (size_t i = 0; i < args->oids->nr; i++)
@@ -50,6 +53,7 @@ int fetch_object_info(const enum protocol_version version, struct object_info_ar
 		      const int stateless_rpc, const int fd_out)
 {
 	int size_index = -1;
+	int type_index = -1;
 
 	switch (version) {
 	case protocol_v2:
@@ -101,8 +105,13 @@ int fetch_object_info(const enum protocol_version version, struct object_info_ar
 			for (size_t j = 0; j < args->oids->nr; j++)
 				object_info_data[j].sizep =
 					xcalloc(1, sizeof(*object_info_data[j].sizep));
+		} else if (!strcmp(reader->line, "type")) {
+			type_index = (int)i;
+			for (size_t j = 0; j < args->oids->nr; j++)
+				object_info_data[j].typep =
+					xcalloc(1, sizeof(*object_info_data[j].typep));
 		} else {
-			BUG("only size is supported");
+			BUG("unexpected object-info option: %s", reader->line);
 		}
 	}
 
@@ -147,6 +156,10 @@ int fetch_object_info(const enum protocol_version version, struct object_info_ar
 			die("object-info: ref %s has invalid size %s",
 			    object_info_values.items[0].string,
 			    object_info_values.items[size_index + 1].string);
+
+		if (type_index >= 0)
+			*object_info_data[i].typep =
+				type_from_string(object_info_values.items[type_index + 1].string);
 
 		string_list_clear(&object_info_values, 0);
 	}
