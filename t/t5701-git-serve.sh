@@ -356,8 +356,8 @@ test_expect_success 'basics of object-info' '
 
 	cat >expect <<-EOF &&
 	size
-	$(git rev-parse two:two.t) $(wc -c <two.t | xargs)
-	$(git rev-parse two:two.t) $(wc -c <two.t | xargs)
+	$(git rev-parse two:two.t) $(test_file_size two.t)
+	$(git rev-parse two:two.t) $(test_file_size two.t)
 	0000
 	EOF
 
