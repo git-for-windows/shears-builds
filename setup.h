@@ -241,6 +241,15 @@ enum apply_repository_format_flags {
 	 * relate to the object database.
 	 */
 	APPLY_REPOSITORY_FORMAT_HONOR_ENV = (1 << 0),
+
+	/*
+	 * Usually, the object database is created after the repository format
+	 * was applied. This step is skipped if this flag is set, which leaves
+	 * us with a partially-working repository.
+	 *
+	 * This is useful when initializing a new repository.
+	 */
+	APPLY_REPOSITORY_FORMAT_SKIP_ODB_CREATION = (1 << 1),
 };
 
 /*
