@@ -1954,7 +1954,10 @@ __git_diff_difftool_options="--cached --staged
 
 _git_diff ()
 {
-	__git_has_doubledash && return
+	if __git_has_doubledash; then
+		__git_complete_index_file
+		return
+	fi
 
 	case "$cur" in
 	--diff-algorithm=*)
@@ -1983,6 +1986,9 @@ _git_diff ()
 		;;
 	esac
 	__git_complete_revlist_file
+	if [ ${#COMPREPLY[@]} -eq 0 ]; then
+		__git_complete_index_file
+	fi
 }
 
 __git_mergetools_common="diffuse diffmerge ecmerge emerge kdiff3 meld opendiff
