@@ -1765,8 +1765,6 @@ int apply_repository_format(struct repository *repo,
 			    enum apply_repository_format_flags flags,
 			    struct strbuf *err)
 {
-	enum odb_new_flags odb_new_flags = 0;
-
 	if (verify_repository_format(format, err) < 0)
 		return -1;
 
@@ -1801,9 +1799,12 @@ int apply_repository_format(struct repository *repo,
 	repo->repository_format_precious_objects =
 		format->precious_objects;
 
-	if (flags & APPLY_REPOSITORY_FORMAT_HONOR_ENV)
-		odb_new_flags |= ODB_NEW_HONOR_ENV;
-	repo->objects = odb_new(repo, odb_new_flags);
+	if (!(flags & APPLY_REPOSITORY_FORMAT_SKIP_ODB_CREATION)) {
+		enum odb_new_flags odb_new_flags = 0;
+		if (flags & APPLY_REPOSITORY_FORMAT_HONOR_ENV)
+			odb_new_flags |= ODB_NEW_HONOR_ENV;
+		repo->objects = odb_new(repo, odb_new_flags);
+	}
 
 	return 0;
 }
@@ -2651,10 +2652,12 @@ static int create_default_files(struct repository *repo,
 	return reinit;
 }
 
-static void create_object_directory(struct repository *repo)
+static void create_object_database(struct repository *repo)
 {
 	struct strbuf path = STRBUF_INIT;
 	size_t baselen;
+
+	repo->objects = odb_new(repo, ODB_NEW_HONOR_ENV);
 
 	strbuf_addstr(&path, repo_get_object_directory(repo));
 	baselen = path.len;
@@ -2864,9 +2867,10 @@ int init_db(struct repository *repo,
 	 */
 	read_and_verify_repository_format(&repo_fmt, repo_get_git_dir(repo), NULL);
 	repository_format_configure(&repo_fmt, hash, ref_storage_format);
-	if (apply_repository_format(repo, &repo_fmt, APPLY_REPOSITORY_FORMAT_HONOR_ENV, &err) < 0)
+	if (apply_repository_format(repo, &repo_fmt,
+				    APPLY_REPOSITORY_FORMAT_HONOR_ENV |
+				    APPLY_REPOSITORY_FORMAT_SKIP_ODB_CREATION, &err) < 0)
 		die("%s", err.buf);
-	startup_info->have_repository = 1;
 
 	/*
 	 * Ensure `core.hidedotfiles` is processed. This must happen after we
@@ -2882,7 +2886,9 @@ int init_db(struct repository *repo,
 
 	if (!(flags & INIT_DB_SKIP_REFDB))
 		create_reference_database(repo, initial_branch, flags & INIT_DB_QUIET);
-	create_object_directory(repo);
+	create_object_database(repo);
+
+	startup_info->have_repository = 1;
 
 	if (repo_settings_get_shared_repository(repo)) {
 		char buf[10];
