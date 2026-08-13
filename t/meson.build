@@ -721,6 +721,7 @@ integration_tests = [
   't5565-push-multiple.sh',
   't5566-push-group.sh',
   't5567-one-time-script.sh',
+  't5568-http-verify-status.sh',
   't5570-git-daemon.sh',
   't5571-pre-push-hook.sh',
   't5572-pull-submodule.sh',
