@@ -1017,4 +1017,48 @@ do
 	'
 done <stdin-modes
 
+format_rev_cmp_log () {
+	opts="$1"
+	format=reference
+	cat >input <<-\EOF &&
+	third
+	second
+	first
+	EOF
+	git -C repo-format log --stdin --no-walk \
+		"$opts" --format="$format" >expect <input &&
+	git -C repo-format format-rev "$opts" \
+		--stdin-mode=revs --format="$format" >actual <input &&
+	test_cmp expect actual
+}
+
+format_rev_err_cmp_log () {
+	opts="$1"
+	format=reference
+	# No input since we ought to fail while parsing options
+	test_must_fail git -C repo-format log --stdin --no-walk \
+		"$opts" --format="$format" 2>expect &&
+	test_must_fail git -C repo-format format-rev "$opts" \
+		--stdin-mode=revs --format="$format" 2>actual &&
+	test_cmp expect actual
+}
+
+test_expect_success 'format-rev --color' '
+	format_rev_cmp_log --color=always &&
+	format_rev_cmp_log --color &&
+	format_rev_cmp_log --no-color &&
+	format_rev_err_cmp_log --color=not-valid
+'
+
+test_expect_success 'format-rev --abbrev' '
+	format_rev_cmp_log --abbrev=31 &&
+	format_rev_cmp_log --no-abbrev
+'
+
+test_expect_success 'format-rev --date' '
+	format_rev_cmp_log --date=relative &&
+	format_rev_cmp_log --date=iso-strict &&
+	format_rev_err_cmp_log --date=not-valid
+'
+
 test_done
