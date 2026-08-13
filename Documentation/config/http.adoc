@@ -196,6 +196,23 @@ http.sslVerify::
 	over HTTPS. Defaults to true. Can be overridden by the
 	`GIT_SSL_NO_VERIFY` environment variable.
 
+http.sslVerifyStatus::
+	Whether to check the revocation status of the server
+	certificate using the stapled OCSP response supplied during
+	the TLS handshake ("OCSP stapling"). Defaults to false.
++
+This is fail-closed: if the server staples no response, verification
+fails. Set it per remote, e.g.
+`http.https://example.com/.sslVerifyStatus`, rather than globally.
++
+What it changes depends on the TLS backend libcurl was built against.
+An OpenSSL-linked build ignores a stapled response unless this is set.
+A GnuTLS-linked build consults the staple during ordinary certificate
+verification, so it already rejects a revoked certificate under
+`http.sslVerify` alone, and setting this to `false` does not disable
+that. Where a backend cannot check the staple at all, git fails with an
+error rather than continuing unchecked.
+
 http.sslCert::
 	File containing the SSL certificate when fetching or pushing
 	over HTTPS. Can be overridden by the `GIT_SSL_CERT` environment

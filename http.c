@@ -44,6 +44,7 @@ static CURL *curl_default;
 char curl_errorstr[CURL_ERROR_SIZE];
 
 static int curl_ssl_verify = -1;
+static int curl_ssl_verify_status;
 static int curl_ssl_try;
 static char *curl_http_version;
 static char *ssl_cert;
@@ -398,6 +399,10 @@ static int http_options(const char *var, const char *value,
 	}
 	if (!strcmp("http.sslverify", var)) {
 		curl_ssl_verify = git_config_bool(var, value);
+		return 0;
+	}
+	if (!strcmp("http.sslverifystatus", var)) {
+		curl_ssl_verify_status = git_config_bool(var, value);
 		return 0;
 	}
 	if (!strcmp("http.sslcipherlist", var))
@@ -1132,6 +1137,11 @@ static CURL *get_curl_handle(void)
 		/* The name in the cert must match whom we tried to connect */
 		curl_easy_setopt(result, CURLOPT_SSL_VERIFYHOST, 2L);
 	}
+
+	if (curl_ssl_verify_status &&
+	    curl_easy_setopt(result, CURLOPT_SSL_VERIFYSTATUS, 1L) != CURLE_OK)
+		die(_("http.sslVerifyStatus is set, but the TLS backend of "
+		      "this libcurl cannot verify certificate status"));
 
     if (curl_http_version) {
 		long opt;
