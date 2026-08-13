@@ -4290,7 +4290,7 @@ static void add_unreachable_loose_objects(struct rev_info *revs);
 
 static void read_stdin_packs(enum stdin_packs_mode mode, int rev_list_unpacked)
 {
-	int prev_fetch_if_missing = fetch_if_missing;
+	int prev_fetch_if_missing = the_repository->fetch_if_missing;
 	struct rev_info revs;
 
 	/*
@@ -4298,7 +4298,7 @@ static void read_stdin_packs(enum stdin_packs_mode mode, int rev_list_unpacked)
 	 * walk is best-effort though we don't want to perform backfill fetches
 	 * for them.
 	 */
-	fetch_if_missing = 0;
+	the_repository->fetch_if_missing = 0;
 
 	repo_init_revisions(the_repository, &revs, NULL);
 	/*
@@ -4347,7 +4347,7 @@ static void read_stdin_packs(enum stdin_packs_mode mode, int rev_list_unpacked)
 	trace2_data_intmax("pack-objects", the_repository, "stdin_packs_hints",
 			   stdin_packs_hints_nr);
 
-	fetch_if_missing = prev_fetch_if_missing;
+	the_repository->fetch_if_missing = prev_fetch_if_missing;
 }
 
 static void add_cruft_object_entry(const struct object_id *oid, enum object_type type,
@@ -4671,14 +4671,14 @@ static int option_parse_missing_action(const struct option *opt UNUSED,
 
 	if (!strcmp(arg, "allow-any")) {
 		arg_missing_action = MA_ALLOW_ANY;
-		fetch_if_missing = 0;
+		the_repository->fetch_if_missing = 0;
 		fn_show_object = show_object__ma_allow_any;
 		return 0;
 	}
 
 	if (!strcmp(arg, "allow-promisor")) {
 		arg_missing_action = MA_ALLOW_PROMISOR;
-		fetch_if_missing = 0;
+		the_repository->fetch_if_missing = 0;
 		fn_show_object = show_object__ma_allow_promisor;
 		return 0;
 	}
@@ -5550,7 +5550,7 @@ int cmd_pack_objects(int argc,
 				  exclude_promisor_objects_best_effort,
 				  "--exclude-promisor-objects-best-effort");
 	if (exclude_promisor_objects) {
-		fetch_if_missing = 0;
+		the_repository->fetch_if_missing = 0;
 
 		/* --stdin-packs handles promisor objects separately. */
 		if (!stdin_packs) {
@@ -5559,7 +5559,7 @@ int cmd_pack_objects(int argc,
 		}
 	} else if (exclude_promisor_objects_best_effort) {
 		use_internal_rev_list = 1;
-		fetch_if_missing = 0;
+		the_repository->fetch_if_missing = 0;
 		option_parse_missing_action(NULL, "allow-any", 0);
 		/* revs configured below */
 	}

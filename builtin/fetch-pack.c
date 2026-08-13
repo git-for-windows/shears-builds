@@ -67,7 +67,7 @@ int cmd_fetch_pack(int argc,
 	struct packet_reader reader;
 	enum protocol_version version;
 
-	fetch_if_missing = 0;
+	the_repository->fetch_if_missing = 0;
 
 	packet_trace_identity("fetch-pack");
 
