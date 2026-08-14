@@ -4090,7 +4090,7 @@ static void add_unreachable_loose_objects(struct rev_info *revs);
 static void read_stdin_packs(struct repository *repo,
 			     enum stdin_packs_mode mode, int rev_list_unpacked)
 {
-	int prev_fetch_if_missing = fetch_if_missing;
+	int prev_fetch_if_missing = repo->fetch_if_missing;
 	struct rev_info revs;
 
 	/*
@@ -4098,7 +4098,7 @@ static void read_stdin_packs(struct repository *repo,
 	 * walk is best-effort though we don't want to perform backfill fetches
 	 * for them.
 	 */
-	fetch_if_missing = 0;
+	repo->fetch_if_missing = 0;
 
 	repo_init_revisions(repo, &revs, NULL);
 	/*
@@ -4146,7 +4146,7 @@ static void read_stdin_packs(struct repository *repo,
 	trace2_data_intmax("pack-objects", the_repository, "stdin_packs_hints",
 			   stdin_packs_hints_nr);
 
-	fetch_if_missing = prev_fetch_if_missing;
+	repo->fetch_if_missing = prev_fetch_if_missing;
 }
 
 static void add_cruft_object_entry(const struct object_id *oid, enum object_type type,
@@ -5268,7 +5268,7 @@ int cmd_pack_objects(int argc,
 
 	if (arg_missing_action == MA_ALLOW_ANY ||
 	    arg_missing_action == MA_ALLOW_PROMISOR)
-		fetch_if_missing = 0;
+		repo->fetch_if_missing = 0;
 
 	if (argc) {
 		base_name = argv[0];
@@ -5348,7 +5348,7 @@ int cmd_pack_objects(int argc,
 				  exclude_promisor_objects_best_effort,
 				  "--exclude-promisor-objects-best-effort");
 	if (exclude_promisor_objects) {
-		fetch_if_missing = 0;
+		repo->fetch_if_missing = 0;
 
 		/* --stdin-packs handles promisor objects separately. */
 		if (!stdin_packs) {
@@ -5357,7 +5357,7 @@ int cmd_pack_objects(int argc,
 		}
 	} else if (exclude_promisor_objects_best_effort) {
 		use_internal_rev_list = 1;
-		fetch_if_missing = 0;
+		repo->fetch_if_missing = 0;
 		option_parse_missing_action(NULL, "allow-any", 0);
 		/* revs configured below */
 	}
