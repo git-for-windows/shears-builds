@@ -2646,8 +2646,13 @@ static int create_default_files(struct repository *repo,
 	return reinit;
 }
 
-static void create_object_database(struct repository *repo)
+void create_object_database(struct repository *repo,
+			    const struct strvec *alternates)
 {
+	struct odb_create_on_disk_options opts = {
+		.alternates = alternates,
+	};
+
 	/*
 	 * Create the "objects" directory in the common directory. This is done
 	 * so that the repository can be discovered regardless of the backend
@@ -2667,7 +2672,7 @@ static void create_object_database(struct repository *repo)
 
 	repo->objects = odb_new(repo, ODB_NEW_HONOR_ENV);
 
-	if (odb_source_create_on_disk(repo->objects->sources) < 0)
+	if (odb_source_create_on_disk(repo->objects->sources, &opts) < 0)
 		die(_("failed creating object database"));
 }
 
@@ -2828,7 +2833,8 @@ int init_db(struct repository *repo,
 	    const char *template_dir, int hash,
 	    enum ref_storage_format ref_storage_format,
 	    const char *initial_branch,
-	    int init_shared_repository, unsigned int flags)
+	    int init_shared_repository,
+	    enum init_db_flags flags)
 {
 	int reinit;
 	int exist_ok = flags & INIT_DB_EXIST_OK;
@@ -2902,7 +2908,8 @@ int init_db(struct repository *repo,
 
 	if (!(flags & INIT_DB_SKIP_REFDB))
 		create_reference_database(repo, initial_branch, flags & INIT_DB_QUIET);
-	create_object_database(repo);
+	if (!(flags & INIT_DB_SKIP_ODB))
+		create_object_database(repo, NULL);
 
 	startup_info->have_repository = 1;
 
