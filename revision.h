@@ -352,7 +352,12 @@ struct rev_info {
 	/* range-diff */
 	const char *rdiff1;
 	const char *rdiff2;
-	struct strvec rdiff_log_arg;
+	/*
+	 * whether to use 'rdiff_notes_arg' or inherited
+	 * notes behavior
+	 */
+	bool rdiff_override_notes;
+	struct strvec rdiff_notes_arg;
 	int creation_factor;
 	const char *rdiff_title;
 
@@ -433,7 +438,7 @@ struct rev_info {
 	.expand_tabs_in_log = -1, \
 	.commit_format = CMIT_FMT_DEFAULT, \
 	.expand_tabs_in_log_default = 8, \
-	.rdiff_log_arg = STRVEC_INIT, \
+	.rdiff_notes_arg = STRVEC_INIT, \
 }
 
 /**
