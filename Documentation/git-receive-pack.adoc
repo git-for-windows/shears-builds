@@ -236,6 +236,21 @@ if the repository is packed and is served via a dumb transport.
 exec git update-server-info
 ----
 
+PROC-RECEIVE HOOK
+-----------------
+This hook is invoked by 'git-receive-pack' when it processes push
+requests. It handles refs whose names match the patterns defined by
+`receive.procReceiveRefs` and executes the actual ref updates. See
+linkgit:githooks[5] for the full protocol description.
+
+REPORT HOOK
+-----------
+This hook is invoked by 'git-receive-pack' after all the ref updates
+have been applied but before the report is sent to the client. The hook
+receives the complete report in pkt-line format on stdin and its stdout
+replaces the report sent to the client. Allowing the hook to rewrite
+the outcomes or abort the push completely. See linkgit:githooks[5] for
+the full protocol description.
 
 QUARANTINE ENVIRONMENT
 ----------------------
