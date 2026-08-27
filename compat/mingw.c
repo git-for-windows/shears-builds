@@ -3838,6 +3838,7 @@ static void setup_windows_environment(void)
 int mingw_platform_has_symlinks(void)
 {
 	static int has_symlinks = -1;
+
 	/*
 	 * Change 'core.symlinks' default to false, unless native symlinks are
 	 * enabled in MSys2 (via 'MSYS=winsymlinks:nativestrict'). Thus we can
