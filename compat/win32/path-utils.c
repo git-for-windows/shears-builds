@@ -2,10 +2,6 @@
 
 #include "../../git-compat-util.h"
 #include "../../environment.h"
-#include "../../repository.h"
-#include "../../wrapper.h"
-#include "../../strbuf.h"
-#include "../../versioncmp.h"
 
 int win32_has_dos_drive_prefix(const char *path)
 {
