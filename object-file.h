@@ -121,6 +121,7 @@ void hash_object_file(const struct git_hash_algo *algo, const void *buf,
 
 
 
+
 /* Helper to check and "touch" a file */
 int check_and_freshen_file(const char *fn, int freshen,
 			   const time_t *mtime);
@@ -160,11 +161,11 @@ enum unpack_loose_header_result {
  */
 enum unpack_loose_header_result unpack_loose_header(git_zstream *stream,
 						    unsigned char *map,
-						    unsigned long mapsize,
+						    size_t mapsize,
 						    void *buffer,
-						    unsigned long bufsiz);
+						    size_t bufsiz);
 void *unpack_loose_rest(git_zstream *stream,
-			void *buffer, unsigned long size,
+			void *buffer, size_t size,
 			const struct object_id *oid);
 
 int parse_loose_header(const char *hdr, struct object_info *oi);
