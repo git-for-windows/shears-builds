@@ -298,6 +298,9 @@ test_expect_success '--top=N reports the N largest paths per axis' '
 				test_grep -E "^${key}\.1\.path=" out &&
 				test_grep -E "^${key}\.2\.path=" out &&
 				test_grep ! -E "^${key}\.3\." out || return 1
+				grep -E "^${key}\.1\.path=" out &&
+				grep -E "^${key}\.2\.path=" out &&
+				! grep -E "^${key}\.3\." out || return 1
 			done
 		done &&
 
@@ -327,6 +330,9 @@ test_expect_success 'repo.structure.top supplies the default for --top' '
 		git -c repo.structure.top=2 \
 			repo structure --format=lines --top=0 >cli-override &&
 		test_grep ! "\.top\." cli-override
+
+		git -c repo.structure.top=2 \
+			repo structure --format=lines --top=0 >cli-override &&
 	)
 '
 
