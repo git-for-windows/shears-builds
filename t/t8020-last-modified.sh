@@ -304,11 +304,13 @@ test_expect_success 'last-modified with Bloom filters and top-level wildcard' '
 		test_commit sub-c d/b.c &&
 
 		git commit-graph write --reachable --changed-paths &&
+		GIT_TEST_COMMIT_GRAPH=0 \
 		GIT_TRACE2_PERF="$(pwd)/off.perf" \
 			git -c core.commitGraph=false last-modified -r HEAD \
 			-- "*.c" >expect &&
 		test_grep "data .* bloom_queries:0$" off.perf &&
 
+		GIT_TEST_COMMIT_GRAPH=1 \
 		GIT_TRACE2_PERF="$(pwd)/on.perf" \
 			git -c core.commitGraph=true last-modified -r HEAD \
 			-- "*.c" >actual &&
