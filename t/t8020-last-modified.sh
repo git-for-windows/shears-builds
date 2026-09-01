@@ -281,8 +281,10 @@ test_expect_success 'last-modified with Bloom filters and --show-trees' '
 		test_commit touch-b d/b &&
 
 		git commit-graph write --reachable --changed-paths &&
+		GIT_TEST_COMMIT_GRAPH=0 \
 		git -c core.commitGraph=false last-modified -t HEAD -- d/a \
 			>expect &&
+		GIT_TEST_COMMIT_GRAPH=1 \
 		git -c core.commitGraph=true last-modified -t HEAD -- d/a \
 			>actual &&
 
