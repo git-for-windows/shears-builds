@@ -988,6 +988,41 @@ static int run_update_hook(struct command *cmd)
 	return code;
 }
 
+static int run_receive_report_hook(struct strbuf *report)
+{
+	struct child_process proc = CHILD_PROCESS_INIT;
+	struct async sideband_async;
+	int sideband_async_started = 0;
+	int saved_stderr = -1;
+	struct strbuf out = STRBUF_INIT;
+	const char *hook_path;
+	int ret;
+
+	hook_path = find_hook(the_repository, "receive-report");
+	if (!hook_path)
+		return 0;
+
+	strvec_push(&proc.args, hook_path);
+	proc.trace2_hook_name = "receive-report";
+
+	prepare_sideband_async(&sideband_async, &saved_stderr,
+			       &sideband_async_started);
+
+	sigchain_push(SIGPIPE, SIG_IGN);
+	ret = pipe_command(&proc, report->buf, report->len, &out,
+			   report->len, NULL, 0);
+	sigchain_pop(SIGPIPE);
+
+	finish_sideband_async(&sideband_async, saved_stderr,
+			      sideband_async_started);
+
+	if (!ret)
+		strbuf_swap(&out, report);
+
+	strbuf_release(&out);
+	return ret;
+}
+
 static struct command *find_command_by_refname(struct command *list,
 					       const char *refname)
 {
@@ -2409,22 +2444,72 @@ static void update_shallow_info(struct command *commands,
 	free(ref_status);
 }
 
-static void report(struct command *commands, const struct strbuf *unpack_status)
+static void override_cmds_error(struct command *commands, const char *err)
+{
+	for (struct command *cmd = commands; cmd; cmd = cmd->next) {
+		cmd->error_string = err;
+	}
+}
+
+/*
+ * Generate the response to be sent to the client invoking 'git-receive-pack(1)'.
+ * For v2 protocol, set `detailed_report` to true, which will also add detailed
+ * report per reference update.
+ */
+static void generate_report(struct strbuf *buf, struct command *commands,
+			    const struct strbuf *unpack_status,
+			    bool detailed_report)
 {
 	struct command *cmd;
+
+	packet_buf_write(buf, "unpack %s\n",
+			 unpack_status->len ? unpack_status->buf : "ok");
+
+	for (cmd = commands; cmd; cmd = cmd->next) {
+		struct ref_push_report *report;
+		int count = 0;
+
+		if (cmd->error_string)
+			packet_buf_write(buf, "ng %s %s\n",
+					 cmd->ref_name, cmd->error_string);
+		else
+			packet_buf_write(buf, "ok %s\n", cmd->ref_name);
+
+		if (!detailed_report || cmd->error_string)
+			continue;
+
+		for (report = cmd->report; report; report = report->next) {
+			if (count++ > 0)
+				packet_buf_write(buf, "ok %s\n",
+						 cmd->ref_name);
+			if (report->ref_name)
+				packet_buf_write(buf, "option refname %s\n",
+						 report->ref_name);
+			if (report->old_oid)
+				packet_buf_write(buf, "option old-oid %s\n",
+						 oid_to_hex(report->old_oid));
+			if (report->new_oid)
+				packet_buf_write(buf, "option new-oid %s\n",
+						 oid_to_hex(report->new_oid));
+			if (report->forced_update)
+				packet_buf_write(buf, "option forced-update\n");
+		}
+	}
+
+	packet_buf_flush(buf);
+}
+
+static void report(struct command *commands, const struct strbuf *unpack_status)
+{
 	struct strbuf buf = STRBUF_INIT;
 
-	packet_buf_write(&buf, "unpack %s\n",
-			 unpack_status->len ? unpack_status->buf : "ok");
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		if (!cmd->error_string)
-			packet_buf_write(&buf, "ok %s\n",
-					 cmd->ref_name);
-		else
-			packet_buf_write(&buf, "ng %s %s\n",
-					 cmd->ref_name, cmd->error_string);
+	generate_report(&buf, commands, unpack_status, false);
+
+	if (run_receive_report_hook(&buf)) {
+		strbuf_reset(&buf);
+		override_cmds_error(commands, "receive-report hook failed");
+		generate_report(&buf, commands, unpack_status, false);
 	}
-	packet_buf_flush(&buf);
 
 	if (use_sideband)
 		send_sideband(1, 1, buf.buf, buf.len, use_sideband);
@@ -2435,41 +2520,15 @@ static void report(struct command *commands, const struct strbuf *unpack_status)
 
 static void report_v2(struct command *commands, const struct strbuf *unpack_status)
 {
-	struct command *cmd;
 	struct strbuf buf = STRBUF_INIT;
-	struct ref_push_report *report;
 
-	packet_buf_write(&buf, "unpack %s\n",
-			 unpack_status->len ? unpack_status->buf : "ok");
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		int count = 0;
+	generate_report(&buf, commands, unpack_status, true);
 
-		if (cmd->error_string) {
-			packet_buf_write(&buf, "ng %s %s\n",
-					 cmd->ref_name,
-					 cmd->error_string);
-			continue;
-		}
-		packet_buf_write(&buf, "ok %s\n",
-				 cmd->ref_name);
-		for (report = cmd->report; report; report = report->next) {
-			if (count++ > 0)
-				packet_buf_write(&buf, "ok %s\n",
-						 cmd->ref_name);
-			if (report->ref_name)
-				packet_buf_write(&buf, "option refname %s\n",
-						 report->ref_name);
-			if (report->old_oid)
-				packet_buf_write(&buf, "option old-oid %s\n",
-						 oid_to_hex(report->old_oid));
-			if (report->new_oid)
-				packet_buf_write(&buf, "option new-oid %s\n",
-						 oid_to_hex(report->new_oid));
-			if (report->forced_update)
-				packet_buf_write(&buf, "option forced-update\n");
-		}
+	if (run_receive_report_hook(&buf)) {
+		strbuf_reset(&buf);
+		override_cmds_error(commands, "receive-report hook failed");
+		generate_report(&buf, commands, unpack_status, true);
 	}
-	packet_buf_flush(&buf);
 
 	if (use_sideband)
 		send_sideband(1, 1, buf.buf, buf.len, use_sideband);
