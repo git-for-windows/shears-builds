@@ -582,6 +582,7 @@ static int wait_or_whine(pid_t pid, const char *argv0, int in_signal)
 		 */
 		code += 128;
 	} else if (WIFEXITED(status)) {
+
 		code = WEXITSTATUS(status);
 	} else {
 		if (!in_signal)
