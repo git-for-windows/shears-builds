@@ -680,14 +680,14 @@ enum odb_write_object_flags {
  * Returns 0 on success, a negative error code otherwise.
  */
 int odb_write_object_ext(struct object_database *odb,
-			 const void *buf, unsigned long len,
+			 const void *buf, size_t len,
 			 enum object_type type,
 			 struct object_id *oid,
 			 const struct object_id *compat_oid,
 			 enum odb_write_object_flags flags);
 
 static inline int odb_write_object(struct object_database *odb,
-				   const void *buf, unsigned long len,
+				   const void *buf, size_t len,
 				   enum object_type type,
 				   struct object_id *oid)
 {
@@ -781,6 +781,9 @@ struct odb_generate_pack_options {
 
 	/* Use offset deltas instead of reference deltas. */
 	unsigned ofs_delta:1;
+
+	/* Do not use reference deltas. */
+	unsigned no_ref_delta:1;
 
 	/* Include unasked-for annotated tags of packed objects. */
 	unsigned include_tag:1;
