@@ -42,6 +42,7 @@ enum advice_level {
 
 static struct {
 	const char *key;
+	bool global_hint;
 	enum advice_level level;
 } advice_setting[] = {
 	[ADVICE_ADD_EMBEDDED_REPO]			= { "addEmbeddedRepo" },
@@ -51,13 +52,14 @@ static struct {
 	[ADVICE_AM_WORK_DIR] 				= { "amWorkDir" },
 	[ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME] 	= { "checkoutAmbiguousRemoteBranchName" },
 	[ADVICE_COMMIT_BEFORE_MERGE]			= { "commitBeforeMerge" },
-	[ADVICE_DEFAULT_BRANCH_NAME]			= { "defaultBranchName" },
+	[ADVICE_DEFAULT_BRANCH_NAME]			= { "defaultBranchName", true },
 	[ADVICE_DETACHED_HEAD]				= { "detachedHead" },
 	[ADVICE_DIVERGING]				= { "diverging" },
 	[ADVICE_FETCH_SET_HEAD_WARN]			= { "fetchRemoteHEADWarn" },
 	[ADVICE_FETCH_SHOW_FORCED_UPDATES]		= { "fetchShowForcedUpdates" },
 	[ADVICE_FORCE_DELETE_BRANCH]			= { "forceDeleteBranch" },
 	[ADVICE_GRAFT_FILE_DEPRECATED]			= { "graftFileDeprecated" },
+	[ADVICE_HISTORY_UPDATE_REFS]			= { "historyUpdateRefs" },
 	[ADVICE_IGNORED_HOOK]				= { "ignoredHook" },
 	[ADVICE_IMPLICIT_IDENTITY]			= { "implicitIdentity" },
 	[ADVICE_MERGE_CONFLICT]				= { "mergeConflict" },
@@ -70,6 +72,8 @@ static struct {
 	[ADVICE_PUSH_NON_FF_CURRENT]			= { "pushNonFFCurrent" },
 	[ADVICE_PUSH_NON_FF_MATCHING]			= { "pushNonFFMatching" },
 	[ADVICE_PUSH_REF_NEEDS_UPDATE]			= { "pushRefNeedsUpdate" },
+	[ADVICE_PUSH_REF_UNVERIFIABLE]			= { "pushRefUnverifiable" },
+	[ADVICE_PUSH_REPO_LOOKS_LIKE_REF]		= { "pushRepoLooksLikeRef" },
 	[ADVICE_PUSH_UNQUALIFIED_REF_NAME]		= { "pushUnqualifiedRefName" },
 	[ADVICE_PUSH_UPDATE_REJECTED]			= { "pushUpdateRejected" },
 	[ADVICE_PUSH_UPDATE_REJECTED_ALIAS]		= { "pushNonFastForward" }, /* backwards compatibility */
@@ -97,10 +101,10 @@ static struct {
 
 static const char turn_off_instructions[] =
 N_("\n"
-   "Disable this message with \"git config set advice.%s false\"");
+   "Disable this message with \"git config set%s advice.%s false\"");
 
 static void vadvise(const char *advice, int display_instructions,
-		    const char *key, va_list params)
+		    const char *key, bool global_hint, va_list params)
 {
 	struct strbuf buf = STRBUF_INIT;
 	const char *cp, *np;
@@ -108,7 +112,8 @@ static void vadvise(const char *advice, int display_instructions,
 	strbuf_vaddf(&buf, advice, params);
 
 	if (display_instructions)
-		strbuf_addf(&buf, turn_off_instructions, key);
+		strbuf_addf(&buf, turn_off_instructions, global_hint ?
+			" --global" : "", key);
 
 	for (cp = buf.buf; *cp; cp = np) {
 		np = strchrnul(cp, '\n');
@@ -127,7 +132,7 @@ void advise(const char *advice, ...)
 {
 	va_list params;
 	va_start(params, advice);
-	vadvise(advice, 0, "", params);
+	vadvise(advice, 0, "", false, params);
 	va_end(params);
 }
 
@@ -157,7 +162,7 @@ void advise_if_enabled(enum advice_type type, const char *advice, ...)
 
 	va_start(params, advice);
 	vadvise(advice, !advice_setting[type].level, advice_setting[type].key,
-		params);
+		advice_setting[type].global_hint, params);
 	va_end(params);
 }
 
