@@ -2,7 +2,8 @@
 
 #include "../../git-compat-util.h"
 #include "../../environment.h"
-#include "../../repository.h"
+
+
 
 int win32_has_dos_drive_prefix(const char *path)
 {
