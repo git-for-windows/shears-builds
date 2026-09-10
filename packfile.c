@@ -960,7 +960,12 @@ int unpack_object_header(struct packed_git *p,
 			 size_t *sizep)
 {
 	unsigned char *base;
+<<<<<<< HEAD
 	size_t left, used;
+=======
+	size_t left;
+	unsigned long used;
+>>>>>>> 32c4f76892
 	enum object_type type;
 
 	/* use_pack() assures us we have [base, base + 20) available
