@@ -980,7 +980,11 @@ static int store_object(
 	struct object_entry *e;
 	unsigned char hdr[96];
 	struct object_id oid;
+<<<<<<< HEAD
 	size_t hdrlen, deltalen = 0;
+=======
+	size_t hdrlen, deltalen;
+>>>>>>> 32c4f76892
 	struct git_hash_ctx c;
 	git_zstream s;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
@@ -3356,7 +3360,10 @@ static void cat_blob_write(const char *buf, unsigned long size)
 static void cat_blob(struct object_entry *oe, struct object_id *oid)
 {
 	struct strbuf line = STRBUF_INIT;
+<<<<<<< HEAD
 	struct iovec iov[3];
+=======
+>>>>>>> 32c4f76892
 	size_t size;
 	enum object_type type = 0;
 	char *buf;
