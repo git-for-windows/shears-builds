@@ -164,9 +164,6 @@ static inline int is_xplatform_dir_sep(int c)
 #include "compat/msvc.h"
 #include "compat/win32/fscache.h"
 #endif
-#ifdef DARWIN_REGEXEC
-#include "compat/darwin.h"
-#endif
 
 /* used on Mac OS X */
 #ifdef PRECOMPOSE_UNICODE
@@ -250,10 +247,6 @@ static inline int git_is_dir_sep(int c)
 #define is_dir_sep git_is_dir_sep
 #endif
 
-#ifndef platform_has_symlinks
-#define platform_has_symlinks() 1
-#endif
-
 #ifndef offset_1st_component
 static inline int git_offset_1st_component(const char *path)
 {
@@ -268,6 +261,13 @@ static inline int git_offset_1st_component(const char *path)
 
 #ifndef fspathncmp
 #define fspathncmp git_fspathncmp
+#endif
+
+#ifndef warn_about_git_lfs_on_windows7
+static inline void warn_about_git_lfs_on_windows7(int exit_code UNUSED,
+						  const char *argv0 UNUSED)
+{
+}
 #endif
 
 #ifndef is_valid_path
@@ -1016,7 +1016,6 @@ static inline int strtol_i(char const *s, int base, int *result)
 #error "Git requires REG_STARTEND support. Compile with NO_REGEX=NeedsStartEnd"
 #endif
 
-#ifndef regexec_buf
 static inline int regexec_buf(const regex_t *preg, const char *buf, size_t size,
 			      size_t nmatch, regmatch_t pmatch[], int eflags)
 {
@@ -1025,7 +1024,6 @@ static inline int regexec_buf(const regex_t *preg, const char *buf, size_t size,
 	pmatch[0].rm_eo = size;
 	return regexec(preg, buf, nmatch, pmatch, eflags | REG_STARTEND);
 }
-#endif
 
 #ifdef USE_ENHANCED_BASIC_REGULAR_EXPRESSIONS
 int git_regcomp(regex_t *preg, const char *pattern, int cflags);
@@ -1107,9 +1105,6 @@ struct fscache;
 
 #ifndef enable_fscache
 #define enable_fscache(x) /* noop */
-#endif
-#ifndef flush_fscache
-#define flush_fscache() /* noop */
 #endif
 
 #ifndef disable_fscache

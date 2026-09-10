@@ -161,21 +161,6 @@
 # These machine files can be passed to `meson setup` via the `--native-file`
 # option.
 #
-# Fuzzing
-# =======
-#
-# Meson supports building the fuzzing targets by setting `-Dfuzzers=true`. By
-# default, the targets will be built without libFuzzer and thus won't be usable
-# for fuzzing. You have to configure a couple of options to properly wire up
-# libFuzzer:
-#
-#   $ meson setup build-fuzzers \
-#       -Db_sanitize=address,fuzzer-no-link \
-#       -Dfuzzers=true \
-#       -Dfuzzers_link_args=-fsanitize=fuzzer
-#   $ meson compile -C build-fuzzers
-#   $ ./build-fuzzers/oss-fuzz/fuzz-config <args>
-#
 # Cross compilation
 # =================
 #
@@ -293,20 +278,7 @@ compat_sources = [
   'compat/terminal.c',
 ]
 
-hook_list = custom_target(
-  input: 'Documentation/githooks.adoc',
-  output: 'hook-list.h',
-  command: [
-    shell,
-    meson.current_source_dir() + '/tools/generate-hooklist.sh',
-    meson.current_source_dir(),
-    '@OUTPUT@',
-  ],
-  env: script_environment,
-)
-
 libgit_sources = [
-  hook_list,
   'abspath.c',
   'add-interactive.c',
   'add-patch.c',
@@ -356,8 +328,6 @@ libgit_sources = [
   'diff-merges.c',
   'diff-lib.c',
   'diff-no-index.c',
-  'diff-process.c',
-  'diff-provider.c',
   'diff.c',
   'diffcore-break.c',
   'diffcore-delta.c',
@@ -365,7 +335,6 @@ libgit_sources = [
   'diffcore-pickaxe.c',
   'diffcore-rename.c',
   'diffcore-rotate.c',
-  'diff-hunks.c',
   'dir-iterator.c',
   'dir.c',
   'editor.c',
@@ -377,7 +346,6 @@ libgit_sources = [
   'ewah/ewah_rlw.c',
   'exec-cmd.c',
   'fetch-negotiator.c',
-  'fetch-object-info.c',
   'fetch-pack.c',
   'fmt-merge-msg.c',
   'fsck.c',
@@ -438,7 +406,6 @@ libgit_sources = [
   'odb/source-files.c',
   'odb/source-inmemory.c',
   'odb/source-loose.c',
-  'odb/source-packed.c',
   'odb/streaming.c',
   'odb/transaction.c',
   'oid-array.c',
@@ -454,7 +421,6 @@ libgit_sources = [
   'pack-revindex.c',
   'pack-write.c',
   'packfile.c',
-  'packfile-list.c',
   'pager.c',
   'parallel-checkout.c',
   'parse.c',
@@ -600,8 +566,19 @@ libgit_sources += custom_target(
   env: script_environment,
 )
 
+libgit_sources += custom_target(
+  input: 'Documentation/githooks.adoc',
+  output: 'hook-list.h',
+  command: [
+    shell,
+    meson.current_source_dir() + '/tools/generate-hooklist.sh',
+    meson.current_source_dir(),
+    '@OUTPUT@',
+  ],
+  env: script_environment,
+)
+
 builtin_sources = [
-  hook_list,
   'builtin/add.c',
   'builtin/am.c',
   'builtin/annotate.c',
@@ -636,7 +613,6 @@ builtin_sources = [
   'builtin/describe.c',
   'builtin/diagnose.c',
   'builtin/diff-files.c',
-  'builtin/diff-hunks.c',
   'builtin/diff-index.c',
   'builtin/diff-pairs.c',
   'builtin/diff-tree.c',
@@ -1338,9 +1314,7 @@ elif host_machine.system() == 'windows'
   if msystem != ''
     mingw_prefix = get_option('mingw_prefix')
     if mingw_prefix == ''
-      mingw_prefix = msystem.to_lower()
-    elif mingw_prefix.startswith('/')
-      mingw_prefix = mingw_prefix.substring(1)
+      mingw_prefix = '/' + msystem.to_lower()
     endif
     libgit_c_args += [
       '-DENSURE_MSYSTEM_IS_SET="' + msystem + '"',
@@ -1427,11 +1401,6 @@ if not get_option('b_sanitize').contains('address') and get_option('regex').allo
     libgit_c_args += '-DUSE_ENHANCED_BASIC_REGULAR_EXPRESSIONS'
     compat_sources += 'compat/regcomp_enhanced.c'
   endif
-
-  if host_machine.system() == 'darwin'
-    libgit_c_args += '-DDARWIN_REGEXEC'
-    compat_sources += 'compat/darwin/regexec.c'
-  endif
 elif not get_option('regex').enabled()
   libgit_c_args += [
     '-DNO_REGEX',
@@ -1489,7 +1458,6 @@ checkfuncs = {
   'initgroups' : [],
   'strtoumax' : ['strtoumax.c', 'strtoimax.c'],
   'pread' : ['pread.c'],
-  'writev' : ['writev.c'],
 }
 
 if host_machine.system() == 'windows'
@@ -1500,8 +1468,6 @@ else
     'unsetenv' : ['unsetenv.c'],
     # provided by compat/mingw.c.
     'getpagesize' : [],
-    # provided by compat/mingw.c.
-    'utimensat' : ['utimensat.c'],
   }
 
   if get_option('b_sanitize').contains('address') or get_option('b_sanitize').contains('leak')
