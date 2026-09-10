@@ -1338,9 +1338,13 @@ elif host_machine.system() == 'windows'
   if msystem != ''
     mingw_prefix = get_option('mingw_prefix')
     if mingw_prefix == ''
+<<<<<<< HEAD
       mingw_prefix = msystem.to_lower()
     elif mingw_prefix.startswith('/')
       mingw_prefix = mingw_prefix.substring(1)
+=======
+      mingw_prefix = '/' + msystem.to_lower()
+>>>>>>> 32c4f76892
     endif
     libgit_c_args += [
       '-DENSURE_MSYSTEM_IS_SET="' + msystem + '"',

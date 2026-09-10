@@ -547,7 +547,11 @@ endif
 	EXTLIBS = user32.lib advapi32.lib shell32.lib wininet.lib ws2_32.lib invalidcontinue.obj kernel32.lib ntdll.lib
 	GITLIBS += git.res
 	PTHREAD_LIBS =
+<<<<<<< HEAD
 	RC = lib/compat/vcbuild/scripts/rc.pl
+=======
+	RC = compat/vcbuild/scripts/rc.pl
+>>>>>>> 32c4f76892
 	lib =
 	BASIC_CFLAGS += $(vcpkg_inc) $(sdk_includes) $(msvc_includes)
 ifndef DEBUG

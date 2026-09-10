@@ -163,9 +163,12 @@ static inline int is_xplatform_dir_sep(int c)
 #include "compat/win32/path-utils.h"
 #include "compat/msvc.h"
 #include "compat/win32/fscache.h"
+<<<<<<< HEAD
 #endif
 #ifdef DARWIN_REGEXEC
 #include "compat/darwin.h"
+=======
+>>>>>>> 32c4f76892
 #endif
 
 /* used on Mac OS X */
@@ -268,6 +271,13 @@ static inline int git_offset_1st_component(const char *path)
 
 #ifndef fspathncmp
 #define fspathncmp git_fspathncmp
+#endif
+
+#ifndef warn_about_git_lfs_on_windows7
+static inline void warn_about_git_lfs_on_windows7(int exit_code UNUSED,
+						  const char *argv0 UNUSED)
+{
+}
 #endif
 
 #ifndef is_valid_path
@@ -1108,9 +1118,12 @@ struct fscache;
 #ifndef enable_fscache
 #define enable_fscache(x) /* noop */
 #endif
+<<<<<<< HEAD
 #ifndef flush_fscache
 #define flush_fscache() /* noop */
 #endif
+=======
+>>>>>>> 32c4f76892
 
 #ifndef disable_fscache
 #define disable_fscache() /* noop */
