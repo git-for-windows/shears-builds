@@ -1,0 +1,36 @@
+    CC builtin/help.o
+    CC object-file.o
+    CC odb.o
+    CC odb/source.o
+    CC odb/source-files.o
+object-file.c: In function ‘close_loose_object’:
+object-file.c:591:17: warning: implicit declaration of function ‘fsync_loose_object_transaction’; did you mean ‘flush_loose_object_transaction’? [-Wimplicit-function-declaration]
+  591 |                 fsync_loose_object_transaction(loose->base.odb->transaction, fd, filename);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                 flush_loose_object_transaction
+object-file.c: In function ‘write_loose_object’:
+object-file.c:770:17: warning: implicit declaration of function ‘prepare_loose_object_transaction’; did you mean ‘flush_loose_object_transaction’? [-Wimplicit-function-declaration]
+  770 |                 prepare_loose_object_transaction(loose->base.odb->transaction);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                 flush_loose_object_transaction
+object-file.c: At top level:
+object-file.c:817:42: warning: ‘struct odb_write_stream’ declared inside parameter list will not be visible outside of this definition or declaration
+  817 |                                   struct odb_write_stream *in_stream, size_t len,
+      |                                          ^~~~~~~~~~~~~~~~
+object-file.c: In function ‘odb_source_loose_write_stream’:
+object-file.c:860:51: error: invalid use of undefined type ‘struct odb_write_stream’
+  860 |                 if (!stream.avail_in && !in_stream->is_finished) {
+      |                                                   ^~
+object-file.c:861:44: warning: implicit declaration of function ‘odb_write_stream_read’; did you mean ‘odb_stream_read’? [-Wimplicit-function-declaration]
+  861 |                         ssize_t read_len = odb_write_stream_read(in_stream, buf,
+      |                                            ^~~~~~~~~~~~~~~~~~~~~
+      |                                            odb_stream_read
+object-file.c:873:38: error: invalid use of undefined type ‘struct odb_write_stream’
+  873 |                         if (in_stream->is_finished)
+      |                                      ^~
+object-file.c: At top level:
+object-file.c:551:13: warning: ‘flush_loose_object_transaction’ defined but not used [-Wunused-function]
+  551 | static void flush_loose_object_transaction(struct odb_transaction_files *transaction)
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+make: *** [Makefile:2962: object-file.o] Error 1
+make: *** Waiting for unfinished jobs....
