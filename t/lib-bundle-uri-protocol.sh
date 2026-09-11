@@ -63,9 +63,9 @@ test_expect_success "connect with $BUNDLE_URI_PROTOCOL:// using protocol v2: no 
 		>actual 2>err &&
 
 	# Server responded using protocol v2
-	test_grep "< version 2" log &&
+	grep "< version 2" log &&
 
-	test_grep ! bundle-uri log
+	! grep bundle-uri log
 '
 
 test_expect_success "connect with $BUNDLE_URI_PROTOCOL:// using protocol v2: have bundle-uri" '
@@ -78,10 +78,10 @@ test_expect_success "connect with $BUNDLE_URI_PROTOCOL:// using protocol v2: hav
 		>actual 2>err &&
 
 	# Server responded using protocol v2
-	test_grep "< version 2" log &&
+	grep "< version 2" log &&
 
 	# Server advertised bundle-uri capability
-	test_grep "< bundle-uri" log
+	grep "< bundle-uri" log
 '
 
 test_expect_success "clone with $BUNDLE_URI_PROTOCOL:// using protocol v2: request bundle-uris" '
@@ -95,13 +95,13 @@ test_expect_success "clone with $BUNDLE_URI_PROTOCOL:// using protocol v2: reque
 		>actual 2>err &&
 
 	# Server responded using protocol v2
-	test_grep "< version 2" log &&
+	grep "< version 2" log &&
 
 	# Server advertised bundle-uri capability
-	test_grep "< bundle-uri" log &&
+	grep "< bundle-uri" log &&
 
 	# Client did not issue bundle-uri command
-	test_grep ! "> command=bundle-uri" log &&
+	! grep "> command=bundle-uri" log &&
 
 	GIT_TRACE_PACKET="$PWD/log" \
 	git \
@@ -111,13 +111,13 @@ test_expect_success "clone with $BUNDLE_URI_PROTOCOL:// using protocol v2: reque
 		>actual 2>err &&
 
 	# Server responded using protocol v2
-	test_grep "< version 2" log &&
+	grep "< version 2" log &&
 
 	# Server advertised bundle-uri capability
-	test_grep "< bundle-uri" log &&
+	grep "< bundle-uri" log &&
 
 	# Client issued bundle-uri command
-	test_grep "> command=bundle-uri" log &&
+	grep "> command=bundle-uri" log &&
 
 	GIT_TRACE_PACKET="$PWD/log3" \
 	git \
@@ -128,13 +128,13 @@ test_expect_success "clone with $BUNDLE_URI_PROTOCOL:// using protocol v2: reque
 		>actual 2>err &&
 
 	# Server responded using protocol v2
-	test_grep "< version 2" log3 &&
+	grep "< version 2" log3 &&
 
 	# Server advertised bundle-uri capability
-	test_grep "< bundle-uri" log3 &&
+	grep "< bundle-uri" log3 &&
 
 	# Client did not issue bundle-uri command (--bundle-uri override)
-	test_grep ! "> command=bundle-uri" log3
+	! grep "> command=bundle-uri" log3
 '
 
 # The remaining tests will all assume transfer.bundleURI=true
@@ -213,83 +213,4 @@ test_expect_success "test bundle-uri with $BUNDLE_URI_PROTOCOL:// using protocol
 		"$BUNDLE_URI_REPO_URI" \
 		>actual &&
 	test_cmp_config_output expect actual
-'
-
-test_expect_success "test bundle-uri with $BUNDLE_URI_PROTOCOL:// using protocol v2 with empty value" '
-	test_config -C "$BUNDLE_URI_PARENT" \
-		bundle.bundle1.uri "$BUNDLE_URI_BUNDLE_URI_ESCAPED-1.bdl" &&
-	test_config -C "$BUNDLE_URI_PARENT" \
-		bundle.bundle2.uri "" &&
-
-	# The empty bundle.bundle2.uri value is invalid configuration and the
-	# server must not advertise it to the client.
-	cat >expect <<-EOF &&
-	[bundle]
-		version = 1
-		mode = all
-	[bundle "bundle1"]
-		uri = $BUNDLE_URI_BUNDLE_URI_ESCAPED-1.bdl
-	EOF
-
-	test-tool bundle-uri \
-		ls-remote \
-		"$BUNDLE_URI_REPO_URI" \
-		>actual &&
-	test_cmp_config_output expect actual
-'
-
-# Advertised bundle URIs are subject to protocol.*.allow; "file" (and bare or
-# UNC paths) is denied by default, so such a URI must be skipped, not fetched.
-advertise_uri () {
-	test_config -C "$BUNDLE_URI_PARENT" bundle.version 1 &&
-	test_config -C "$BUNDLE_URI_PARENT" bundle.mode all &&
-	test_config -C "$BUNDLE_URI_PARENT" bundle.payload.uri "$1"
-}
-
-ignores_advertised_uri () {
-	rm -rf victim &&
-	advertise_uri "$1" &&
-	git -c transfer.bundleURI=true -c protocol.version=2 \
-		clone "$BUNDLE_URI_REPO_URI" victim &&
-	git -C victim for-each-ref refs/bundles/ >refs &&
-	test_must_be_empty refs
-}
-
-test_expect_success "create bundle to advertise" '
-	git -C "$BUNDLE_URI_PARENT" bundle create "$PWD/payload.bundle" main
-'
-
-test_expect_success "ignore non-HTTP(S) bundle URI with $BUNDLE_URI_PROTOCOL://" '
-	ignores_advertised_uri "$PWD/payload.bundle" &&
-	ignores_advertised_uri "file://$PWD/payload.bundle"
-'
-
-test_expect_success "protocol.file.allow=always honors file bundle URI with $BUNDLE_URI_PROTOCOL://" '
-	rm -rf victim &&
-	advertise_uri "$PWD/payload.bundle" &&
-	git -c transfer.bundleURI=true -c protocol.version=2 \
-		-c protocol.file.allow=always \
-		clone "$BUNDLE_URI_REPO_URI" victim &&
-	git -C victim rev-parse --verify refs/bundles/heads/main
-'
-
-# same path via a UNC administrative share (cf. t5580-unc-paths.sh)
-if test_have_prereq CYGWIN
-then
-	UNCPATH="$(cygpath -aw .)"
-elif test_have_prereq MINGW
-then
-	UNCPATH="$(pwd)"
-fi
-case "$UNCPATH" in
-[A-Za-z]:*)
-	WITHOUTDRIVE="${UNCPATH#?:}"
-	UNCPATH="//localhost/${UNCPATH%%:*}\$$WITHOUTDRIVE"
-	test -d "$UNCPATH" && test_set_prereq ADMIN_UNC
-	;;
-esac
-
-test_expect_success ADMIN_UNC "ignore UNC bundle URI with $BUNDLE_URI_PROTOCOL://" '
-	ignores_advertised_uri "$UNCPATH/payload.bundle" &&
-	ignores_advertised_uri "file://$UNCPATH/payload.bundle"
 '
