@@ -3,16 +3,25 @@ git-survey(1)
 
 NAME
 ----
+<<<<<<< HEAD
 git-survey - DEPRECATED: Measure various repository dimensions of scale
+=======
+git-survey - EXPERIMENTAL: Measure various repository dimensions of scale
+>>>>>>> 32c4f76892
 
 SYNOPSIS
 --------
 [verse]
+<<<<<<< HEAD
 (DEPRECATED!) 'git survey' <options>
+=======
+(EXPERIMENTAL!) 'git survey' <options>
+>>>>>>> 32c4f76892
 
 DESCRIPTION
 -----------
 
+<<<<<<< HEAD
 NOTE: `git survey` is being superseded by `git repo structure`. New
 deployments and new features should use `git repo structure`; its
 `--ref-filter=<pattern>` option subsumes the various `--branches`,
@@ -20,6 +29,8 @@ deployments and new features should use `git repo structure`; its
 same detail tables. During the deprecation phase, `git survey` is
 a thin shim over `git repo structure`. See linkgit:git-repo[1].
 
+=======
+>>>>>>> 32c4f76892
 Survey the repository and measure various dimensions of scale.
 
 As repositories grow to "monorepo" size, certain data shapes can cause

@@ -1521,6 +1521,7 @@ int mingw_utimensat(int fd, const char *path, const struct timespec times[2], in
 	wchar_t wfilename[MAX_LONG_PATH];
 	HANDLE osfilehandle;
 
+<<<<<<< HEAD
 	if (fd != AT_FDCWD) {
 		errno = ENOSYS;
 		return -1;
@@ -1532,6 +1533,9 @@ int mingw_utimensat(int fd, const char *path, const struct timespec times[2], in
 	}
 
 	if (xutftowcs_long_path(wfilename, path) < 0)
+=======
+	if (xutftowcs_long_path(wfilename, file_name) < 0)
+>>>>>>> 32c4f76892
 		return -1;
 
 	/* must have write permission */
@@ -3855,11 +3859,15 @@ static void setup_windows_environment(void)
 
 	if (!getenv("LC_ALL") && !getenv("LC_CTYPE") && !getenv("LANG"))
 		setenv("LC_CTYPE", "C.UTF-8", 1);
+<<<<<<< HEAD
 }
 
 int mingw_platform_has_symlinks(void)
 {
 	static int has_symlinks = -1;
+=======
+
+>>>>>>> 32c4f76892
 	/*
 	 * Change 'core.symlinks' default to false, unless native symlinks are
 	 * enabled in MSys2 (via 'MSYS=winsymlinks:nativestrict'). Thus we can
