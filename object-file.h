@@ -117,6 +117,17 @@ int finalize_object_file_flags(struct repository *repo,
 void hash_object_file(const struct git_hash_algo *algo, const void *buf,
 		      size_t len, enum object_type type,
 		      struct object_id *oid);
+<<<<<<< HEAD
+=======
+void write_object_file_prepare(const struct git_hash_algo *algo,
+			       const void *buf, size_t len,
+			       enum object_type type, struct object_id *oid,
+			       char *hdr, size_t *hdrlen);
+int write_loose_object(struct odb_source_loose *loose,
+		       const struct object_id *oid, char *hdr,
+		       int hdrlen, const void *buf, unsigned long len,
+		       time_t mtime, unsigned flags);
+>>>>>>> 32c4f76892
 
 /* Helper to check and "touch" a file */
 int check_and_freshen_file(const char *fn, int freshen,
