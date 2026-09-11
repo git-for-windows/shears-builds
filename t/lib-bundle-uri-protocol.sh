@@ -215,6 +215,7 @@ test_expect_success "test bundle-uri with $BUNDLE_URI_PROTOCOL:// using protocol
 	test_cmp_config_output expect actual
 '
 
+<<<<<<< HEAD
 test_expect_success "test bundle-uri with $BUNDLE_URI_PROTOCOL:// using protocol v2 with empty value" '
 	test_config -C "$BUNDLE_URI_PARENT" \
 		bundle.bundle1.uri "$BUNDLE_URI_BUNDLE_URI_ESCAPED-1.bdl" &&
@@ -238,6 +239,8 @@ test_expect_success "test bundle-uri with $BUNDLE_URI_PROTOCOL:// using protocol
 	test_cmp_config_output expect actual
 '
 
+=======
+>>>>>>> 32c4f76892
 # Advertised bundle URIs are subject to protocol.*.allow; "file" (and bare or
 # UNC paths) is denied by default, so such a URI must be skipped, not fetched.
 advertise_uri () {
