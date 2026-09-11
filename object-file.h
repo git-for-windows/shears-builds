@@ -5,7 +5,6 @@
 #include "object.h"
 #include "odb.h"
 #include "odb/source-loose.h"
-#include "odb/transaction.h"
 
 /* The maximum size for an object header. */
 #define MAX_HEADER_LEN 32
@@ -23,6 +22,20 @@ int index_path(struct index_state *istate, struct object_id *oid, const char *pa
 
 struct object_info;
 struct odb_source;
+
+/*
+ * Write the given stream into the loose object source. The only difference
+ * from the generic implementation of this function is that we don't perform an
+ * object existence check here.
+ *
+ * TODO: We should stop exposing this function altogether and move it into
+ * "odb/source-loose.c". This requires a couple of refactorings though to make
+ * `force_object_loose()` generic and is thus postponed to a later point in
+ * time.
+ */
+int odb_source_loose_write_stream(struct odb_source_loose *source,
+				  struct odb_write_stream *stream, size_t len,
+				  struct object_id *oid);
 
 /*
  * Put in `buf` the name of the file in the local object database that
@@ -84,6 +97,9 @@ int for_each_file_in_obj_subdir(unsigned int subdir_nr,
 int format_object_header(char *str, size_t size, enum object_type type,
 			 size_t objsize);
 
+int force_object_loose(struct odb_source *source,
+		       const struct object_id *oid, time_t mtime);
+
 /**
  * With in-core object data in "buf", rehash it to make sure the
  * object name actually matches "oid" to detect object corruption.
@@ -101,7 +117,7 @@ int check_object_signature(struct repository *r, const struct object_id *oid,
  * the streaming interface and rehash it to do the same.
  */
 int stream_object_signature(struct repository *r,
-			    struct odb_stream *stream,
+			    struct odb_read_stream *stream,
 			    const struct object_id *oid);
 
 enum finalize_object_file_flags {
@@ -117,10 +133,17 @@ int finalize_object_file_flags(struct repository *repo,
 void hash_object_file(const struct git_hash_algo *algo, const void *buf,
 		      size_t len, enum object_type type,
 		      struct object_id *oid);
+void write_object_file_prepare(const struct git_hash_algo *algo,
+			       const void *buf, size_t len,
+			       enum object_type type, struct object_id *oid,
+			       char *hdr, size_t *hdrlen);
+int write_loose_object(struct odb_source_loose *loose,
+		       const struct object_id *oid, char *hdr,
+		       int hdrlen, const void *buf, unsigned long len,
+		       time_t mtime, unsigned flags);
 
 /* Helper to check and "touch" a file */
-int check_and_freshen_file(const char *fn, int freshen,
-			   const time_t *mtime);
+int check_and_freshen_file(const char *fn, int freshen);
 
 /*
  * Open the loose object at path, check its hash, and return the contents,
@@ -171,14 +194,9 @@ struct odb_transaction;
 /*
  * Tell the object database to optimize for adding
  * multiple objects. odb_transaction_files_commit must be called
- * to make new objects visible.
+ * to make new objects visible. If a transaction is already
+ * pending, NULL is returned.
  */
-int odb_transaction_files_begin(struct odb_source *source,
-				struct odb_transaction **out,
-				enum odb_transaction_flags flags);
-
-int odb_transaction_files_prepare(struct odb_transaction *base);
-void odb_transaction_files_fsync(struct odb_transaction *base,
-				 int fd, const char *filename);
+struct odb_transaction *odb_transaction_files_begin(struct odb_source *source);
 
 #endif /* OBJECT_FILE_H */
