@@ -832,15 +832,24 @@ static int write_loose_object(struct odb_source_loose *loose,
 
 static int odb_source_loose_write_object(struct odb_source *source,
 					 const void *buf, size_t len,
+<<<<<<< HEAD
 					 enum object_type type,
 					 const struct object_id *oid,
 					 const struct object_id *compat_oid,
 					 const time_t *mtime,
+=======
+					 enum object_type type, struct object_id *oid,
+					 struct object_id *compat_oid_in,
+>>>>>>> 32c4f76892
 					 enum odb_write_object_flags flags)
 {
 	struct odb_source_loose *loose = odb_source_loose_downcast(source);
 	char hdr[MAX_HEADER_LEN];
+<<<<<<< HEAD
 	int hdrlen;
+=======
+	size_t hdrlen = sizeof(hdr);
+>>>>>>> 32c4f76892
 
 	hdrlen = format_object_header(hdr, sizeof(hdr), type, len);
 
