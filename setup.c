@@ -1070,7 +1070,36 @@ int read_gitfile_raw(struct strbuf *contents, const char *path)
 		error_code = READ_GITFILE_ERR_NO_PATH;
 		goto cleanup_return;
 	}
+<<<<<<< HEAD
 	strbuf_add(contents, buf+8, len-8);
+=======
+	buf[len] = '\0';
+	dir = buf + 8;
+
+	if (!is_absolute_path(dir) && (slash = strrchr(path, '/'))) {
+		size_t pathlen = slash+1 - path;
+		dir = xstrfmt("%.*s%.*s", (int)pathlen, path,
+			      (int)(len - 8), buf + 8);
+		free(buf);
+		buf = dir;
+	}
+#if (defined _WIN32 || defined __WIN32__)
+	if (is_dir_sep(dir[0]) && is_invalid_dotgit_path(path, dir)) {
+		strbuf_reset(&realpath);
+		strbuf_add(&realpath, dir, strlen(dir));
+		path = realpath.buf;
+		goto cleanup_return;
+	}
+#endif
+	if (!is_git_directory(dir)) {
+		error_code = READ_GITFILE_ERR_NOT_A_REPO;
+		goto cleanup_return;
+	}
+
+	strbuf_reset(&realpath);
+	strbuf_realpath(&realpath, dir, 1);
+	path = realpath.buf;
+>>>>>>> 32c4f76892
 
 cleanup_return:
 	free(buf);

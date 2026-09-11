@@ -540,8 +540,11 @@ int send_pack(struct repository *r,
 		allow_deleting_refs = 1;
 	if (server_supports("ofs-delta"))
 		args->use_ofs_delta = 1;
+<<<<<<< HEAD
 	if (server_supports("no-ref-delta"))
 		args->no_ref_delta = 1;
+=======
+>>>>>>> 32c4f76892
 	use_sideband = use_sideband && server_supports("side-band-64k");
 	if (server_supports("quiet"))
 		quiet_supported = 1;
