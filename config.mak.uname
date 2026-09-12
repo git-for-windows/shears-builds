@@ -546,7 +546,11 @@ endif
 	EXTLIBS = user32.lib advapi32.lib shell32.lib wininet.lib ws2_32.lib invalidcontinue.obj kernel32.lib ntdll.lib
 	GITLIBS += git.res
 	PTHREAD_LIBS =
+<<<<<<< HEAD
 	RC = lib/compat/vcbuild/scripts/rc.pl
+=======
+	RC = compat/vcbuild/scripts/rc.pl
+>>>>>>> 32c4f76892
 	lib =
 	BASIC_CFLAGS += $(vcpkg_inc) $(sdk_includes) $(msvc_includes)
 ifndef DEBUG
@@ -763,6 +767,7 @@ ifeq ($(uname_S),MINGW)
 			MINGW_PREFIX := /$(shell echo '$(MSYSTEM)' | tr A-Z a-z)
                 endif
 		prefix = $(MINGW_PREFIX)
+<<<<<<< HEAD
 
 		# A rustup-managed Rust on Windows defaults to the MSVC ABI and
 		# produces a `gitcore.lib` that the MinGW `ld.exe` cannot link.
@@ -786,6 +791,9 @@ ifeq ($(uname_S),MINGW)
 			CARGO_TARGET = $(HOST_CPU)-pc-windows-gnu
                 endif
 
+=======
+		HOST_CPU = $(patsubst %-w64-mingw32,%,$(MINGW_CHOST))
+>>>>>>> 32c4f76892
 		BASIC_LDFLAGS += -Wl,--pic-executable
 		COMPAT_CFLAGS += -DDETECT_MSYS_TTY \
 			-DENSURE_MSYSTEM_IS_SET="\"$(MSYSTEM)\"" \

@@ -1610,9 +1610,12 @@ char *xdg_config_home_for(const char *subdir, const char *filename)
 				if (home_config && file_exists(home_config))
 					warning("'%s' was ignored because '%s' exists.", home_config, appdata_config);
 				free(home_config);
+<<<<<<< HEAD
 #ifdef GIT_WINDOWS_NATIVE
 				convert_slashes(appdata_config);
 #endif
+=======
+>>>>>>> 32c4f76892
 				return appdata_config;
 			}
 			free(appdata_config);
@@ -1620,10 +1623,13 @@ char *xdg_config_home_for(const char *subdir, const char *filename)
 	}
 	#endif
 
+<<<<<<< HEAD
 #ifdef GIT_WINDOWS_NATIVE
 	if (home_config)
 		convert_slashes(home_config);
 #endif
+=======
+>>>>>>> 32c4f76892
 	return home_config;
 }
 
