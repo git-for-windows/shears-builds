@@ -134,7 +134,8 @@ do
 	http-backend | http-fetch | http-push | init-db | \
 	mktag | p4 | p4.py | pickaxe | remote-ftp | remote-ftps | \
 	remote-http | remote-https | replay | send-email | \
-	sh-i18n--envsubst | shell | show | stage | \
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< HEAD
+	sh-i18n--envsubst | shell | show | stage | survey | \
 	upload-archive--writer | upload-pack | whatchanged)
 		h_expect_outcome=expect_failure
 		all_expect_outcome=expect_failure
@@ -144,6 +145,11 @@ do
 		h_expect_outcome=expect_success
 		all_expect_outcome=expect_failure
 		;;
+================================
+	sh-i18n--envsubst | shell | show | stage | submodule | survey | svn | \
+	upload-archive--writer | upload-pack | web--browse | whatchanged)
+		expect_outcome=expect_failure ;;
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 32c4f76892
 	*)
 		h_expect_outcome=expect_success
 		all_expect_outcome=expect_success
