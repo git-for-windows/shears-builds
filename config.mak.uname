@@ -781,6 +781,14 @@ ifeq ($(uname_S),MINGW)
 	USE_GETTEXT_SCHEME = fallthrough
 	USE_LIBPCRE = YesPlease
 	NO_PYTHON =
+<<<<<<< HEAD
+=======
+        ifeq (/mingw64,$(subst 32,64,$(subst clangarm,mingw,$(prefix))))
+		# Move system config into top-level /etc/
+		ETC_GITCONFIG = ../etc/gitconfig
+		ETC_GITATTRIBUTES = ../etc/gitattributes
+        endif
+>>>>>>> fd193f3a8d (mingw: include the Python parts in the build)
 endif
 ifeq ($(uname_S),QNX)
 	COMPAT_CFLAGS += -DSA_RESTART=0
