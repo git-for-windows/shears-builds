@@ -247,10 +247,6 @@ static inline int git_is_dir_sep(int c)
 #define is_dir_sep git_is_dir_sep
 #endif
 
-#ifndef platform_has_symlinks
-#define platform_has_symlinks() 1
-#endif
-
 #ifndef offset_1st_component
 static inline int git_offset_1st_component(const char *path)
 {
@@ -265,6 +261,13 @@ static inline int git_offset_1st_component(const char *path)
 
 #ifndef fspathncmp
 #define fspathncmp git_fspathncmp
+#endif
+
+#ifndef warn_about_git_lfs_on_windows7
+static inline void warn_about_git_lfs_on_windows7(int exit_code UNUSED,
+						  const char *argv0 UNUSED)
+{
+}
 #endif
 
 #ifndef is_valid_path
@@ -1102,9 +1105,6 @@ struct fscache;
 
 #ifndef enable_fscache
 #define enable_fscache(x) /* noop */
-#endif
-#ifndef flush_fscache
-#define flush_fscache() /* noop */
 #endif
 
 #ifndef disable_fscache

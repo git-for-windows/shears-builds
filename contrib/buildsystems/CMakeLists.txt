@@ -284,7 +284,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 				OVERRIDE_STRDUP MMAP_PREVENTS_DELETE USE_WIN32_MMAP
 				HAVE_WPGMPTR HAVE_RTLGENRANDOM)
 	if(CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
-		add_compile_definitions(ENSURE_MSYSTEM_IS_SET="UCRT64" MINGW_PREFIX="ucrt64")
+		add_compile_definitions(ENSURE_MSYSTEM_IS_SET="MINGW64" MINGW_PREFIX="mingw64")
 	elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "arm64")
 		add_compile_definitions(ENSURE_MSYSTEM_IS_SET="CLANGARM64" MINGW_PREFIX="clangarm64")
 	elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "x86")
@@ -413,11 +413,11 @@ endif()
 #function checks
 set(function_checks
 	strcasestr memmem strlcpy strtoimax strtoumax strtoull
-	setenv mkdtemp poll pread memmem writev)
+	setenv mkdtemp poll pread memmem)
 
-#unsetenv,hstrerror,utimensat are incompatible with windows build (provided by compat/mingw.c)
+#unsetenv,hstrerror are incompatible with windows build
 if(NOT WIN32)
-	list(APPEND function_checks unsetenv hstrerror utimensat)
+	list(APPEND function_checks unsetenv hstrerror)
 endif()
 
 foreach(f ${function_checks})
@@ -458,15 +458,7 @@ if(NOT HAVE_MEMMEM)
 	list(APPEND compat_SOURCES compat/memmem.c)
 endif()
 
-if(NOT HAVE_WRITEV)
-	list(APPEND compat_SOURCES compat/writev.c)
-endif()
-
 if(NOT WIN32)
-	if(NOT HAVE_UTIMENSAT)
-		list(APPEND compat_SOURCES compat/utimensat.c)
-	endif()
-
 	if(NOT HAVE_UNSETENV)
 		list(APPEND compat_SOURCES compat/unsetenv.c)
 	endif()
