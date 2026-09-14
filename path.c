@@ -1328,45 +1328,6 @@ char *strip_path_suffix(const char *path, const char *suffix)
 	return offset == -1 ? NULL : xstrndup(path, offset);
 }
 
-int is_mount_point_via_stat(struct strbuf *path)
-{
-	size_t len = path->len;
-	dev_t current_dev;
-	struct stat st;
-
-	if (!strcmp("/", path->buf))
-		return 1;
-
-	strbuf_addstr(path, "/.");
-	if (lstat(path->buf, &st)) {
-		/*
-		 * If we cannot access the current directory, we cannot say
-		 * that it is a bind mount.
-		 */
-		strbuf_setlen(path, len);
-		return 0;
-	}
-	current_dev = st.st_dev;
-
-	/* Now look at the parent directory */
-	strbuf_addch(path, '.');
-	if (lstat(path->buf, &st)) {
-		/*
-		 * If we cannot access the parent directory, we cannot say
-		 * that it is a bind mount.
-		 */
-		strbuf_setlen(path, len);
-		return 0;
-	}
-	strbuf_setlen(path, len);
-
-	/*
-	 * If the device ID differs between current and parent directory,
-	 * then it is a bind mount.
-	 */
-	return current_dev != st.st_dev;
-}
-
 int daemon_avoid_alias(const char *p)
 {
 	int sl, ndot;
@@ -1584,47 +1545,18 @@ int looks_like_command_line_option(const char *str)
 char *xdg_config_home_for(const char *subdir, const char *filename)
 {
 	const char *home, *config_home;
-	char *home_config = NULL;
 
 	assert(subdir);
 	assert(filename);
 	config_home = getenv("XDG_CONFIG_HOME");
-	if (config_home && *config_home) {
-		char *ret = mkpathdup("%s/%s/%s", config_home, subdir, filename);
-#ifdef GIT_WINDOWS_NATIVE
-		convert_slashes(ret);
-#endif
-		return ret;
-	}
+	if (config_home && *config_home)
+		return mkpathdup("%s/%s/%s", config_home, subdir, filename);
 
 	home = getenv("HOME");
-	if (home && *home)
-		home_config = mkpathdup("%s/.config/%s/%s", home, subdir, filename);
+	if (home)
+		return mkpathdup("%s/.config/%s/%s", home, subdir, filename);
 
-	#ifdef WIN32
-	{
-		const char *appdata = getenv("APPDATA");
-		if (appdata && *appdata) {
-			char *appdata_config = mkpathdup("%s/Git/%s", appdata, filename);
-			if (file_exists(appdata_config)) {
-				if (home_config && file_exists(home_config))
-					warning("'%s' was ignored because '%s' exists.", home_config, appdata_config);
-				free(home_config);
-#ifdef GIT_WINDOWS_NATIVE
-				convert_slashes(appdata_config);
-#endif
-				return appdata_config;
-			}
-			free(appdata_config);
-		}
-	}
-	#endif
-
-#ifdef GIT_WINDOWS_NATIVE
-	if (home_config)
-		convert_slashes(home_config);
-#endif
-	return home_config;
+	return NULL;
 }
 
 char *xdg_config_home(const char *filename)
@@ -1645,75 +1577,6 @@ char *xdg_cache_home(const char *filename)
 	if (home)
 		return mkpathdup("%s/.cache/git/%s", home, filename);
 	return NULL;
-}
-
-void format_path(struct strbuf *dest, const char *path,
-		 const char *prefix, enum path_format format)
-{
-	strbuf_reset(dest);
-
-	switch (format) {
-	case PATH_FORMAT_UNMODIFIED:
-		strbuf_addstr(dest, path);
-		break;
-
-	case PATH_FORMAT_RELATIVE: {
-		struct strbuf relative_buf = STRBUF_INIT;
-		struct strbuf real_path = STRBUF_INIT;
-		struct strbuf real_prefix = STRBUF_INIT;
-		char *cwd = NULL;
-
-		/*
-		 * We don't ever produce a relative path if prefix is NULL,
-		 * so set the prefix to the current directory so that we can
-		 * produce a relative path whenever possible.
-		 */
-		if (!prefix)
-			prefix = cwd = xgetcwd();
-
-		if (!is_absolute_path(path)) {
-			strbuf_realpath_forgiving(&real_path, path, 1);
-			path = real_path.buf;
-		}
-		if (!is_absolute_path(prefix)) {
-			strbuf_realpath_forgiving(&real_prefix, prefix, 1);
-			prefix = real_prefix.buf;
-		}
-
-		strbuf_addstr(dest, relative_path(path, prefix, &relative_buf));
-
-		strbuf_release(&relative_buf);
-		strbuf_release(&real_path);
-		strbuf_release(&real_prefix);
-		free(cwd);
-		break;
-	}
-
-	case PATH_FORMAT_RELATIVE_IF_SHARED: {
-		struct strbuf relative_buf = STRBUF_INIT;
-
-		/*
-		 * If we're using RELATIVE_IF_SHARED mode, then we want an
-		 * absolute path unless the two share a common prefix, so don't
-		 * default the prefix to the current working directory. Doing so
-		 * would cause a relative path to always be produced if possible.
-		 */
-		strbuf_addstr(dest, relative_path(path, prefix, &relative_buf));
-		strbuf_release(&relative_buf);
-		break;
-	}
-
-	case PATH_FORMAT_CANONICAL:
-		/*
-		 * strbuf_realpath_forgiving inherently resets the destination
-		 * buffer, safely aligning with our replace semantics.
-		 */
-		strbuf_realpath_forgiving(dest, path, 1);
-		break;
-
-	default:
-		BUG("unknown path_format value %d", format);
-	}
 }
 
 REPO_GIT_PATH_FUNC(squash_msg, "SQUASH_MSG")
