@@ -356,7 +356,11 @@ test_expect_success "expected conflict markers" '
 test_expect_success 'binary files cannot be merged' '
 	test_must_fail git merge-file -p \
 		orig.txt "$TEST_DIRECTORY"/lib-diff/test-binary-1.png new1.txt 2> merge.err &&
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< HEAD
 	test_grep "Cannot merge binary files" merge.err
+================================
+	grep "Cannot merge binary files" merge.err
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 32c4f76892
 '
 
 test_expect_success 'binary files cannot be merged with --object-id' '
