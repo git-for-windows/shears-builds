@@ -69,7 +69,7 @@ test_expect_success 'run_command does not try to execute a directory' '
 	cat bin2/greet
 	EOF
 
-	PATH=$PWD/bin1:$PWD/bin2:$PATH \
+	PATH=$PWD/bin1$PATH_SEP$PWD/bin2$PATH_SEP$PATH \
 		test-tool run-command run-command greet >actual 2>err &&
 	test_cmp bin2/greet actual &&
 	test_must_be_empty err
@@ -86,7 +86,7 @@ test_expect_success POSIXPERM 'run_command passes over non-executable file' '
 	cat bin2/greet
 	EOF
 
-	PATH=$PWD/bin1:$PWD/bin2:$PATH \
+	PATH=$PWD/bin1$PATH_SEP$PWD/bin2$PATH_SEP$PATH \
 		test-tool run-command run-command greet >actual 2>err &&
 	test_cmp bin2/greet actual &&
 	test_must_be_empty err
@@ -106,7 +106,7 @@ test_expect_success POSIXPERM,SANITY 'unreadable directory in PATH' '
 	git config alias.nitfol "!echo frotz" &&
 	chmod a-rx local-command &&
 	(
-		PATH=./local-command:$PATH &&
+		PATH=./local-command$PATH_SEP$PATH &&
 		git nitfol >actual
 	) &&
 	echo frotz >expect &&
@@ -162,6 +162,77 @@ test_expect_success 'run_command runs ungrouped in parallel with more tasks than
 	test-tool run-command --ungroup run-command-parallel 3 sh -c "printf \"%s\n%s\n\" Hello World" >out 2>err &&
 	test_line_count = 8 out &&
 	test_line_count = 4 err
+'
+
+wait_for_line_count () {
+	expected=$1 &&
+	file=$2 &&
+
+	for i in $(test_seq 1 100)
+	do
+		if test "$(wc -l <"$file")" -eq "$expected"
+		then
+			return 0
+		fi &&
+		sleep 0.1
+	done &&
+	return 1
+}
+
+cleanup_parallel () {
+	touch release
+	if test -n "$parallel_pid"
+	then
+		wait "$parallel_pid"
+	fi
+}
+
+test_expect_success MINGW 'setup poll descriptor limit test' '
+	write_script wait-for-release <<-\EOF
+	echo started >>"$1"
+	if test "$3" = stdin
+	then
+		while read line
+		do
+			:
+		done
+	fi
+	while ! test -e "$2"
+	do
+		sleep 0.1
+	done
+	EOF
+'
+
+test_expect_success MINGW 'run_command uses full poll limit without stdin' '
+	: >started &&
+	rm -f release &&
+	test-tool run-command run-command-parallel --tasks=40 40 \
+		./wait-for-release "$PWD/started" "$PWD/release" \
+		>out 2>err &
+	parallel_pid=$! &&
+	test_when_finished cleanup_parallel &&
+	wait_for_line_count 40 started &&
+	touch release &&
+	wait "$parallel_pid" &&
+	parallel_pid=
+'
+
+test_expect_success MINGW 'run_command limits children with stdin pipes' '
+	: >started &&
+	rm -f release &&
+	test-tool run-command run-command-stdin --tasks=40 40 \
+		./wait-for-release "$PWD/started" "$PWD/release" stdin \
+		>out 2>err &
+	parallel_pid=$! &&
+	test_when_finished cleanup_parallel &&
+	wait_for_line_count 31 started &&
+	sleep 1 &&
+	test_line_count = 31 started &&
+	touch release &&
+	wait "$parallel_pid" &&
+	parallel_pid= &&
+	test_line_count = 40 started
 '
 
 test_expect_success 'run_command listens to stdin' '
