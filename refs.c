@@ -16,6 +16,7 @@
 #include "refs/refs-internal.h"
 #include "hook.h"
 #include "object-name.h"
+#include "oid-array.h"
 #include "odb.h"
 #include "object.h"
 #include "path.h"
@@ -3069,34 +3070,60 @@ void ref_transaction_for_each_rejected_update(struct ref_transaction *transactio
 	}
 }
 
-int refs_delete_refs(struct ref_store *refs, const char *logmsg,
-		     struct string_list *refnames, unsigned int flags)
+struct delete_refs_rejection_data {
+	int failures;
+};
+
+static void delete_refs_rejection_handler(const char *refname,
+					  const struct object_id *old_oid UNUSED,
+					  const struct object_id *new_oid UNUSED,
+					  const char *old_target UNUSED,
+					  const char *new_target UNUSED,
+					  enum ref_transaction_error err,
+					  const char *details,
+					  void *cb_data)
 {
+	struct delete_refs_rejection_data *data = cb_data;
+
+	warning(_("could not delete reference %s: %s"), refname,
+		details ? details : ref_transaction_error_msg(err));
+	data->failures = 1;
+}
+
+int refs_delete_refs(struct ref_store *refs, const char *logmsg,
+		     struct string_list *refnames,
+		     const struct oid_array *old_oids,
+		     unsigned int flags)
+{
+	struct delete_refs_rejection_data rejection_data = { 0 };
 	struct ref_transaction *transaction;
 	struct strbuf err = STRBUF_INIT;
-	struct string_list_item *item;
+	size_t i;
 	int ret = 0, failures = 0;
 	char *msg;
 
 	if (!refnames->nr)
 		return 0;
+	if (old_oids && old_oids->nr != refnames->nr)
+		BUG("refname and old OID counts do not match");
 
 	msg = normalize_reflog_message(logmsg);
 
-	/*
-	 * Since we don't check the references' old_oids, the
-	 * individual updates can't fail, so we can pack all of the
-	 * updates into a single transaction.
-	 */
-	transaction = ref_store_transaction_begin(refs, 0, &err);
+	transaction = ref_store_transaction_begin(refs,
+			old_oids ? REF_TRANSACTION_ALLOW_FAILURE : 0, &err);
 	if (!transaction) {
 		ret = error("%s", err.buf);
 		goto out;
 	}
 
-	for_each_string_list_item(item, refnames) {
+	for (i = 0; i < refnames->nr; i++) {
+		struct string_list_item *item = &refnames->items[i];
+		const struct object_id *old_oid = old_oids ? &old_oids->oid[i] : NULL;
+
+		if (old_oid && is_null_oid(old_oid))
+			old_oid = NULL;
 		ret = ref_transaction_delete(transaction, item->string,
-					     NULL, NULL, flags, msg, &err);
+					     old_oid, NULL, flags, msg, &err);
 		if (ret) {
 			warning(_("could not delete reference %s: %s"),
 				item->string, err.buf);
@@ -3112,9 +3139,14 @@ int refs_delete_refs(struct ref_store *refs, const char *logmsg,
 			      refnames->items[0].string, err.buf);
 		else
 			error(_("could not delete references: %s"), err.buf);
-	}
+	} else if (old_oids)
+		ref_transaction_for_each_rejected_update(transaction,
+						 delete_refs_rejection_handler,
+						 &rejection_data);
 
 out:
+	if (rejection_data.failures)
+		failures = 1;
 	if (!ret && failures)
 		ret = -1;
 	ref_transaction_free(transaction);
