@@ -1471,28 +1471,36 @@ static int prune_refs(struct display_state *display_state,
 	struct ref *ref, *stale_refs = get_stale_heads(rs, ref_map);
 	struct strbuf err = STRBUF_INIT;
 	struct string_list refnames = STRING_LIST_INIT_NODUP;
-
-	for (ref = stale_refs; ref; ref = ref->next)
-		string_list_append(&refnames, ref->name);
+	struct oid_array old_oids = OID_ARRAY_INIT;
 
 	if (!dry_run) {
 		if (transaction) {
 			for (ref = stale_refs; ref; ref = ref->next) {
-				result = ref_transaction_delete(transaction, ref->name, NULL,
-								NULL, 0, "fetch: prune", &err);
+				result = ref_transaction_delete(transaction, ref->name,
+							&ref->new_oid, NULL, 0,
+							"fetch: prune", &err);
 				if (result)
 					goto cleanup;
 			}
 		} else {
+			for (ref = stale_refs; ref; ref = ref->next) {
+				string_list_append(&refnames, ref->name);
+				oid_array_append(&old_oids, &ref->new_oid);
+			}
 			result = refs_delete_refs(get_main_ref_store(the_repository),
 						  "fetch: prune", &refnames,
-						  NULL, 0);
+						  &old_oids, 0);
 		}
+		if (result)
+			goto cleanup;
 	}
 
 	if (verbosity >= 0) {
 		int summary_width = transport_summary_width(stale_refs);
 
+		if (!refnames.nr)
+			for (ref = stale_refs; ref; ref = ref->next)
+				string_list_append(&refnames, ref->name);
 		for (ref = stale_refs; ref; ref = ref->next) {
 			display_ref_update(display_state, '-', _("[deleted]"), NULL,
 					   _("(none)"), ref->name,
@@ -1506,6 +1514,7 @@ static int prune_refs(struct display_state *display_state,
 
 cleanup:
 	string_list_clear(&refnames, 0);
+	oid_array_clear(&old_oids);
 	strbuf_release(&err);
 	free_refs(stale_refs);
 	return result;
