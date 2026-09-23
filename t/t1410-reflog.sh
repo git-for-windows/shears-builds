@@ -153,6 +153,51 @@ test_expect_success 'reflog expire should not barf on an annotated tag' '
 	test_grep ! "error: [Oo]bject .* not a commit" err
 '
 
+test_expect_success 'reflog expire uses the correct default expiry periods' '
+	test_when_finished "rm -rf reachable-keep reachable-expire unreachable" &&
+	git init reachable-keep &&
+	(
+		cd reachable-keep &&
+		timestamp=$(test-tool date timestamp "60.days.ago") &&
+		timestamp=${timestamp#* -> } &&
+		test_commit --no-tag --date "$timestamp +0000" old &&
+		git reflog expire --all &&
+		test_stdout_line_count = 1 git reflog refs/heads/main
+	) &&
+	git init reachable-expire &&
+	(
+		cd reachable-expire &&
+		timestamp=$(test-tool date timestamp "100.days.ago") &&
+		timestamp=${timestamp#* -> } &&
+		test_commit --no-tag --date "$timestamp +0000" old &&
+		git reflog expire --all &&
+		test_stdout_line_count = 0 git reflog refs/heads/main
+	) &&
+	git init unreachable &&
+	(
+		cd unreachable &&
+		test_commit --no-tag base &&
+		base=$(git rev-parse HEAD) &&
+		timestamp=$(test-tool date timestamp "20.days.ago") &&
+		timestamp=${timestamp#* -> } &&
+		test_commit --no-tag --date "$timestamp +0000" old-20 &&
+		old20=$(git rev-parse HEAD) &&
+		git update-ref refs/heads/main "$base" &&
+		timestamp=$(test-tool date timestamp "40.days.ago") &&
+		timestamp=${timestamp#* -> } &&
+		test_commit --no-tag --date "$timestamp +0000" old-40 &&
+		old40=$(git rev-parse HEAD) &&
+		git update-ref refs/heads/main "$base" &&
+		git rev-list --all --objects >reachable &&
+		test_grep ! "$old20" reachable &&
+		test_grep ! "$old40" reachable &&
+		git reflog expire --all &&
+		git reflog --format='%H' refs/heads/main >actual &&
+		test_grep "$old20" actual &&
+		test_grep ! "$old40" actual
+	)
+'
+
 test_expect_success 'corrupt and check' '
 
 	corrupt $F &&
