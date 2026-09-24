@@ -147,25 +147,25 @@ ancestor /foo /fo -1
 ancestor /foo /foo -1
 ancestor /foo /bar -1
 ancestor /foo /foo/bar -1
-ancestor /foo /foo:/bar -1
-ancestor /foo /:/foo:/bar 0
-ancestor /foo /foo:/:/bar 0
-ancestor /foo /:/bar:/foo 0
+ancestor /foo "/foo$PATH_SEP/bar" -1
+ancestor /foo "/$PATH_SEP/foo$PATH_SEP/bar" 0
+ancestor /foo "/foo$PATH_SEP/$PATH_SEP/bar" 0
+ancestor /foo "/$PATH_SEP/bar$PATH_SEP/foo" 0
 ancestor /foo/bar / 0
 ancestor /foo/bar /fo -1
 ancestor /foo/bar /foo 4
 ancestor /foo/bar /foo/ba -1
-ancestor /foo/bar /:/fo 0
-ancestor /foo/bar /foo:/foo/ba 4
+ancestor /foo/bar "/$PATH_SEP/fo" 0
+ancestor /foo/bar "/foo$PATH_SEP/foo/ba" 4
 ancestor /foo/bar /bar -1
 ancestor /foo/bar /fo -1
-ancestor /foo/bar /foo:/bar 4
-ancestor /foo/bar /:/foo:/bar 4
-ancestor /foo/bar /foo:/:/bar 4
-ancestor /foo/bar /:/bar:/fo 0
-ancestor /foo/bar /:/bar 0
+ancestor /foo/bar "/foo$PATH_SEP/bar" 4
+ancestor /foo/bar "/$PATH_SEP/foo$PATH_SEP/bar" 4
+ancestor /foo/bar "/foo$PATH_SEP/$PATH_SEP/bar" 4
+ancestor /foo/bar "/$PATH_SEP/bar$PATH_SEP/fo" 0
+ancestor /foo/bar "/$PATH_SEP/bar" 0
 ancestor /foo/bar /foo 4
-ancestor /foo/bar /foo:/bar 4
+ancestor /foo/bar "/foo$PATH_SEP/bar" 4
 ancestor /foo/bar /bar -1
 
 # Windows-specific: DOS drives, network shares
@@ -279,6 +279,14 @@ test_expect_success SYMLINKS 'real path works on symlinks' '
 	echo "$sym" >expect &&
 	test-tool path-utils real_path "$dir2/syml" >actual &&
 	test_cmp expect actual
+'
+
+test_expect_success MINGW 'real path works near drive root' '
+	# we need a non-existing path at the drive root; simply skip if C:/xyz exists
+	if test ! -e C:/xyz
+	then
+		test C:/xyz = $(test-tool path-utils real_path C:/xyz)
+	fi
 '
 
 test_expect_success SYMLINKS 'prefix_path works with absolute paths to work tree symlinks' '
