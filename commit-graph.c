@@ -743,7 +743,7 @@ struct commit_graph *read_commit_graph_one(struct repository *repo,
  * On the first invocation, this function attempts to load the commit
  * graph if the repository is configured to have one.
  */
-static struct commit_graph *prepare_commit_graph(struct repository *r)
+struct commit_graph *prepare_commit_graph(struct repository *r)
 {
 	struct odb_source_files *files;
 

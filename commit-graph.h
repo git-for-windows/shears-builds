@@ -31,6 +31,7 @@ struct string_list;
 
 char *get_commit_graph_filename(const char *dir);
 char *get_commit_graph_chain_filename(const char *dir);
+struct commit_graph *prepare_commit_graph(struct repository *r);
 int open_commit_graph(const char *graph_file, int *fd, struct stat *st);
 int open_commit_graph_chain(const char *chain_file, int *fd, struct stat *st,
 			    const struct git_hash_algo *hash_algo);
