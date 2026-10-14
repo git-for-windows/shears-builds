@@ -2108,6 +2108,22 @@ test_expect_success "backfill tags when providing a refspec" '
 	test_cmp expect actual
 '
 
+test_expect_success 'shallow fetch does not fetch objects again for tags' '
+	test_when_finished rm -rf source target &&
+
+	git init source &&
+	test_commit_bulk -C source 10 &&
+	git -C source tag -a tag -m tag HEAD~2 &&
+	root_oid=$(git -C source rev-parse HEAD~9) &&
+
+	git init target &&
+	git -C target remote add origin ../source &&
+	git -C target fetch --depth 5 origin &&
+
+	# Should not fetch objects beyond the pre-specified depth.
+	test_must_fail git -C target cat-file -e "$root_oid"
+'
+
 test_expect_success REFFILES "FETCH_HEAD is updated even if ref updates fail" '
 	test_when_finished rm -rf base repo &&
 
