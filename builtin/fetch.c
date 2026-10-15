@@ -2200,6 +2200,27 @@ static int do_fetch(struct transport *transport,
 		struct ref *tags_ref_map = NULL, **tail = &tags_ref_map;
 
 		find_non_local_tags(remote_refs, transaction, &tags_ref_map, &tail);
+
+		/*
+		 * Backfilling tags has no depth limit. If we don't commit
+		 * the fetched references, the backfill will report no refs
+		 * in the 'have' section of the negotiation. This can cause
+		 * the server to send all objects.
+		 */
+		if (tags_ref_map && !atomic_fetch) {
+			retcode |= commit_ref_transaction(&transaction, false,
+							  transport->remote->name,
+							  &rejected_refs, &err);
+
+			transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
+								  REF_TRANSACTION_ALLOW_FAILURE, &err);
+			if (!transaction) {
+				free_refs(tags_ref_map);
+				retcode = -1;
+				goto cleanup;
+			}
+		}
+
 		if (tags_ref_map) {
 			/*
 			 * If backfilling of tags fails then we want to tell
