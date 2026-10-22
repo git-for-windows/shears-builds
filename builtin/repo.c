@@ -6,6 +6,7 @@
 #include "hash.h"
 #include "hex.h"
 #include "odb.h"
+#include "odb/source.h"
 #include "parse-options.h"
 #include "path.h"
 #include "path-walk.h"
@@ -269,11 +270,18 @@ static int get_references_format(struct repository *repo, struct strbuf *buf)
 	return 0;
 }
 
+static int get_object_storage_format(struct repository *repo, struct strbuf *buf)
+{
+	strbuf_addstr(buf, repo->object_storage_format);
+	return 0;
+}
+
 /* repo_info_field keys must be in lexicographical order */
 static const struct repo_info_field repo_info_field[] = {
 	{ "layout.bare", get_layout_bare },
 	{ "layout.shallow", get_layout_shallow },
 	{ "object.format", get_object_format },
+	{ "objects.storageFormat", get_object_storage_format },
 	{ "path.cdup", get_path_cdup },
 	{ "path.commondir.absolute", get_path_commondir_absolute },
 	{ "path.commondir.relative", get_path_commondir_relative },

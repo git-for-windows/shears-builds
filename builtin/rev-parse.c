@@ -17,6 +17,7 @@
 #include "gettext.h"
 #include "hash.h"
 #include "hex.h"
+#include "odb/source.h"
 #include "refs.h"
 #include "quote.h"
 #include "object-name.h"
@@ -1136,6 +1137,10 @@ int cmd_rev_parse(int argc,
 			}
 			if (!strcmp(arg, "--show-ref-format") || !strcmp(arg, "--show-ref-storage-format")) {
 				puts(ref_storage_format_to_name(the_repository->ref_storage_format));
+				continue;
+			}
+			if (!strcmp(arg, "--show-object-storage-format")) {
+				puts(the_repository->object_storage_format);
 				continue;
 			}
 			if (!strcmp(arg, "--end-of-options")) {

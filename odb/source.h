@@ -32,6 +32,14 @@ enum odb_source_type {
  */
 const char *odb_source_type_to_name(enum odb_source_type type);
 
+/*
+ * Parse the given URI in the format "<schema>[://<payload>]" and return the
+ * source type identified by the schema. If `payload` is non-NULL it will be
+ * set to a newly allocated copy of the payload, or NULL if the URI has no or
+ * an empty payload. Returns `ODB_SOURCE_UNKNOWN` for unknown schemas.
+ */
+enum odb_source_type odb_source_type_by_uri(const char *uri, char **payload);
+
 struct object_id;
 struct odb_stream;
 struct strbuf;
@@ -325,9 +333,11 @@ struct odb_source {
 
 /*
  * Allocate and initialize a new source for the given object database. The path
- * of the source is derived from repository paths.
+ * of the source is derived from repository paths or from the object storage
+ * format.
  */
 struct odb_source *odb_source_new(struct object_database *odb,
+				  const char *object_storage_format,
 				  enum odb_new_flags flags);
 
 /*

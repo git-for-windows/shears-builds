@@ -1,4 +1,5 @@
 #include "git-compat-util.h"
+#include "gettext.h"
 #include "object-file.h"
 #include "odb/source-files.h"
 #include "odb/source.h"
@@ -23,10 +24,52 @@ const char *odb_source_type_to_name(enum odb_source_type type)
 	return name;
 }
 
+static enum odb_source_type odb_source_type_by_name(const char *name)
+{
+	if (!strcmp(name, "files"))
+		return ODB_SOURCE_FILES;
+	return ODB_SOURCE_UNKNOWN;
+}
+
+enum odb_source_type odb_source_type_by_uri(const char *uri, char **payload)
+{
+	enum odb_source_type type;
+	const char *schema_end;
+	char *name;
+
+	schema_end = strstr(uri, "://");
+	if (!schema_end) {
+		name = xstrdup(uri);
+		if (payload)
+			*payload = NULL;
+	} else {
+		name = xstrndup(uri, schema_end - uri);
+		if (payload)
+			*payload = *(schema_end + 3) ? xstrdup(schema_end + 3) : NULL;
+	}
+
+	type = odb_source_type_by_name(name);
+	free(name);
+	return type;
+}
+
 struct odb_source *odb_source_new(struct object_database *odb,
+				  const char *object_storage_format,
 				  enum odb_new_flags flags)
 {
-	return &odb_source_files_new(odb, flags)->base;
+	struct odb_source *source;
+	char *payload = NULL;
+
+	switch (odb_source_type_by_uri(object_storage_format, &payload)) {
+	case ODB_SOURCE_FILES:
+		source = &odb_source_files_new(odb, payload, flags)->base;
+		break;
+	default:
+		die(_("unknown object storage format '%s'"), object_storage_format);
+	}
+
+	free(payload);
+	return source;
 }
 
 void odb_source_init(struct odb_source *source,
