@@ -70,10 +70,15 @@ A repository that only allows signed commits can store the file
 in the repository itself using a path relative to the top-level of the working tree.
 This way only committers with an already valid key can add or change keys in the keyring.
 +
-Since OpensSSH 8.8 this file allows specifying a key lifetime using valid-after &
-valid-before options. Git will mark signatures as valid if the signing key was
-valid at the time of the signature's creation. This allows users to change a
-signing key without invalidating all previously made signatures.
+Since OpenSSH 8.8 this file allows specifying a key lifetime using valid-after &
+valid-before options. When verifying a commit or a tag, Git checks that lifetime
+against the committer or tagger date recorded in the commit or tag. This allows
+users to change a signing key without invalidating all previously made
+signatures. That date is chosen by whoever creates the commit or tag, so it is
+not evidence of when the signature was made; the same is true of the creation
+time in a GPG signature, which is set by the signer's clock. Relying on a key
+lifetime is therefore only safe as long as the signing key has never leaked;
+once it has, valid-after and valid-before guarantee nothing.
 +
 Using a SSH CA key with the cert-authority option
 (see ssh-keygen(1) "CERTIFICATES") is also valid.
