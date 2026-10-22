@@ -759,7 +759,7 @@ struct object_database *odb_new(struct repository *repo,
 	o->repo = repo;
 	pthread_mutex_init(&o->replace_mutex, NULL);
 
-	o->source = odb_source_new(o, flags);
+	o->source = odb_source_new(o, repo->object_storage_format, flags);
 	o->inmemory_objects = &odb_source_inmemory_new(o)->base;
 
 	return o;

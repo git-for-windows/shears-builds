@@ -218,6 +218,16 @@ void repo_set_ref_storage_format(struct repository *repo,
 	repo->ref_storage_payload = xstrdup_or_null(payload);
 }
 
+void repo_set_object_storage_format(struct repository *repo,
+				    const char *uri)
+{
+	free(repo->object_storage_format);
+	if (uri)
+		repo->object_storage_format = xstrdup(uri);
+	else
+		repo->object_storage_format = xstrdup("files");
+}
+
 /*
  * Attempt to resolve and set the provided 'gitdir' for repository 'repo'.
  * Return 0 upon success and a non-zero value upon failure.
@@ -384,6 +394,7 @@ void repo_clear(struct repository *repo)
 	free(repo->worktree);
 	free(repo->submodule_prefix);
 	free(repo->ref_storage_payload);
+	free(repo->object_storage_format);
 
 	diff_providers_clear(repo);
 
