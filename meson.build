@@ -713,6 +713,7 @@ builtin_sources = [
   'builtin/stash.c',
   'builtin/stripspace.c',
   'builtin/submodule--helper.c',
+  'builtin/survey.c',
   'builtin/symbolic-ref.c',
   'builtin/tag.c',
   'builtin/unpack-file.c',
@@ -1311,9 +1312,11 @@ elif host_machine.system() == 'windows'
     'compat/winansi.c',
     'compat/win32/dirent.c',
     'compat/win32/flush.c',
+    'compat/win32/fscache.c',
     'compat/win32/path-utils.c',
     'compat/win32/pthread.c',
     'compat/win32/syslog.c',
+    'compat/win32/wsl.c',
     'compat/win32mmap.c',
   ]
 
