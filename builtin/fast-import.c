@@ -4193,6 +4193,10 @@ int cmd_fast_import(int argc,
 	};
 
 	show_usage_with_options_if_asked(argc, argv, fast_import_usage, fast_import_options);
+	if (argc == 2 && (!strcmp(argv[1], "--git-completion-helper") ||
+			  !strcmp(argv[1], "--git-completion-helper-all")))
+		parse_options(argc, argv, prefix, fast_import_options,
+			      fast_import_usage, 0);
 
 	fast_import_state_init(&state, argc, argv, prefix, fast_import_options);
 
