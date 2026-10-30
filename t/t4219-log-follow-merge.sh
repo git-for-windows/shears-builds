@@ -266,4 +266,35 @@ test_expect_success '--follow with --diff-merges=first-parent follows all parent
 	test_cmp expect actual
 '
 
+test_expect_success 'setup merge keeping the renamed path, other side edited the old one' '
+	git init keep-renamed &&
+	printf "line 1\nline 2\nline 3\nline 4\nline 5\n" >keep-renamed/F &&
+	git -C keep-renamed add F &&
+	test_tick &&
+	git -C keep-renamed commit -m "O: add F" &&
+	git -C keep-renamed branch B &&
+	git -C keep-renamed mv F G &&
+	test_tick &&
+	git -C keep-renamed commit -m "A1: rename F to G on master" &&
+
+	git -C keep-renamed checkout B &&
+	printf "line 1\nline 2\nline 3\nline 4 T\nline 5\n" >keep-renamed/F &&
+	test_tick &&
+	git -C keep-renamed commit -am "B2: update F on B" &&
+
+	git -C keep-renamed checkout master &&
+	test_tick &&
+	git -C keep-renamed merge -s ours -m "M: merge B, keep G, drop F" B
+'
+
+test_expect_success '--follow follows an edit on the side the merge did not take' '
+	git -C keep-renamed log --follow --pretty=tformat:%s G >actual &&
+	cat >expect <<-\EOF &&
+	B2: update F on B
+	A1: rename F to G on master
+	O: add F
+	EOF
+	test_cmp expect actual
+'
+
 test_done

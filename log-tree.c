@@ -1111,15 +1111,20 @@ static void set_pathspec_to_single_path(struct pathspec *ps, const char *path)
 		       PATHSPEC_LITERAL_PATH, "", paths);
 }
 
-static int commit_has_path(struct rev_info *opt, struct commit *c,
-			   const char *path)
+static int tree_has_path(struct rev_info *opt, struct object_id *tree,
+			 const char *path)
 {
 	struct object_id oid;
 	unsigned short mode;
 
+	return !get_tree_entry(opt->diffopt.repo, tree, path, &oid, &mode);
+}
+
+static int commit_has_path(struct rev_info *opt, struct commit *c,
+			   const char *path)
+{
 	parse_commit_or_die(c);
-	return !get_tree_entry(opt->diffopt.repo, get_commit_tree_oid(c), path,
-			       &oid, &mode);
+	return tree_has_path(opt, get_commit_tree_oid(c), path);
 }
 
 static void remember_follow_pathspec(struct rev_info *opt,
@@ -1170,25 +1175,96 @@ void release_follow_pathspec_slab(struct rev_info *opt)
 }
 
 /*
+ * Did 'parent' change a file since 'base' that the merge (with tree 'oid') no
+ * longer has? Only such a file can be the source of a rename on the other side
+ * of the merge that still needs to be followed in 'parent'.
+ */
+static int follow_parent_changed_dropped_file(struct rev_info *opt,
+					      struct commit *base,
+					      struct commit *parent,
+					      struct object_id *oid)
+{
+	struct diff_options diff_opts;
+	int i, ret = 0;
+
+	repo_diff_setup(opt->diffopt.repo, &diff_opts);
+	diff_opts.flags.recursive = 1;
+	diff_opts.output_format = DIFF_FORMAT_NO_OUTPUT;
+	diff_setup_done(&diff_opts);
+	diff_tree_oid(get_commit_tree_oid(base), get_commit_tree_oid(parent),
+		      "", &diff_opts);
+	for (i = 0; i < diff_queued_diff.nr && !ret; i++) {
+		struct diff_filepair *p = diff_queued_diff.queue[i];
+
+		ret = DIFF_FILE_VALID(p->two) &&
+		      !tree_has_path(opt, oid, p->two->path);
+	}
+	diff_queue_clear(&diff_queued_diff);
+	diff_free(&diff_opts);
+	return ret;
+}
+
+/*
+ * Is 'path' in the merge (with tree 'oid') renamed from a file of 'parent'?
+ * Only look at the files that the merge deleted, not at all files of 'parent'
+ * like --follow does.
+ */
+static int follow_has_rename_source(struct rev_info *opt,
+				    struct commit *parent,
+				    struct object_id *oid, const char *path)
+{
+	struct diff_options diff_opts;
+	int i, ret = 0;
+
+	repo_diff_setup(opt->diffopt.repo, &diff_opts);
+	diff_opts.flags.recursive = 1;
+	diff_opts.detect_rename = DIFF_DETECT_RENAME;
+	diff_opts.rename_score = opt->diffopt.rename_score;
+	diff_opts.single_follow = path;
+	diff_opts.output_format = DIFF_FORMAT_NO_OUTPUT;
+	diff_setup_done(&diff_opts);
+	diff_tree_oid(get_commit_tree_oid(parent), oid, "", &diff_opts);
+	diffcore_std(&diff_opts);
+	for (i = 0; i < diff_queued_diff.nr && !ret; i++) {
+		struct diff_filepair *p = diff_queued_diff.queue[i];
+
+		ret = p->status == DIFF_STATUS_RENAMED &&
+		      !strcmp(p->two->path, path);
+	}
+	diff_queue_clear(&diff_queued_diff);
+	diff_free(&diff_opts);
+	return ret;
+}
+
+/*
  * When the path in a merge is the same as in 'same', does the path still need
  * renames to be followed in 'parent'? Only if the merge has the path, 'parent'
- * doesn't have it, but its fork point with 'same' had it, e.g. 'parent'
- * renamed the path.
+ * doesn't have it, and either:
+ *
+ * - its fork point with 'same' had it, e.g. 'parent' renamed the path, or
+ * - 'same' renamed the path from a file that 'parent' changed.
  */
 static int follow_needs_renames(struct rev_info *opt, struct commit *parent,
-				struct commit *same, const char *path)
+				struct commit *same, struct object_id *oid,
+				const char *path)
 {
 	struct commit_list *bases = NULL, *base;
-	int ret = 0;
+	int ret = 0, changed_dropped = 0;
 
 	if (commit_has_path(opt, parent, path) ||
 	    !commit_has_path(opt, same, path))
 		return 0;
 	if (repo_get_merge_bases(opt->diffopt.repo, parent, same, &bases) < 0)
 		exit(128);
-	for (base = bases; base && !ret; base = base->next)
+	for (base = bases; base && !ret; base = base->next) {
 		ret = commit_has_path(opt, base->item, path);
+		if (!ret && !changed_dropped)
+			changed_dropped = follow_parent_changed_dropped_file(
+				opt, base->item, parent, oid);
+	}
 	commit_list_free(bases);
+	if (!ret && changed_dropped)
+		ret = follow_has_rename_source(opt, parent, oid, path);
 	return ret;
 }
 
@@ -1313,7 +1389,7 @@ static int log_tree_diff(struct rev_info *opt, struct commit *commit, struct log
 			     parents = parents->next) {
 				if (parents->item != parent &&
 				    follow_needs_renames(opt, parents->item,
-							 parent, path))
+							 parent, oid, path))
 					tail = &commit_list_insert(parents->item,
 								   tail)->next;
 				else
