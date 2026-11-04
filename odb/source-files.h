@@ -29,6 +29,15 @@ struct odb_files_dir {
 	 * repository. Directories added via alternates are not local.
 	 */
 	bool local;
+
+	/*
+	 * Whether this directory is borrowed from another repository, so
+	 * that its refs are alternate refs. Not every directory added via
+	 * alternates is borrowed: inside an object quarantine, our own
+	 * object directory is passed to us as an alternate, too. Only set
+	 * for directories added via alternates.
+	 */
+	bool borrowed;
 };
 
 struct odb_files_dir *odb_files_dir_new(struct object_database *odb,
@@ -65,6 +74,12 @@ struct odb_source_files {
 
 	/* Stat data of the "info/alternates" file. */
 	struct stat_validity alternates_validity;
+
+	/*
+	 * The value of GIT_QUARANTINE_PATH when this source was set up from
+	 * the environment (see ODB_NEW_HONOR_ENV), or NULL.
+	 */
+	char *quarantine_path;
 };
 
 /* Allocate and initialize a new object source. */
