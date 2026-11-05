@@ -439,6 +439,12 @@ int parse_options_takes_argument(const struct option *opt);
 NORETURN void usage_with_options(const char * const *usagestr,
 				 const struct option *options);
 
+/*
+ * If the only argument is -h, --help-all, --git-completion-helper or
+ * --git-completion-helper-all, print the answer and exit. Call this
+ * before the command does any work. Then asking for help or for the
+ * completion list does not wait for input or leave files behind.
+ */
 void show_usage_with_options_if_asked(int ac, const char **av,
 				      const char * const *usage,
 				      const struct option *options);
