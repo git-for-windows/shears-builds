@@ -39,17 +39,13 @@ fedora-*|almalinux-*)
 	dnf -yq update >/dev/null &&
 	dnf -yq install shadow-utils sudo make pkg-config gcc findutils diffutils perl python3 gawk gettext zlib-devel expat-devel openssl-devel curl-devel pcre2-devel $MESON_DEPS cargo >/dev/null
 	;;
-ubuntu-*|i386/ubuntu-*|debian-*)
+ubuntu-*|i386/debian-*|debian-*)
 	# Required so that apt doesn't wait for user input on certain packages.
 	export DEBIAN_FRONTEND=noninteractive
 
 	case "$distro" in
 	ubuntu-*)
 		SVN='libsvn-perl subversion'
-		LANGUAGES='language-pack-is'
-		;;
-	i386/ubuntu-*)
-		SVN=
 		LANGUAGES='language-pack-is'
 		;;
 	*)
@@ -84,7 +80,7 @@ ubuntu-*|i386/ubuntu-*|debian-*)
 	# See <https://github.com/uutils/coreutils/issues/10508>.
 	if test -x /usr/bin/gnudirname
 	then
-		ln -sfT /usr/bin/gnudirname /usr/bin/dirname
+		sudo ln -sfT /usr/bin/gnudirname /usr/bin/dirname
 	fi
 
 	case "$distro" in
@@ -119,11 +115,12 @@ macos-*)
 	# brew install gnu-time
 	brew link --force gettext
 
-	mkdir -p "$CUSTOM_PATH"
-	wget -q "$P4WHENCE/bin.macosx12arm64/helix-core-server.tgz" &&
-	tar -xf helix-core-server.tgz -C "$CUSTOM_PATH" p4 p4d &&
-	sudo xattr -d com.apple.quarantine "$CUSTOM_PATH/p4" "$CUSTOM_PATH/p4d" 2>/dev/null || true
-	rm helix-core-server.tgz
+	# Uncomment this block if you want to run `git p4` tests:
+	# mkdir -p "$CUSTOM_PATH"
+	# wget -q "$P4WHENCE/bin.macosx12arm64/helix-core-server.tgz" &&
+	# tar -xf helix-core-server.tgz -C "$CUSTOM_PATH" p4 p4d &&
+	# sudo xattr -d com.apple.quarantine "$CUSTOM_PATH/p4" "$CUSTOM_PATH/p4d" 2>/dev/null || true
+	# rm helix-core-server.tgz
 
 	case "$jobname" in
 	osx-meson)
