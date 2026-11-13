@@ -1,0 +1,253 @@
+  1:  d6e65bf8e9bfe3d0f5701a4c2ebf75479db41343 <   -:  ---------------------------------------- unix-socket: avoid leak when initialization fails
+  2:  533f055c309880998ecf72f50f109629be060dfb <   -:  ---------------------------------------- grep: prevent `^$` false match at end of file
+  3:  af7c47b77756ffcfff2e0d9acad70b7a518e475a <   -:  ---------------------------------------- t9350: point out that refs are not updated correctly
+  4:  ec9dd4a7ea78d08d77f8b48831f49d7fd5cfa849 <   -:  ---------------------------------------- difftool: do not crash on a path rejected by verify_path()
+  5:  7454121363eeb2f403ab98e51f6ef5be46cd87ad <   -:  ---------------------------------------- transport-helper: add trailing --
+  6:  560a8a9960a619493894a96aa52279dfb59697bb <   -:  ---------------------------------------- difftool: avoid memory leak when `run_dir_diff()` fails
+  7:  3222acbd784f9c9749a1554d69d7095f3f3ded75 <   -:  ---------------------------------------- ci: bump actions/checkout from 6 to 7
+  8:  9cdef9913c8e2ac067d0dbba00be786ed469cec0 <   -:  ---------------------------------------- remote-helper: check helper status after import/export
+  9:  d50ade00b045c5283638350472e30c6d311b772b <   -:  ---------------------------------------- difftool: avoid invalid memory access by an atexit handler
+ 10:  d5278c862aea1bf0b32d23c3268369fdc2f2e379 <   -:  ---------------------------------------- bundle-uri: refuse advertised URIs by protocol
+ 11:  f3b6b423e2afa6ce2ffa61a54a750cb9ee927bd8 <   -:  ---------------------------------------- ci(coverity): bump actions/cache from 5 to 6
+ 12:  b274e42846af30927caff2eceb839370d9401ab9 <   -:  ---------------------------------------- Always auto-gc after calling a fast-import transport
+ 13:  7abef11b1b58b44d84c2b155a80319894c263f4c <   -:  ---------------------------------------- mingw: prevent regressions with "drive-less" absolute paths
+ 14:  aeb915ef7b8434a95089aece238040e24582c061 <   -:  ---------------------------------------- transport: optionally disable side-band-64k
+ 15:  02670b68f2e8c67cfbb9f1432c5cc89f3daf0e07 <   -:  ---------------------------------------- mingw: fix fatal error working on mapped network drives on Windows
+ 16:  4ee05994cbf9707aea092cf8d50769f8c4491bfe <   -:  ---------------------------------------- ci(vs-build): adapt to Visual Studio 2026 default on windows-latest
+ 17:  35247f0529b6eafc9944f3d222e2315072dfee51 <   -:  ---------------------------------------- vcpkg_install: detect lack of Git
+ 18:  1cce2dadaaf30c6304e9fe3dd62e77fc77462872 <   -:  ---------------------------------------- vcpkg_install: add comment regarding slow network connections
+ 19:  dd638160536156eaba0e86562ca724941402003c <   -:  ---------------------------------------- t5505/t5516: allow running without `.git/branches/` in the templates
+ 20:  40f70e314c3cc52a189ab36c2f2e96306b706f2e <   -:  ---------------------------------------- max_tree_depth: lower it for clang builds in general on Windows
+ 21:  f0674a9dbd2ad359208abc7f10915ce762eaeb6f <   -:  ---------------------------------------- vcbuild: install ARM64 dependencies when building ARM64 binaries
+ 22:  9cc204401a5e522fd03137c8a16334a62de0d49f <   -:  ---------------------------------------- t5505/t5516: fix white-space around redirectors
+ 23:  4a5ad3fdd152d4e27956e14851362a8118bbba07 <   -:  ---------------------------------------- mingw: ignore HOMEDRIVE/HOMEPATH if it points to Windows' system directory
+ 24:  0dacbc235a1c3c0e7072d4a9ea41cb8ae2c2d1f6 <   -:  ---------------------------------------- vcbuild: add an option to install individual 'features'
+ 25:  18fad0c2a884c97e325b8592eea2b34760e56e44 <   -:  ---------------------------------------- cmake: allow building for Windows/ARM64
+ 26:  a3604040b51274231f06ed6829a37688e3d554fe <   -:  ---------------------------------------- clink.pl: fix libexpatd.lib link error when using MSVC
+ 27:  689da5e3f70f502f8e0bfd654b4c6febdfc862d5 <   -:  ---------------------------------------- ci(vs-build) also build Windows/ARM64 artifacts
+ 28:  097e4cd4e6a72362d96b1aa77dc2f45dd9837d68 <   -:  ---------------------------------------- Makefile: clean up .ilk files when MSVC=1
+ 29:  c09d9bee045bad3a9775855bfd68ef331edc36b6 <   -:  ---------------------------------------- vcbuild: stop hard-coding OpenSSL as a dependency
+ 30:  111657b4ea9d55bf848c94e9b95ab666bdfc0e73 <   -:  ---------------------------------------- vcbuild: add support for compiling Windows resource files
+ 31:  2b633210190fee96016ec68bcc9e0c23adef2ea1 <   -:  ---------------------------------------- cmake(): allow setting HOST_CPU for cross-compilation
+ 32:  328ec29cc2b407a8e6279438ae4d64c8dad61e4e <   -:  ---------------------------------------- config.mak.uname: add git.rc to MSVC builds
+ 33:  2bb5696e330bf641fcc6d49c513d0464a917ffe2 <   -:  ---------------------------------------- MinGW: link as terminal server aware
+ 34:  2e70104f95e83e3eb0611b1b9e3e956027d04561 <   -:  ---------------------------------------- CMake: default Visual Studio generator has changed
+ 35:  0fdf05434937ad932059c54660de775d4ab4ab54 <   -:  ---------------------------------------- clink.pl: ignore no-stack-protector arg on MSVC=1 builds
+ 36:  79e7f92f659c39a9c1d82dc783f185ae05c24e00 <   -:  ---------------------------------------- http: optionally load libcurl lazily
+ 37:  b573f3849da8e8924a9b7ee3dd832db9bf2c5797 <   -:  ---------------------------------------- mingw: demonstrate a `git add` issue with NTFS junctions
+ 38:  8f6404518587dbab55f233e396c5a101c753e8dc <   -:  ---------------------------------------- .gitignore: add Visual Studio CMakeSetting.json file
+ 39:  589af2416328af09ba14009d0bfa1c46b69b155b <   -:  ---------------------------------------- clink.pl: move default linker options for MSVC=1 builds
+ 40:  580ec6199d240ad4b17323fd13a31c9ed99323ed <   -:  ---------------------------------------- http: support lazy-loading libcurl also on Windows
+ 41:  adfb240e1a2883750fdb69753793b1d0d9522749 <   -:  ---------------------------------------- revision: create mark_trees_uninteresting_dense()
+ 42:  fdab438c1d2933fa9f12beaa9e2a5cb6ebbeb733 <   -:  ---------------------------------------- strbuf_realpath(): use platform-dependent API if available
+ 43:  fec0804fce677650fc7423a7b929b4a68da1bdb4 <   -:  ---------------------------------------- http: use new "best effort" strategy for Secure Channel revoke checking
+ 44:  1bfd4fe6fbbd534a2dc8a70c6f2c37c9f8afbf93 <   -:  ---------------------------------------- subtree: update `contrib/subtree` `test` target
+ 45:  bdf0d7335b5f5fb5e0954151c3a04ef30c7b1e00 <   -:  ---------------------------------------- CMakeLists: add default "x64-windows" arch for Visual Studio
+ 46:  658b8fd659b5a9f6b66bb1349b64e3a3c112af66 <   -:  ---------------------------------------- setup: properly use "%(prefix)/" when in WSL
+ 47:  6782a0c5808846f57ca3e68aa919359324b70111 <   -:  ---------------------------------------- Add config option `windows.appendAtomically`
+ 48:  ccc8478d1bb5932fe8121a9b13a8081b75b0833d <   -:  ---------------------------------------- cmake: install headless-git.
+ 49:  da7c5008364edfa7c2e2859d96ffb1fccb389f9d <   -:  ---------------------------------------- http: when loading libcurl lazily, allow for multiple SSL backends
+ 50:  343cb7036e249c0a4d450d6c498e9e3ce2c1da4c <   -:  ---------------------------------------- survey: stub in new experimental 'git-survey' command
+ 51:  433484536d92ff07bd41a206ad68db7d680821ae <   -:  ---------------------------------------- clink.pl: fix MSVC compile script to handle libcurl-d.lib
+ 52:  d4d53a30cc68970ccdc86cf028f306dc157450fa <   -:  ---------------------------------------- mingw: implement a platform-specific `strbuf_realpath()`
+ 53:  266fc5404d1439d6d034de4a3dfc4b1e90c3fd02 <   -:  ---------------------------------------- t3701: verify that we can add *lots* of files interactively
+ 54:  91039717d090cf04489ddc7049e2a5abfbab63d4 <   -:  ---------------------------------------- commit: accept "scissors" with CR/LF line endings
+ 55:  bd0b38ac1776b3ce6d3e86e8b6812c19612a5f9c <   -:  ---------------------------------------- t0014: fix indentation
+ 56:  6663750eac4106135819c6bdfae87c34befa7b1c <   -:  ---------------------------------------- git-gui: accommodate for intent-to-add files
+ 57:  635314d19323af1a20eeb9dcfef5152bb67431aa <   -:  ---------------------------------------- mingw: allow for longer paths in `parse_interpreter()`
+ 58:  84a80f82ea349839c18bbc259d08048465d7bd03 <   -:  ---------------------------------------- compat/vcbuild: document preferred way to build in Visual Studio
+ 59:  16bb4cb763b6e2679912b36a852a6e650c7b2838 <   -:  ---------------------------------------- http: optionally send SSL client certificate
+ 60:  e3b0126f7a3c10fadfae577383d14fe124455d65 <   -:  ---------------------------------------- ci: run `contrib/subtree` tests in CI builds
+ 61:  7655355e9b2d523dfb9277a9723eb7559760bbaf <   -:  ---------------------------------------- CMake: show Win32 and Generator_platform build-option values
+ 62:  bcb6493357160505882d7838e462102080d73525 <   -:  ---------------------------------------- compat/mingw.c: do not warn when failing to get owner
+ 63:  09bc3a4bd6958945eaf418ef985cc71ffd2fd00e <   -:  ---------------------------------------- mingw: $env:TERM="xterm-256color" for newer OSes
+ 64:  5ebb605674688067dec8d08181621491eb8ad83c <   -:  ---------------------------------------- winansi: check result and Buffer before using Name
+ 65:  8780f719a0cfc2f4445a63565b8ef7fcfad15d7d <   -:  ---------------------------------------- mingw: change core.fsyncObjectFiles = 1 by default
+ 66:  dd81c2cb3105d9122a9d089920bc06512b47ba34 <   -:  ---------------------------------------- Fix Windows version resources
+ 67:  b1acf6a5d6697c2e3ff84318774b6377244fdd46 <   -:  ---------------------------------------- status: fix for old-style submodules with commondir
+ 68:  cb8c3662f7629f7a9b191f9ee4fe654290ffe956 <   -:  ---------------------------------------- git.rc: include winuser.h
+ 69:  1ed2b43f73e7a4ccef989bc9c0d1a3a9575972b1 <   -:  ---------------------------------------- mingw: do load libcurl dynamically by default
+ 70:  221cf3c5e8e7c89f9d610393e8b605ab213e67c3 <   -:  ---------------------------------------- Add a GitHub workflow to verify that Git/Scalar work in Nano Server
+ 71:  c5d97b50b049ec2bab17541d0fc1206ced4e28f8 <   -:  ---------------------------------------- mingw: suggest `windows.appendAtomically` in more cases
+ 72:  e2bcace48cfdd84a1d9b42a2817a06960a3f094b <   -:  ---------------------------------------- win32: use native ANSI sequence processing, if possible
+ 73:  0d23a1a54033a876e706a53153b32137cd509924 <   -:  ---------------------------------------- common-main.c: fflush stdout buffer upon exit
+ 74:  8b5e4fc2ee47d3b2b3e1ec1543f0cbf17022221a <   -:  ---------------------------------------- t5601/t7406(mingw): do run tests with symlink support
+ 75:  a06967f1097b714ff32265c8698bc7f8bfe2c3a4 <   -:  ---------------------------------------- Fallback to AppData if XDG_CONFIG_HOME is unset
+ 76:  fe1380007c4068dede56780f1ee08409fe0d8024 <   -:  ---------------------------------------- survey: add command line opts to select references
+ 77:  a0de33b6b7a31ecbaa0941617d62dc711ab121bd <   -:  ---------------------------------------- survey: start pretty printing data in table form
+ 78:  755508d77b920cf963223dbeccf49978678ceda6 <   -:  ---------------------------------------- survey: add object count summary
+ 79:  1efa54763ecc51ef0fd2bac154fa2246dd185254 <   -:  ---------------------------------------- survey: summarize total sizes by object type
+ 80:  33747f4167831920f744cf6f8c1f8980dc469dfd <   -:  ---------------------------------------- survey: show progress during object walk
+ 81:  3c8ef9b2c8caf7d94b209bd4043afed0bbae502d <   -:  ---------------------------------------- survey: add ability to track prioritized lists
+ 82:  af97a8464f7864b5e6f079747a9ae40457e31a9c <   -:  ---------------------------------------- survey: add report of "largest" paths
+ 83:  dfba49c235e3f03712b3df018c00f49f09b05dd1 <   -:  ---------------------------------------- survey: add --top=<N> option and config
+ 84:  eb223ad9b9fc745d225b3aafdaac35be5a0994b5 <   -:  ---------------------------------------- mingw: Support `git_terminal_prompt` with more terminals
+ 85:  af41ece12ec27c0ffa053ddef29084fe6b0ed0d6 <   -:  ---------------------------------------- survey: clearly note the experimental nature in the output
+ 86:  76e66392d5f27b4d786e33de21c66b04c647f2c8 <   -:  ---------------------------------------- compat/terminal.c: only use the Windows console if bash 'read -r' fails
+ 87:  3f5cfce080f02335f298289a800b35dfac4f2bb4 <   -:  ---------------------------------------- diff: stop truncating the deflated-binary-diff size on Windows
+ 88:  97ffadcd71dcfe3edf6bf85e9b8abbbb394ac40b <   -:  ---------------------------------------- repo: split annotated tags out from total tag count in structure
+ 89:  7376cec79a6425644e26008fc4ca93b038e78c73 <   -:  ---------------------------------------- mingw (git_terminal_prompt): do fall back to CONIN$/CONOUT$ method
+ 90:  799ea7a435521b309cdca9ee77d916224ab3ef0b <   -:  ---------------------------------------- convert: widen gather_convert_stats() helpers to size_t
+ 91:  2613c1653a9ced729be4ec40b288246d89f34c8c <   -:  ---------------------------------------- repo: filter the structure scope via --ref-filter=<pattern>
+ 92:  2aa5c117659f4249e6afc760de647e029ec569d0 <   -:  ---------------------------------------- Win32: symlink: move phantom symlink creation to a separate function
+ 93:  db869cb24253d02d601f2bdbc028e557c9d8765a <   -:  ---------------------------------------- read-cache: stop truncating index blob sizes on Windows
+ 94:  3032f74f302e61d6af7953d11124c3eadcd28477 <   -:  ---------------------------------------- repo: report top-N paths by count, disk, and inflated size in structure
+ 95:  5bc008a898048dfad0b1a3e6b3928b8a6ef08c07 <   -:  ---------------------------------------- mingw: make sure `errno` is set correctly when socket operations fail
+ 96:  92e5be09723f295197db1b34cd9ced8124846bd1 <   -:  ---------------------------------------- t5563: verify that NTLM authentication works
+ 97:  b8aaf73ce2f5df3db4a19eac39a0e65b2029fd1a <   -:  ---------------------------------------- mingw: introduce code to detect whether we're inside a Windows container
+ 98:  80d6c8f085a5065d720f018cadfc070e7f62c640 <   -:  ---------------------------------------- Introduce helper to create symlinks that knows about index_state
+ 99:  816266134b5bfe88fdeb76c49adac6e3f347017c <   -:  ---------------------------------------- xdiff-interface: widen buffer_is_binary() size parameter to size_t
+100:  9f5c912c36864ea8efae2ac64070f5c684a361cc <   -:  ---------------------------------------- tree-walk: drop link_len cast in get_tree_entry_follow_symlinks()
+101:  3dfa5703346b7bf5954997d676b1cfc6cd6e7dd3 <   -:  ---------------------------------------- t1901: cover the --top option of `git repo structure`
+102:  deb76cf1b412e20dfc1d4f598e7175d67344a6ca <   -:  ---------------------------------------- compat/mingw: handle WSA errors in strerror
+103:  298cd9acc575e0ccdb6e7359385b971a0f7437b6 <   -:  ---------------------------------------- http: disallow NTLM authentication by default
+104:  54afdd7a21f28738c69035821de6053e0bd6eb2b <   -:  ---------------------------------------- mingw: when running in a Windows container, try to rename() harder
+105:  b4596961d9e55bf0d262c170283770fa41e2e84c <   -:  ---------------------------------------- mingw: allow to specify the symlink type in .gitattributes
+106:  cd633c7cc32f5592736b09a695d827ff51b33487 <   -:  ---------------------------------------- combine-diff: stop truncating combined-diff blob sizes on Windows
+107:  8440ef99dcee60c0830358b8bf8229610884817a <   -:  ---------------------------------------- tree-walk: widen init_tree_desc() and init_tree_desc_gently() to size_t
+108:  040ff609104a8e5a6333f57edfa4839ed86db7b5 <   -:  ---------------------------------------- repo: read the `--top` default from `repo.structure.top`
+109:  5515b2d1618980d9dac2dc8ccd772742a0e1516a <   -:  ---------------------------------------- compat/mingw: drop outdated comment
+110:  c3a788d36560046d370b4220c1862b33f907023c <   -:  ---------------------------------------- http: warn if might have failed because of NTLM
+111:  cd0357d2ddc889d0d0b4c8363214057c1fb7136c <   -:  ---------------------------------------- mingw: move the file_attr_to_st_mode() function definition
+112:  2cfde78621eeafbed5a2b18ea05cd328191215ca <   -:  ---------------------------------------- Win32: symlink: add test for `symlink` attribute
+113:  4283600e51e3c23334d9fe094746802dc664ddba <   -:  ---------------------------------------- diff: widen textconv_object() size out-param to size_t
+114:  8b4f94d8e5a7d08d487dda8f6bdc5564e9ae60e6 <   -:  ---------------------------------------- pack-objects: drop the two tree-walk casts in the preferred-base path
+115:  ceec376c19bf4bd126eabfc70f46d5c48b976ede <   -:  ---------------------------------------- git-survey: announce the upcoming pivot into `git repo structure`
+116:  3a5b4a8f276f99050d499cc6a85d3efdc1a854f9 <   -:  ---------------------------------------- t0301: actually test credential-cache on Windows
+117:  11a30deed099249bb0513530e67257b4dcd490f2 <   -:  ---------------------------------------- credential: advertise NTLM suppression and allow helpers to re-enable
+118:  c8355b5d1f49af5f55de902c432bfd6c371985b4 <   -:  ---------------------------------------- mingw: Windows Docker volumes are *not* symbolic links
+119:  c8f9bc6f25605ef54c59b0788f777e054f1625ad <   -:  ---------------------------------------- clean: do not traverse mount points
+120:  bf9ae42a1dd93bf7d3a4e2f4dbd3a02588c8cf58 <   -:  ---------------------------------------- pack-bitmap: stop truncating blob sizes used by --filter=blob:limit
+121:  2b11b79d2ce194f573bb7d367844767bb26bb448 <   -:  ---------------------------------------- diffcore: widen struct diff_filespec.size to size_t
+122:  74a84b41aad76b73084f3406ce5c68d55fb10cbf <   -:  ---------------------------------------- tree: widen struct tree.size and parse_tree_buffer() to size_t
+123:  112d8fe4b3128a57c16b27bfced4770d16467a0d <   -:  ---------------------------------------- survey: turn into a thin shim over `git repo structure`
+124:  353d7a1cf97457aab084b5604a9115b4f8105908 <   -:  ---------------------------------------- credential-cache: handle ECONNREFUSED gracefully
+125:  43762db192381a368e16037939628edb8b17e7f7 <   -:  ---------------------------------------- reftable: do make sure to use custom allocators
+126:  dcf21351b53d5121c36c135602db9936f7f5da9b <   -:  ---------------------------------------- check-whitespace: avoid alerts about upstream commits
+127:  185b813267aaf006900681621ced0d384055ab94 <   -:  ---------------------------------------- t/t5571-prep-push-hook.sh: Add test with writing to stderr
+128:  52c4ec875959d2771293c23c56ac288ec8dedaff <   -:  ---------------------------------------- dir: do not traverse mount points
+129:  44a6f92584f1b6dc001a5bda87f36cbcb5cb0c94 <   -:  ---------------------------------------- win32: thread-utils: handle multi-socket systems
+130:  4b2719e3a49c9c5e9919647ff69563f5c16c5579 <   -:  ---------------------------------------- t5563: add tests for http.emptyAuth with Negotiate
+131:  b29faa3432429e690569b18918b9cb94aafafa78 <   -:  ---------------------------------------- entry: flush fscache after creating directories and writing files
+132:  2f645a1c57ec955a41094a531301d3f53f6ca1cd <   -:  ---------------------------------------- ci(macos): skip the `git p4` tests
+133:  e9737012bcb69feaedffb4c679775ca01943f341 <   -:  ---------------------------------------- mingw: work around rename() failing on a read-only file
+134:  a3b7cc083ad580fabc442551d9385e0172126ca9 <   -:  ---------------------------------------- clean: remove mount points when possible
+135:  f2282caf3fca46cc7e131dfd152c37ef0ebb25c4 <   -:  ---------------------------------------- mingw: optionally enable wsl compability file mode bits
+136:  46a77b5ccfb71410849db91ddaec83162f14eb52 <   -:  ---------------------------------------- Refuse to follow invalid paths in `.git` files
+137:  abb14df23d1227b2f4e8867c96c829c47e27224c <   -:  ---------------------------------------- commit: widen the commit-buffer API to size_t
+138:  89df2ab6a005ffdba8fbf6b4b44a6ad92a2f6fc1 <   -:  ---------------------------------------- blame: widen find_line_starts() len parameter to size_t
+139:  f5e817fb0869cf25727076acfd1a155aae6478b3 <   -:  ---------------------------------------- grep: widen struct grep_source.size and grep_buffer() to size_t
+140:  1170e1e7a2fcbdd03225c45bf4fba62cdbc11717 <   -:  ---------------------------------------- fast-export: drop the export_blob() size cast and widen anonymize_blob()
+141:  86db474a410475e6dce5e05b9032820d1978bb08 <   -:  ---------------------------------------- repo: drop the inflated-size cast in count_objects()
+142:  190cb4bf922b0ccb1039a9b78dd02acb89162654 <   -:  ---------------------------------------- unpack-objects: widen the size-passing infrastructure to size_t
+143:  e4bce380e3e0a885c1e7ab2e5d4367c1a0d0ffa8 <   -:  ---------------------------------------- pack-objects: drop cast_size_t_to_ulong shims in get_delta()
+144:  de7ba105eae108eefc3b6d993fe02b00283addf4 <   -:  ---------------------------------------- pack-objects: drop cast_size_t_to_ulong shims in try_delta()
+145:  362b767294cf550414b6a2efcb3efed49e435af8 <   -:  ---------------------------------------- pack-objects: drop the last size shim in write_no_reuse_object()
+146:  5907c60c65f738b2094481654dec1db9160ac1f5 <   -:  ---------------------------------------- blame: widen struct blame_scoreboard.final_buf_size to size_t
+147:  5c94fabc0653dfef4e9f6e23fbba520a15aaca32 <   -:  ---------------------------------------- fast-import: drop the six size casts in the object-read paths
+148:  16004a934641d5e7e69f845f5f1d72ced540c24e <   -:  ---------------------------------------- t/helper/test-pack-deltas: drop the delta_size cast in write_ref_delta()
+149:  068fdac0e7fed61f423b44c86a2550d89eb1192d <   -:  ---------------------------------------- Drop the `cast_size_t_to_ulong()` helper
+150:  83fb56cf7f9bf55f9798e5fbe606c04be17f2302 <   -:  ---------------------------------------- mingw: handle staging 4GB+ files correctly
+151:  102b5cd29a35f648ad068a2ac028445f6b24b4c6 <   -:  ---------------------------------------- mingw: support unpacking loose 4GB+ objects
+152:  91cfbe7c90bb90cca1873d1e525f5a71151472f6 <   -:  ---------------------------------------- t: add an expensive test to verify that 4GB+ blobs can be staged/read
+153:  fede144ce87c27365da3ec4c54c515b025722ba9 <   -:  ---------------------------------------- object-file: use size_t for object size in check_object_signature()
+154:  f2cdc41f19545ddeda8e0866834441e6ae4946c6 <   -:  ---------------------------------------- coverity: skip building with Rust, for now
+155:  f7636001dd578fa07dc2fde767d212a4ecd74b3c <   -:  ---------------------------------------- Win32: make FILETIME conversion functions public
+156:  699995c28cfa02b3afb35e834f669301c42a3b04 <   -:  ---------------------------------------- Win32: dirent.c: Move opendir down
+157:  584a491be283fbb32fa89c5d3b6894143efdae94 <   -:  ---------------------------------------- mingw: make the dirent implementation pluggable
+158:  fd7a3e04991c11a0790537f02488daa851126b8b <   -:  ---------------------------------------- Win32: make the lstat implementation pluggable
+159:  2720412688df3836fe8d68d889026ff8e7415dec <   -:  ---------------------------------------- mingw: add infrastructure for read-only file system level caches
+160:  c62a5918cacc610db24c5e343f480f791c2d12b8 <   -:  ---------------------------------------- mingw: add a cache below mingw's lstat and dirent implementations
+161:  9e7abf2abd66fb274037ca05884778683d1b81e4 <   -:  ---------------------------------------- fscache: load directories only once
+162:  3d04a0f640be255546c9a1664be1c31a1ae2f3df <   -:  ---------------------------------------- fscache: add key for GIT_TRACE_FSCACHE
+163:  72224afa92f6d3cbfa9e921cfd5d07991c9b977f <   -:  ---------------------------------------- fscache: remember not-found directories
+164:  67e1bbf61fcee4c7e7ddd7df230627bc1bd2dd71 <   -:  ---------------------------------------- fscache: add a test for the dir-not-found optimization
+165:  7c6ce22934eaefe928469f8fea1980c44e886821 <   -:  ---------------------------------------- add: use preload-index and fscache for performance
+166:  13f403db22fdbc032a347652814b2212c27a6b7b <   -:  ---------------------------------------- dir.c: make add_excludes aware of fscache during status
+167:  cd1a4212369adad79f4ae3b4cc02800332076bb4 <   -:  ---------------------------------------- fscache: make fscache_enabled() public
+168:  5cab8b32c29e255b43d99b601208c95ec195789a <   -:  ---------------------------------------- dir.c: regression fix for add_excludes with fscache
+169:  e25678619c8f8c8ab416f11dba5035fc349b255e <   -:  ---------------------------------------- fetch-pack.c: enable fscache for stats under .git/objects
+170:  61ee33af8afeb4134afd3ea08479a601b59435ef <   -:  ---------------------------------------- checkout.c: enable fscache for checkout again
+171:  3877cd9955635136308a8d8096950b64774f5dd2 <   -:  ---------------------------------------- Enable the filesystem cache (fscache) in refresh_index().
+172:  72907693e24413225492d3d617dcbbc431d97efc <   -:  ---------------------------------------- fscache: use FindFirstFileExW to avoid retrieving the short name
+173:  dba6377bed343ec88ca65c9e203b43efe0ef6e7b <   -:  ---------------------------------------- fscache: add GIT_TEST_FSCACHE support
+174:  58b68c7ed8608be5aba0dc67909ca9f6cda3ee66 <   -:  ---------------------------------------- fscache: add fscache hit statistics
+175:  9535a5358587d85f4865e94db176485b8fcae541 <   -:  ---------------------------------------- unpack-trees: enable fscache for sparse-checkout
+176:  9f5f9770f209314655dea108eddbdeefc7a3566a <   -:  ---------------------------------------- status: disable and free fscache at the end of the status command
+177:  7e9e08f751ea6c710776252ae866c2d0b10d8b47 <   -:  ---------------------------------------- mem_pool: add GIT_TRACE_MEMPOOL support
+178:  53757e5346afb7c85e13ddbeabf7e2f58e5df04b <   -:  ---------------------------------------- fscache: fscache takes an initial size
+179:  4f5cf51d0166763c46f1e682b39226f97c7af67d <   -:  ---------------------------------------- fscache: update fscache to be thread specific instead of global
+180:  6bb91311fa16ef26024a07253731f079ec5bbcb6 <   -:  ---------------------------------------- fscache: teach fscache to use mempool
+181:  786060d6a022db66862ae5b98688f37ea73d7ed4 <   -:  ---------------------------------------- fscache: make fscache_enable() thread safe
+182:  7579c31eee8ae3e63782d229b826afe6db295965 <   -:  ---------------------------------------- fscache: teach fscache to use NtQueryDirectoryFile
+183:  53a99bc8cf11f33422a63d691e2741944ab36f31 <   -:  ---------------------------------------- fscache: remember the reparse tag for each entry
+184:  72dd96b8ed27ac5b5f11eed51d20754721ba49d6 <   -:  ---------------------------------------- fscache: Windows Docker volumes are *not* symbolic links
+185:  929a6dc771fecd4d914328ea167c4bc381184984 <   -:  ---------------------------------------- fscache: optionally enable wsl compability file mode bits
+186:  5789dcba1f43884bbd7c8814dd58f6df130d0bdf <   -:  ---------------------------------------- fscache: implement an FSCache-aware is_mount_point()
+187:  d2b472546ed57e93841464225af96fad9a3c9fbe <   -:  ---------------------------------------- git-gui--askyesno: fix funny text wrapping
+188:  dec8adc4cf1888a67713c98f319c8ddc44ef725c <   -:  ---------------------------------------- clean: make use of FSCache
+189:  72b1078032ffe43b82f83d4dad55db55d3695a00 <   -:  ---------------------------------------- git-gui--askyesno (mingw): use Git for Windows' icon, if available
+190:  ecb40c78ba1010ea7f5ee31f67bcb19c42ae5fa3 <   -:  ---------------------------------------- compat/poll: do not collect more handles than the wait supports
+191:  ebde5620285dd837037402a2599c5618a05341c1 <   -:  ---------------------------------------- parallel-checkout: limit worker count to what poll() can wait on
+192:  ff36c5b22e4c99ebc04526fe5b49c4bb887a938a <   -:  ---------------------------------------- run-command: limit concurrent children to what poll() can wait on
+193:  baab0e927d175eb12368336aba213292bc8813f3 <   -:  ---------------------------------------- pack-objects (mingw): demonstrate a segmentation fault with large deltas
+194:  1211798966f3d1f688db304cbefd160106b0ee94 <   -:  ---------------------------------------- mingw: support long paths
+195:  c5cb1bfd49b17cffbb64ad8976ed7ccd2bd96184 <   -:  ---------------------------------------- win32(long path support): leave drive-less absolute paths intact
+196:  b492fa135b67276b772074c6c7a8e7b18f0a8c63 <   -:  ---------------------------------------- compat/fsmonitor/fsm-*-win32: support long paths
+197:  7553026b43225d64fdae5fd3eeaf513ae0479bf5 <   -:  ---------------------------------------- clean: suggest using `core.longPaths` if paths are too long to remove
+198:  c1330b3ecb549adf26ad83f21e53bbc58099ee80 <   -:  ---------------------------------------- mingw: explicitly specify with which cmd to prefix the cmdline
+199:  a000304381e8556a7889e60d6a9cd4bc90cb7887 <   -:  ---------------------------------------- mingw: when path_lookup() failed, try BusyBox
+200:  b87b91355b9e557153fd418a680e37e9721a03db <   -:  ---------------------------------------- test-tool: learn to act as a drop-in replacement for `iconv`
+201:  3c70c8b7bbddd2bf8059124ad356555eb88b0e54 <   -:  ---------------------------------------- tests(mingw): if `iconv` is unavailable, use `test-helper --iconv`
+202:  d0526a869b01824c6f4cbc71cd1117448d4b9684 <   -:  ---------------------------------------- gitattributes: mark .png files as binary
+203:  545a0a01444d53ff2d5a01272bca5590fb81f7f4 <   -:  ---------------------------------------- tests: move test PNGs into t/lib-diff/
+204:  1af2c002fe815bb129812202a03d3da3698b3ba8 <   -:  ---------------------------------------- tests: only override sort & find if there are usable ones in /usr/bin/
+205:  50514f64742206f7f5ac89120187e3e4830fc183 <   -:  ---------------------------------------- tests: use the correct path separator with BusyBox
+206:  0566c2fab348a998e1e3b570d510b991f7f77a05 <   -:  ---------------------------------------- mingw: only use Bash-ism `builtin pwd -W` when available
+207:  29d29b5f7f9fa909cc2772d6ad50718b1f90c8f9 <   -:  ---------------------------------------- tests (mingw): remove Bash-specific pwd option
+208:  b5d4d68a9c32cc2cc9c6c3c810e032fab23b647a <   -:  ---------------------------------------- test-lib: add BUSYBOX prerequisite
+209:  32b1cef015c7d61c47997e42c1f0b50a8ec4ce10 <   -:  ---------------------------------------- t5003: use binary file from t/lib-diff/
+210:  bde85a8112b912d80ff0c2a521fb16f5ca035b1d <   -:  ---------------------------------------- t5532: workaround for BusyBox on Windows
+211:  a5ced1199e61f89209c0b778e4e071189570859b <   -:  ---------------------------------------- t5605: special-case hardlink test for BusyBox-w32
+212:  7b862a9cb28cd606eb4c504c649ea93da72eeec2 <   -:  ---------------------------------------- t5813: allow for $PWD to be a Windows path
+213:  c386b93231d57c3ea237fda7f7ce01796ffb13dd <   -:  ---------------------------------------- t9200: skip tests when $PWD contains a colon
+214:  ce81191f64f88c0ae54566aba5539e382c358a6d <   -:  ---------------------------------------- Describe Git for Windows' architecture
+215:  3a6e819d58f6be3fba6db56fbb34ed04f0126d16 <   -:  ---------------------------------------- Add an AGENTS.md file to help with AI-assisted debugging/development
+216:  fcedebd38fc8a359461977cbf0fac2dd017b4985 <   -:  ---------------------------------------- Modify the Code of Conduct for Git for Windows
+217:  fd75b4443679c2cb6deee845d9ae4152197b4fb3 <   -:  ---------------------------------------- CONTRIBUTING.md: add guide for first-time contributors
+218:  cc2e8b2c5b6d3cd0120076d0a5fe7a3cb90723b2 <   -:  ---------------------------------------- README.md: Add a Windows-specific preamble
+219:  fca1212a83eedfc4bfefdf1f78dac4df9209d618 <   -:  ---------------------------------------- Add an issue template
+220:  e7d37ee1784ca547b9fb751edcb859f5e71db3be <   -:  ---------------------------------------- Modify the GitHub Pull Request template (to reflect Git for Windows)
+221:  b3905f0d7e4a517485829fcbe74df31bd37b8788 <   -:  ---------------------------------------- Add a GitHub workflow to monitor component updates
+222:  3d3877d811c7df7f115700da1dd8243517ea35a5 <   -:  ---------------------------------------- SECURITY.md: document Git for Windows' policies
+223:  5ffd3b1b565e56f4b4adca8c483be68ec0a4f3aa <   -:  ---------------------------------------- Partially un-revert "editor: save and reset terminal after calling EDITOR"
+224:  d4126f7c5d36fbbec881d6e1551398354151551f <   -:  ---------------------------------------- reset: reinstate support for the deprecated --stdin option
+225:  5b01af85d428c86874beb28cd64b37f0798e52e9 <   -:  ---------------------------------------- fsmonitor: reintroduce core.useBuiltinFSMonitor
+226:  e904ff3ede4ca85368a60aa1e7143ec94885e024 <   -:  ---------------------------------------- dependabot: help keeping GitHub Actions versions up to date
+227:  a9c63fe24cc421a3da9884e2e31954cb89437627 <   -:  ---------------------------------------- ci: only run the expensive tests in the Windows tests for now
+228:  9d87df1d526066c5d4756d36665706f5b4b7f614 <   -:  ---------------------------------------- mingw: let `access()` handle `nul` whether lower-case or not
+229:  718aaa62fce8d7cd8ed5bf718559a951b8dd8ed1 <   -:  ---------------------------------------- ci: bump actions/setup-python from 6 to 7
+230:  8bda6e826cccb103330c2b6393371c7a9c1cea91 <   -:  ---------------------------------------- fixup! Add a GitHub workflow to verify that Git/Scalar work in Nano Server
+231:  789c3cef41f42a98e1eb9ed6005245e57ef44ce6 <   -:  ---------------------------------------- fixup! Add an AGENTS.md file to help with AI-assisted debugging/development
+232:  1c72f0289796ee3c1764b8c1b33079866142b325 <   -:  ---------------------------------------- fixup! survey: turn into a thin shim over `git repo structure`
+233:  298c63c19ebc3663442d225e27649e37b6362f0c <   -:  ---------------------------------------- ci(dockerized): really do show the result of failing tests again
+234:  a52161b521117f7d98b173b4b05bf4e956fec3e3 <   -:  ---------------------------------------- fixup! mingw: allow `git.exe` to be used instead of the "Git wrapper"
+235:  eddd939aa4b917a2e7e5ad3c90874b3f425be70f <   -:  ---------------------------------------- fixup! README.md: Add a Windows-specific preamble
+236:  4f8694c5d683b47f431cde1c5423b626a8175b2e <   -:  ---------------------------------------- fixup! README.md: Add a Windows-specific preamble
+237:  b0f27f1b10371aa28263e28731e9fc7fd9b2df3a <   -:  ---------------------------------------- install-dependencies: work around a permission problem
+238:  3bb980c2eea9c30d3aa610ecf6f3f227fe18698e <   -:  ---------------------------------------- ci: pin linux32 to ubuntu-24.04 to restore networking
+  -:  ---------------------------------------- >   1:  255822c17bc24356b8ed0ab7a904458c6121380c remote: move "simple" @{push} resolution into a helper
+  -:  ---------------------------------------- >   2:  eb26c3a044b0a31d4082fefaffea335d3f8551a3 remote: resolve "simple" @{push} when pushing to another remote
+  -:  ---------------------------------------- >   3:  a861abbd6ddd5cbe730eaf041a7fdaad8e6b78a0 t5702: be more resilient to env quoting
+  -:  ---------------------------------------- >   4:  47eb472f9c725f011be3e73372116ded71d57bbd range-diff: use diffopt->repo instead of the_repository
+  -:  ---------------------------------------- >   5:  95694f2cf13f093219e11f9f582b8b109546e624 merge-ort: accept rename settings given without a value
+  -:  ---------------------------------------- >   6:  87c2c94614ababf4493716a14bbdbf1c58765cd5 pack-objects: use size_t for streamed large blobs
+  -:  ---------------------------------------- >   7:  c24deacf48cd47bd9b094e5beef970b9278e16e4 ci: consolidate setup of test environment
+  -:  ---------------------------------------- >   8:  1d8834292f14395defa78407ba7a725c2cb9dc06 ci/lib: always set GIT_TEST_USE_SET_E on Linux jobs
+  -:  ---------------------------------------- >   9:  8f614a55d0e93ec8fdaf71c79ddc5f2c54bc1660 ci/lib: deduplicate test variables by pattern matching
+  -:  ---------------------------------------- >  10:  af7f10a54b51a88eb185d238b6e843df5f640f92 ci/lib: merge switches for specific job names
+  -:  ---------------------------------------- >  11:  f9d2a6c87fd629c6c474371c621fd2c35e130760 t: honor default ref storage format
+  -:  ---------------------------------------- >  12:  3a35d5058046fc2aa2dc7c4855b36d54e80183fe ci/lib: add another NO_RUST build using glibc
+  -:  ---------------------------------------- >  13:  e24c306b8712290c3c98b59a63f2b704d0726b4e ci: don't override initial branch name in testbed job
+  -:  ---------------------------------------- >  14:  8bfbb744421218b7bb0dd6fabfc5eecd05a11d19 Documentation: clarify Git's security boundary
+  -:  ---------------------------------------- >  15:  9354c5f04055932909b660a237905b360cba195a The 19th batch
