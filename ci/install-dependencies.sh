@@ -61,7 +61,7 @@ ubuntu-*|i386/debian-*|debian-*)
 		tcl tk gettext zlib1g-dev perl-modules liberror-perl libauthen-sasl-perl \
 		libemail-valid-perl libio-pty-perl libio-socket-ssl-perl libnet-smtp-ssl-perl libdbd-sqlite3-perl libcgi-pm-perl \
 		libsecret-1-dev libpcre2-dev meson ninja-build pkg-config cargo \
-		${CC_PACKAGE:-${CC:-gcc}} python3
+		${CC_PACKAGE:-${CC:-gcc}} $PYTHON_PACKAGE
 
 	# Starting with Ubuntu 25.10, sudo can now be provided via either
 	# sudo(1) or sudo-rs(1), with the latter being the default. The problem
@@ -89,26 +89,23 @@ ubuntu-*|i386/debian-*|debian-*)
 
 		wget --quiet --directory-prefix="$CUSTOM_PATH" \
 			"$P4WHENCE/bin.linux26x86_64/p4d" \
-			"$P4WHENCE/bin.linux26x86_64/p4"
-		chmod a+x "$CUSTOM_PATH/p4d" "$CUSTOM_PATH/p4"
-		echo "$(tput setaf 6)Perforce Server Version$(tput sgr0)"
-		p4d -V
-		echo "$(tput setaf 6)Perforce Client Version$(tput sgr0)"
-		p4 -V
+			"$P4WHENCE/bin.linux26x86_64/p4" &&
+		chmod a+x "$CUSTOM_PATH/p4d" "$CUSTOM_PATH/p4" || {
+			rm -f "$CUSTOM_PATH/p4"
+			rm -f "$CUSTOM_PATH/p4d"
+		}
 
 		wget --quiet \
-		     "$LFSWHENCE/git-lfs-linux-amd64-$LINUX_GIT_LFS_VERSION.tar.gz"
+		     "$LFSWHENCE/git-lfs-linux-amd64-$LINUX_GIT_LFS_VERSION.tar.gz" &&
 		tar -xzf "git-lfs-linux-amd64-$LINUX_GIT_LFS_VERSION.tar.gz" \
 			-C "$CUSTOM_PATH" --strip-components=1 \
-			"git-lfs-$LINUX_GIT_LFS_VERSION/git-lfs"
-		rm "git-lfs-linux-amd64-$LINUX_GIT_LFS_VERSION.tar.gz"
-		echo "$(tput setaf 6)Git-LFS Version$(tput sgr0)"
-		git-lfs version
+			"git-lfs-$LINUX_GIT_LFS_VERSION/git-lfs" &&
+		rm "git-lfs-linux-amd64-$LINUX_GIT_LFS_VERSION.tar.gz" ||
+		rm -f "$CUSTOM_PATH/git-lfs"
 
-		wget --quiet "$JGITWHENCE" --output-document="$CUSTOM_PATH/jgit"
-		chmod a+x "$CUSTOM_PATH/jgit"
-		echo "$(tput setaf 6)JGit Version$(tput sgr0)"
-		jgit version
+		wget --quiet "$JGITWHENCE" --output-document="$CUSTOM_PATH/jgit" &&
+		chmod a+x "$CUSTOM_PATH/jgit" ||
+		rm -f "$CUSTOM_PATH/jgit"
 		;;
 	esac
 	;;
@@ -120,13 +117,10 @@ macos-*)
 
 	# Uncomment this block if you want to run `git p4` tests:
 	# mkdir -p "$CUSTOM_PATH"
-	# wget -q "$P4WHENCE/bin.macosx12arm64/helix-core-server.tgz"
-	# tar -xf helix-core-server.tgz -C "$CUSTOM_PATH" p4 p4d
+	# wget -q "$P4WHENCE/bin.macosx12arm64/helix-core-server.tgz" &&
+	# tar -xf helix-core-server.tgz -C "$CUSTOM_PATH" p4 p4d &&
+	# sudo xattr -d com.apple.quarantine "$CUSTOM_PATH/p4" "$CUSTOM_PATH/p4d" 2>/dev/null || true
 	# rm helix-core-server.tgz
-	# echo "$(tput setaf 6)Perforce Server Version$(tput sgr0)"
-	# p4d -V
-	# echo "$(tput setaf 6)Perforce Client Version$(tput sgr0)"
-	# p4 -V
 
 	case "$jobname" in
 	osx-meson)
@@ -173,5 +167,31 @@ Documentation)
 	sudo gem install concurrent-ruby
 	;;
 esac
+
+if type p4d >/dev/null 2>&1 && type p4 >/dev/null 2>&1
+then
+	echo "$(tput setaf 6)Perforce Server Version$(tput sgr0)"
+	p4d -V
+	echo "$(tput setaf 6)Perforce Client Version$(tput sgr0)"
+	p4 -V
+else
+	echo >&2 "::warning:: perforce wasn't installed, see above for clues why"
+fi
+
+if type git-lfs >/dev/null 2>&1
+then
+	echo "$(tput setaf 6)Git-LFS Version$(tput sgr0)"
+	git-lfs version
+else
+	echo >&2 "::warning:: git-lfs wasn't installed, see above for clues why"
+fi
+
+if type jgit >/dev/null 2>&1
+then
+	echo "$(tput setaf 6)JGit Version$(tput sgr0)"
+	jgit version
+else
+	echo >&2 "::warning:: JGit wasn't installed, see above for clues why"
+fi
 
 end_group "Install dependencies"
