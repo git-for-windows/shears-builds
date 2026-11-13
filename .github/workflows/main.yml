@@ -65,7 +65,7 @@ jobs:
           echo "skip_concurrent=$skip_concurrent" >>$GITHUB_OUTPUT
       - name: skip if the commit or tree was already tested
         id: skip-if-redundant
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        uses: actions/github-script@v9
         if: steps.check-ref.outputs.enabled == 'yes'
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
@@ -114,8 +114,8 @@ jobs:
       group: windows-build-${{ github.ref }}
       cancel-in-progress: ${{ needs.ci-config.outputs.skip_concurrent == 'yes' }}
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-    - uses: git-for-windows/setup-git-for-windows-sdk@aed153d1258c311b680b81584a72a1a4807401f0 # v2
+    - uses: actions/checkout@v6
+    - uses: git-for-windows/setup-git-for-windows-sdk@v2
     - name: Install GCC-compatible Rust target
       shell: bash
       run: |
@@ -149,7 +149,7 @@ jobs:
     - name: zip up tracked files
       run: git archive -o artifacts/tracked.tar.gz HEAD
     - name: upload tracked files and build artifacts
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      uses: actions/upload-artifact@v7
       with:
         name: windows-artifacts
         path: artifacts
@@ -166,14 +166,14 @@ jobs:
       cancel-in-progress: ${{ needs.ci-config.outputs.skip_concurrent == 'yes' }}
     steps:
     - name: download tracked files and build artifacts
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      uses: actions/download-artifact@v8
       with:
         name: windows-artifacts
         path: ${{github.workspace}}
     - name: extract tracked files and build artifacts
       shell: bash
       run: tar xf artifacts.tar.gz && tar xf tracked.tar.gz
-    - uses: git-for-windows/setup-git-for-windows-sdk@aed153d1258c311b680b81584a72a1a4807401f0 # v2
+    - uses: git-for-windows/setup-git-for-windows-sdk@v2
     - name: test
       shell: bash
       run: . /etc/profile && ci/run-test-slice.sh $((${{matrix.nr}} + 1)) 10
@@ -183,7 +183,7 @@ jobs:
       run: ci/print-test-failures.sh
     - name: Upload failed tests' directories
       if: failure() && env.FAILED_TEST_ARTIFACTS != ''
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      uses: actions/upload-artifact@v7
       with:
         name: failed-tests-windows-${{ matrix.nr }}
         path: ${{env.FAILED_TEST_ARTIFACTS}}
@@ -195,39 +195,37 @@ jobs:
       NO_PERL: 1
       GIT_CONFIG_PARAMETERS: "'user.name=CI' 'user.email=ci@git'"
     runs-on: windows-latest
-    strategy:
-      matrix:
-        arch: [x64, arm64]
     concurrency:
-      group: vs-build-${{ github.ref }}-${{ matrix.arch }}
+      group: vs-build-${{ github.ref }}
       cancel-in-progress: ${{ needs.ci-config.outputs.skip_concurrent == 'yes' }}
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-    - uses: git-for-windows/setup-git-for-windows-sdk@aed153d1258c311b680b81584a72a1a4807401f0 # v2
+    - uses: actions/checkout@v6
+    - uses: git-for-windows/setup-git-for-windows-sdk@v2
     - name: initialize vcpkg
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      uses: actions/checkout@v6
       with:
         repository: 'microsoft/vcpkg'
         path: 'compat/vcbuild/vcpkg'
     - name: download vcpkg artifacts
-      uses: git-for-windows/get-azure-pipelines-artifact@2e424b98e1251b725d6064c5f1a9f854a33e5b88 # v0
+      uses: git-for-windows/get-azure-pipelines-artifact@v0
       with:
         repository: git/git
         definitionId: 9
     - name: add msbuild to PATH
-      uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3
+      uses: microsoft/setup-msbuild@v3
     - name: copy dlls to root
       shell: cmd
-      run: compat\vcbuild\vcpkg_copy_dlls.bat release ${{ matrix.arch }}-windows
+      run: compat\vcbuild\vcpkg_copy_dlls.bat release
     - name: generate Visual Studio solution
       shell: bash
       run: |
-        cmake `pwd`/contrib/buildsystems/ -DCMAKE_PREFIX_PATH=`pwd`/compat/vcbuild/vcpkg/installed/${{ matrix.arch }}-windows \
-        -DNO_GETTEXT=YesPlease -DPERL_TESTS=OFF -DPYTHON_TESTS=OFF -DCURL_NO_CURL_CMAKE=ON -DCMAKE_GENERATOR_PLATFORM=${{ matrix.arch }} -DVCPKG_ARCH=${{ matrix.arch }}-windows -DHOST_CPU=${{ matrix.arch }}
+        cmake `pwd`/contrib/buildsystems/ -DCMAKE_PREFIX_PATH=`pwd`/compat/vcbuild/vcpkg/installed/x64-windows \
+        -DNO_GETTEXT=YesPlease -DPERL_TESTS=OFF -DPYTHON_TESTS=OFF \
+        -DCURL_NO_CURL_CMAKE=ON -DCMAKE_GENERATOR_PLATFORM=x64
     - name: MSBuild
       run: |
         $sln = if (Test-Path git.slnx) { 'git.slnx' } else { 'git.sln' }
-        msbuild $sln -property:Configuration=Release -property:Platform=${{ matrix.arch }} -maxCpuCount:4
+        msbuild $sln -property:Configuration=Release -property:Platform=x64 -maxCpuCount:4
     - name: bundle artifact tar
       shell: bash
       env:
@@ -239,9 +237,9 @@ jobs:
     - name: zip up tracked files
       run: git archive -o artifacts/tracked.tar.gz HEAD
     - name: upload tracked files and build artifacts
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      uses: actions/upload-artifact@v7
       with:
-        name: vs-artifacts-${{ matrix.arch }}
+        name: vs-artifacts
         path: artifacts
   vs-test:
     name: win+VS test
@@ -255,11 +253,11 @@ jobs:
       group: vs-test-${{ matrix.nr }}-${{ github.ref }}
       cancel-in-progress: ${{ needs.ci-config.outputs.skip_concurrent == 'yes' }}
     steps:
-    - uses: git-for-windows/setup-git-for-windows-sdk@aed153d1258c311b680b81584a72a1a4807401f0 # v2
+    - uses: git-for-windows/setup-git-for-windows-sdk@v2
     - name: download tracked files and build artifacts
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      uses: actions/download-artifact@v8
       with:
-        name: vs-artifacts-x64
+        name: vs-artifacts
         path: ${{github.workspace}}
     - name: extract tracked files and build artifacts
       shell: bash
@@ -275,7 +273,7 @@ jobs:
       run: ci/print-test-failures.sh
     - name: Upload failed tests' directories
       if: failure() && env.FAILED_TEST_ARTIFACTS != ''
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      uses: actions/upload-artifact@v7
       with:
         name: failed-tests-windows-vs-${{ matrix.nr }}
         path: ${{env.FAILED_TEST_ARTIFACTS}}
@@ -289,8 +287,8 @@ jobs:
       group: windows-meson-build-${{ github.ref }}
       cancel-in-progress: ${{ needs.ci-config.outputs.skip_concurrent == 'yes' }}
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+    - uses: actions/checkout@v6
+    - uses: actions/setup-python@v6
     - name: Set up dependencies
       shell: pwsh
       run: pip install meson ninja
@@ -301,7 +299,7 @@ jobs:
       shell: pwsh
       run: meson compile -C build
     - name: Upload build artifacts
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      uses: actions/upload-artifact@v7
       with:
         name: windows-meson-artifacts
         path: build
@@ -317,13 +315,13 @@ jobs:
       group: windows-meson-test-${{ matrix.nr }}-${{ github.ref }}
       cancel-in-progress: ${{ needs.ci-config.outputs.skip_concurrent == 'yes' }}
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+    - uses: actions/checkout@v6
+    - uses: actions/setup-python@v6
     - name: Set up dependencies
       shell: pwsh
       run: pip install meson ninja
     - name: Download build artifacts
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      uses: actions/download-artifact@v8
       with:
         name: windows-meson-artifacts
         path: build
@@ -336,7 +334,7 @@ jobs:
       run: ci/print-test-failures.sh
     - name: Upload failed tests' directories
       if: failure() && env.FAILED_TEST_ARTIFACTS != ''
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      uses: actions/upload-artifact@v7
       with:
         name: failed-tests-windows-meson-${{ matrix.nr }}
         path: ${{env.FAILED_TEST_ARTIFACTS}}
@@ -357,10 +355,10 @@ jobs:
             pool: macos-15
           - jobname: osx-reftable
             cc: clang
-            pool: macos-26
+            pool: macos-15
           - jobname: osx-gcc
             cc: gcc-13
-            pool: macos-26
+            pool: macos-15
           - jobname: osx-meson
             cc: clang
             pool: macos-15
@@ -372,7 +370,7 @@ jobs:
       TEST_OUTPUT_DIRECTORY: ${{github.workspace}}/t
     runs-on: ${{matrix.vector.pool}}
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/checkout@v6
     - run: ci/install-dependencies.sh
     - run: ci/run-build-and-tests.sh
     - name: print test failures
@@ -380,7 +378,7 @@ jobs:
       run: ci/print-test-failures.sh
     - name: Upload failed tests' directories
       if: failure() && env.FAILED_TEST_ARTIFACTS != ''
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      uses: actions/upload-artifact@v7
       with:
         name: failed-tests-${{matrix.vector.jobname}}
         path: ${{env.FAILED_TEST_ARTIFACTS}}
@@ -393,7 +391,7 @@ jobs:
       CI_JOB_IMAGE: ubuntu-latest
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/checkout@v6
     - run: ci/install-dependencies.sh
     - run: ci/run-build-and-minimal-fuzzers.sh
   dockerized:
@@ -410,8 +408,13 @@ jobs:
         - jobname: linux-sha256
           image: ubuntu:rolling
           cc: clang
-        - jobname: linux-feature-testbed
-          image: ubuntu:latest
+        - jobname: linux-reftable
+          image: ubuntu:rolling
+          cc: clang
+        - jobname: linux-TEST-vars
+          image: ubuntu:20.04
+          cc: gcc
+          cc_package: gcc-8
         - jobname: linux-breaking-changes
           cc: gcc
           image: ubuntu:rolling
@@ -431,8 +434,9 @@ jobs:
           cc: gcc
         - jobname: linux-musl-meson
           image: alpine:latest
+        # Supported until 2025-04-02.
         - jobname: linux32
-          image: i386/debian:latest
+          image: i386/ubuntu:20.04
         # A RHEL 8 compatible distro.  Supported until 2029-05-31.
         - jobname: almalinux-8
           image: almalinux:8
@@ -444,9 +448,7 @@ jobs:
       CC: ${{matrix.vector.cc}}
       CI_JOB_IMAGE: ${{matrix.vector.image}}
       CUSTOM_PATH: /custom
-    runs-on: >-
-      ${{ matrix.vector.jobname == 'linux32'
-          && 'ubuntu-24.04' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     container:
       image: ${{ matrix.vector.image }}
       options: ${{ github.repository_visibility == 'private' && '--pids-limit 16384 --ulimit nproc=16384:16384 --ulimit nofile=32768:32768' || '' }}
@@ -468,19 +470,17 @@ jobs:
         else
           apt-get -q update && apt-get -q -y install git
         fi
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/checkout@v6
     - run: ci/install-dependencies.sh
     - run: useradd builder --create-home
     - run: chown -R builder .
     - run: chmod a+w $GITHUB_ENV && sudo --preserve-env --set-home --user=builder ci/run-build-and-tests.sh
     - name: print test failures
       if: failure() && env.FAILED_TEST_ARTIFACTS != ''
-      run: |
-        chmod a+w "$GITHUB_ENV" &&
-        sudo --preserve-env --set-home --user=builder ci/print-test-failures.sh
+      run: sudo --preserve-env --set-home --user=builder ci/print-test-failures.sh
     - name: Upload failed tests' directories
       if: failure() && env.FAILED_TEST_ARTIFACTS != ''
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      uses: actions/upload-artifact@v7
       with:
         name: failed-tests-${{matrix.vector.jobname}}
         path: ${{env.FAILED_TEST_ARTIFACTS}}
@@ -495,7 +495,7 @@ jobs:
       group: static-analysis-${{ github.ref }}
       cancel-in-progress: ${{ needs.ci-config.outputs.skip_concurrent == 'yes' }}
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/checkout@v6
     - run: ci/install-dependencies.sh
     - run: ci/run-static-analysis.sh
     - run: ci/check-directional-formatting.bash
@@ -511,7 +511,7 @@ jobs:
       group: rust-analysis-${{ github.ref }}
       cancel-in-progress: ${{ needs.ci-config.outputs.skip_concurrent == 'yes' }}
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/checkout@v6
     - run: ci/install-dependencies.sh
     - run: ci/run-rust-checks.sh
   sparse:
@@ -525,7 +525,7 @@ jobs:
       group: sparse-${{ github.ref }}
       cancel-in-progress: ${{ needs.ci-config.outputs.skip_concurrent == 'yes' }}
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/checkout@v6
     - name: Install other dependencies
       run: ci/install-dependencies.sh
     - run: make sparse
@@ -541,6 +541,6 @@ jobs:
       CI_JOB_IMAGE: ubuntu-latest
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/checkout@v6
     - run: ci/install-dependencies.sh
     - run: ci/test-documentation.sh

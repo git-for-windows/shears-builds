@@ -6,12 +6,10 @@ clar_test_suites = [
   'unit-tests/u-hashmap.c',
   'unit-tests/u-list-objects-filter-options.c',
   'unit-tests/u-mem-pool.c',
-  'unit-tests/u-mingw.c',
   'unit-tests/u-odb-inmemory.c',
   'unit-tests/u-oid-array.c',
   'unit-tests/u-oidmap.c',
   'unit-tests/u-oidtree.c',
-  'unit-tests/u-poll.c',
   'unit-tests/u-prio-queue.c',
   'unit-tests/u-reftable-basics.c',
   'unit-tests/u-reftable-block.c',
@@ -32,6 +30,7 @@ clar_test_suites = [
 ]
 
 clar_sources = [
+  'unit-tests/clar/clar.c',
   'unit-tests/unit-test.c',
   'unit-tests/lib-oid.c',
   'unit-tests/lib-reftable.c'
@@ -50,7 +49,7 @@ clar_decls_h = custom_target(
 )
 clar_sources += clar_decls_h
 
-clar_suite_h = custom_target(
+clar_sources += custom_target(
   input: clar_decls_h,
   output: 'clar.suite',
   command : [
@@ -67,13 +66,6 @@ clar_unit_tests = executable('unit-tests',
   c_args: [
     '-DGIT_CLAR_DECLS_H="' + clar_decls_h.full_path() + '"',
   ],
-  c_pch: '../tools/precompiled.h',
-  link_with: static_library('clar',
-    sources: [
-      'unit-tests/clar/clar.c',
-      clar_suite_h,
-    ],
-  ),
   dependencies: [libgit_commonmain],
 )
 test('unit-tests', clar_unit_tests, kwargs: test_kwargs)
@@ -289,9 +281,6 @@ integration_tests = [
   't2026-checkout-pathspec-file.sh',
   't2027-checkout-track.sh',
   't2030-unresolve-info.sh',
-  't2031-checkout-long-paths.sh',
-  't2040-checkout-symlink-attr.sh',
-  't2041-existing-junction.sh',
   't2050-git-dir-relative.sh',
   't2060-switch.sh',
   't2070-restore.sh',
@@ -418,7 +407,6 @@ integration_tests = [
   't3452-history-split.sh',
   't3453-history-fixup.sh',
   't3454-history-drop.sh',
-  't3455-history-squash.sh',
   't3500-cherry.sh',
   't3501-revert-cherry-pick.sh',
   't3502-cherry-pick-merge.sh',
@@ -444,7 +432,6 @@ integration_tests = [
   't3703-add-magic-pathspec.sh',
   't3704-add-pathspec-file.sh',
   't3705-add-sparse-checkout.sh',
-  't3706-add-4gb-file.sh',
   't3800-mktag.sh',
   't3900-i18n-commit.sh',
   't3901-i18n-patch.sh',
@@ -665,8 +652,6 @@ integration_tests = [
   't5409-colorize-remote-messages.sh',
   't5410-receive-pack.sh',
   't5411-proc-receive-hook.sh',
-  't5412-receive-report-hook.sh',
-  't5413-connectivity-check.sh',
   't5500-fetch-pack.sh',
   't5501-fetch-push-alternates.sh',
   't5502-quickfetch.sh',
@@ -903,7 +888,6 @@ integration_tests = [
   't7105-reset-patch.sh',
   't7106-reset-unborn-branch.sh',
   't7107-reset-pathspec-file.sh',
-  't7108-reset-stdin.sh',
   't7110-reset-merge.sh',
   't7111-reset-table.sh',
   't7112-reset-submodule.sh',
@@ -934,8 +918,6 @@ integration_tests = [
   't7424-submodule-mixed-ref-formats.sh',
   't7425-submodule-gitdir-path-extension.sh',
   't7426-submodule-get-default-remote.sh',
-  't7427-submodule-object-storage-format.sh',
-  't7429-submodule-long-path.sh',
   't7450-bad-git-dotfiles.sh',
   't7500-commit-template-squash-signoff.sh',
   't7501-commit-basic-functionality.sh',
@@ -1012,7 +994,6 @@ integration_tests = [
   't8014-blame-ignore-fuzzy.sh',
   't8015-blame-diff-algorithm.sh',
   't8020-last-modified.sh',
-  't8100-git-survey.sh',
   't9001-send-email.sh',
   't9002-column.sh',
   't9003-help-autocorrect.sh',

@@ -292,9 +292,6 @@ static void fast_import_state_init(struct fast_import_state *state,
 	state->option = option;
 }
 
-static struct object_entry *dereference(struct object_entry *oe,
-					struct object_id *oid);
-
 static void parse_argv(struct fast_import_state *state);
 static void parse_get_mark(struct fast_import_state *state, const char *p);
 static void parse_cat_blob(struct fast_import_state *state, const char *p);
@@ -898,7 +895,7 @@ static void end_packfile(void)
 	running = 1;
 	clear_delta_base_cache();
 	if (object_count) {
-		struct odb_source_files *files = odb_source_files_downcast(pack_data->repo->objects->source);
+		struct odb_source_files *files = odb_source_files_downcast(pack_data->repo->objects->sources);
 		struct packed_git *new_p;
 		struct object_id cur_pack_oid;
 		char *idx_name;
@@ -924,7 +921,7 @@ static void end_packfile(void)
 		idx_name = keep_pack(create_index());
 
 		/* Register the packfile with core git's machinery. */
-		new_p = packfile_store_load_pack(files->dirs->packed, idx_name, 1);
+		new_p = packfile_store_load_pack(files->packed, idx_name, 1);
 		if (!new_p)
 			die(_("core Git rejected index %s"), idx_name);
 		all_packs[pack_id] = new_p;
@@ -978,12 +975,12 @@ static int store_object(
 	struct object_id *oidout,
 	uintmax_t mark)
 {
-	struct odb_source_files *files = odb_source_files_downcast(the_repository->objects->source);
+	struct odb_source *source;
 	void *out, *delta;
 	struct object_entry *e;
 	unsigned char hdr[96];
 	struct object_id oid;
-	size_t hdrlen, deltalen = 0;
+	unsigned long hdrlen, deltalen = 0;
 	struct git_hash_ctx c;
 	git_zstream s;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
@@ -1005,8 +1002,10 @@ static int store_object(
 		return 1;
 	}
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		if (!packfile_list_find_oid(packfile_store_get_packs(dir->packed), &oid))
+	for (source = the_repository->objects->sources; source; source = source->next) {
+		struct odb_source_files *files = odb_source_files_downcast(source);
+
+		if (!packfile_list_find_oid(packfile_store_get_packs(files->packed), &oid))
 			continue;
 		e->type = type;
 		e->pack_id = MAX_PACK_ID;
@@ -1017,10 +1016,13 @@ static int store_object(
 
 	if (last && last->data.len && last->data.buf && last->depth < max_depth
 		&& dat->len > the_hash_algo->rawsz) {
+		size_t deltalen_st;
+
 		delta_count_attempts_by_type[type]++;
 		delta = diff_delta(last->data.buf, last->data.len,
 			dat->buf, dat->len,
-			&deltalen, dat->len - the_hash_algo->rawsz);
+			&deltalen_st, dat->len - the_hash_algo->rawsz);
+		deltalen = cast_size_t_to_ulong(deltalen_st);
 	} else
 		delta = NULL;
 
@@ -1123,10 +1125,10 @@ static void truncate_pack(struct hashfile_checkpoint *checkpoint)
 
 static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
 {
-	struct odb_source_files *files = odb_source_files_downcast(the_repository->objects->source);
 	size_t in_sz = 64 * 1024, out_sz = 64 * 1024;
 	unsigned char *in_buf = xmalloc(in_sz);
 	unsigned char *out_buf = xmalloc(out_sz);
+	struct odb_source *source;
 	struct object_entry *e;
 	struct object_id oid;
 	unsigned long hdrlen;
@@ -1210,8 +1212,10 @@ static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
 		goto out;
 	}
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		if (!packfile_list_find_oid(packfile_store_get_packs(dir->packed), &oid))
+	for (source = the_repository->objects->sources; source; source = source->next) {
+		struct odb_source_files *files = odb_source_files_downcast(source);
+
+		if (!packfile_list_find_oid(packfile_store_get_packs(files->packed), &oid))
 			continue;
 		e->type = OBJ_BLOB;
 		e->pack_id = MAX_PACK_ID;
@@ -1255,9 +1259,10 @@ out:
  */
 static void *gfi_unpack_entry(
 	struct object_entry *oe,
-	size_t *sizep)
+	unsigned long *sizep)
 {
 	enum object_type type;
+	size_t size_st = 0;
 	void *data;
 	struct packed_git *p = all_packs[oe->pack_id];
 	if (p == pack_data && p->pack_size < (pack_size + the_hash_algo->rawsz)) {
@@ -1280,7 +1285,9 @@ static void *gfi_unpack_entry(
 		 */
 		p->pack_size = pack_size + the_hash_algo->rawsz;
 	}
-	data = unpack_entry(the_repository, p, oe->idx.offset, &type, sizep);
+	data = unpack_entry(the_repository, p, oe->idx.offset, &type, &size_st);
+	if (sizep)
+		*sizep = cast_size_t_to_ulong(size_st);
 	return data;
 }
 
@@ -1289,7 +1296,7 @@ static void load_tree(struct tree_entry *root)
 	struct object_id *oid = &root->versions[1].oid;
 	struct object_entry *myoe;
 	struct tree_content *t;
-	size_t size;
+	unsigned long size;
 	char *buf;
 	const char *c;
 
@@ -1307,8 +1314,10 @@ static void load_tree(struct tree_entry *root)
 			die(_("can't load tree %s"), oid_to_hex(oid));
 	} else {
 		enum object_type type;
+		size_t size_st = 0;
 		buf = odb_read_object(the_repository->objects, oid, &type,
-				      &size);
+				      &size_st);
+		size = cast_size_t_to_ulong(size_st);
 		if (!buf || type != OBJ_TREE)
 			die(_("can't load tree %s"), oid_to_hex(oid));
 	}
@@ -2631,7 +2640,7 @@ static void file_change_deleteall(struct branch *b)
 	b->num_notes = 0;
 }
 
-static void parse_from_commit(struct branch *b, char *buf, size_t size)
+static void parse_from_commit(struct branch *b, char *buf, unsigned long size)
 {
 	if (!buf || size < the_hash_algo->hexsz + 6)
 		die(_("not a valid commit: %s"), oid_to_hex(&b->oid));
@@ -2648,19 +2657,13 @@ static void parse_from_existing(struct branch *b)
 		oidclr(&b->branch_tree.versions[0].oid, the_repository->hash_algo);
 		oidclr(&b->branch_tree.versions[1].oid, the_repository->hash_algo);
 	} else {
-		size_t size;
+		unsigned long size;
+		size_t size_st = 0;
 		char *buf;
-		struct object_entry *e = find_object(&b->oid);
 
-		while (e && e->type == OBJ_TAG)
-			e = dereference(e, &b->oid);
-
-		if (e && e->type == OBJ_COMMIT && e->pack_id != MAX_PACK_ID) {
-			buf = gfi_unpack_entry(e, &size);
-		} else {
-			buf = odb_read_object_peeled(the_repository->objects, &b->oid,
-						     OBJ_COMMIT, &size, &b->oid);
-		}
+		buf = odb_read_object_peeled(the_repository->objects, &b->oid,
+					     OBJ_COMMIT, &size_st, &b->oid);
+		size = cast_size_t_to_ulong(size_st);
 		parse_from_commit(b, buf, size);
 		free(buf);
 	}
@@ -2691,7 +2694,7 @@ static int parse_objectish(struct fast_import_state *state,
 		if (!oideq(&b->oid, &oe->idx.oid)) {
 			oidcpy(&b->oid, &oe->idx.oid);
 			if (oe->pack_id != MAX_PACK_ID) {
-				size_t size;
+				unsigned long size;
 				char *buf = gfi_unpack_entry(oe, &size);
 				parse_from_commit(b, buf, size);
 				free(buf);
@@ -3364,13 +3367,15 @@ static void cat_blob(struct object_entry *oe, struct object_id *oid)
 {
 	struct strbuf line = STRBUF_INIT;
 	struct iovec iov[3];
-	size_t size;
+	unsigned long size;
 	enum object_type type = 0;
 	char *buf;
 
 	if (!oe || oe->pack_id == MAX_PACK_ID) {
+		size_t size_st = 0;
 		buf = odb_read_object(the_repository->objects, oid, &type,
-				      &size);
+				      &size_st);
+		size = cast_size_t_to_ulong(size_st);
 	} else {
 		type = oe->type;
 		buf = gfi_unpack_entry(oe, &size);
@@ -3462,7 +3467,7 @@ static void parse_cat_blob(struct fast_import_state *state UNUSED,
 static struct object_entry *dereference(struct object_entry *oe,
 					struct object_id *oid)
 {
-	size_t size;
+	unsigned long size;
 	char *buf = NULL;
 	const unsigned hexsz = the_hash_algo->hexsz;
 
@@ -3491,8 +3496,10 @@ static struct object_entry *dereference(struct object_entry *oe,
 		buf = gfi_unpack_entry(oe, &size);
 	} else {
 		enum object_type unused;
+		size_t size_st = 0;
 		buf = odb_read_object(the_repository->objects, oid,
-				      &unused, &size);
+				      &unused, &size_st);
+		size = cast_size_t_to_ulong(size_st);
 	}
 	if (!buf)
 		die(_("can't load object %s"), oid_to_hex(oid));
