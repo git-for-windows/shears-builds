@@ -1,0 +1,3 @@
+survey.*::
+	Deprecated and ignored by `git survey`. See the "MIGRATION" section
+	of linkgit:git-survey[1] for replacements and changed defaults.
