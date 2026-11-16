@@ -202,6 +202,33 @@ struct commit_graph_write_options {
 bool commit_graph_write_allowed(struct repository *r);
 
 /*
+ * Write a single commit-graph layer to the given file descriptor. When writing
+ * a split commit graph then the repository's loaded commit graph will be used
+ * as the base. This can be tweaked:
+ *
+ *   - `mergeable_layers` controls how many of the topmost layers may be merged
+ *     together.
+ *
+ *   - `chainable_layers` controls how many of the topmost layers may be used
+ *     as base. In case the picked base is not chainable, then it and all of
+ *     its bases are merged.
+ *
+ * On success, `*base` is set to the layer of the currently-loaded chain that
+ * the new layer builds upon, or NULL if the new layer is standalone. `hash`
+ * receives the trailing checksum of the new layer.
+ *
+ * Returns 1 in case a new layer has been written, 0 in case there was nothing
+ * to write, a negative error code otherwise.
+ */
+int commit_graph_write_layer(struct repository *r,
+			     const struct commit_graph_write_options *opts,
+			     size_t mergeable_layers,
+			     size_t chainable_layers,
+			     int fd, const char *path,
+			     struct commit_graph **base,
+			     unsigned char *hash);
+
+/*
  * The commit_graph_write* methods return zero on success
  * and a negative value on failure. Note that if the repository
  * is not compatible with the commit-graph feature, then the

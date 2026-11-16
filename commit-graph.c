@@ -1140,8 +1140,6 @@ struct tree *get_commit_tree_in_graph(struct repository *r, const struct commit 
 
 struct write_commit_graph_context {
 	struct repository *r;
-	char *dir;
-	char *graph_name;
 	struct oid_array oids;
 	struct commit_stack commits;
 	int num_extra_edges;
@@ -2092,68 +2090,16 @@ static void expire_commit_graphs(const char *dirpath,
 				 struct string_list *kept,
 				 timestamp_t expire_time);
 
-static int write_commit_graph_file(struct write_commit_graph_context *ctx)
+static int write_commit_graph_file(struct write_commit_graph_context *ctx,
+				   int fd, const char *path,
+				   unsigned char *file_hash)
 {
-	struct hashfile *f;
-	struct tempfile *graph_layer = NULL; /* when COMMIT_GRAPH_WRITE_SPLIT is non-zero */
-	struct lock_file lk = LOCK_INIT;
 	const unsigned hashsz = ctx->r->hash_algo->rawsz;
 	struct strbuf progress_title = STRBUF_INIT;
-	struct string_list chain_hashes = STRING_LIST_INIT_DUP;
-	struct string_list kept = STRING_LIST_INIT_DUP;
-	struct commit_graph *base = ctx->new_base_graph, *chain;
-	char *base_rename_from = NULL, *base_rename_to = NULL;
-	char *new_path = NULL;
+	struct hashfile *f;
 	struct chunkfile *cf;
-	unsigned char file_hash[GIT_MAX_RAWSZ];
-	int ret;
 
-	if (ctx->opts->flags & COMMIT_GRAPH_WRITE_SPLIT) {
-		struct strbuf tmp_file = STRBUF_INIT;
-
-		strbuf_addf(&tmp_file,
-			    "%s/info/commit-graphs/tmp_graph_XXXXXX",
-			    ctx->dir);
-		ctx->graph_name = strbuf_detach(&tmp_file, NULL);
-	} else {
-		ctx->graph_name = get_commit_graph_filename(ctx->dir);
-	}
-
-	if (safe_create_leading_directories(ctx->r, ctx->graph_name)) {
-		ret = error(_("unable to create leading directories of %s"),
-			    ctx->graph_name);
-		goto out;
-	}
-
-	if (ctx->opts->flags & COMMIT_GRAPH_WRITE_SPLIT) {
-		char *lock_name = get_commit_graph_chain_filename(ctx->dir);
-
-		repo_hold_lock_file_for_update_mode(ctx->r, &lk, lock_name,
-						    LOCK_DIE_ON_ERROR, 0444);
-		free(lock_name);
-
-		graph_layer = mks_tempfile_m(ctx->graph_name, 0444);
-		if (!graph_layer) {
-			ret = error(_("unable to create temporary graph layer"));
-			goto out;
-		}
-
-		if (adjust_shared_perm(ctx->r, get_tempfile_path(graph_layer))) {
-			ret = error(_("unable to adjust shared permissions for '%s'"),
-				    get_tempfile_path(graph_layer));
-			goto out;
-		}
-
-		f = hashfd(ctx->r->hash_algo,
-			   get_tempfile_fd(graph_layer), get_tempfile_path(graph_layer));
-	} else {
-		repo_hold_lock_file_for_update_mode(ctx->r, &lk,
-						    ctx->graph_name,
-						    LOCK_DIE_ON_ERROR, 0444);
-		f = hashfd(ctx->r->hash_algo,
-			   get_lock_file_fd(&lk), get_lock_file_path(&lk));
-	}
-
+	f = hashfd(ctx->r->hash_algo, fd, path);
 	cf = init_chunkfile(f);
 
 	add_chunk(cf, GRAPH_CHUNKID_OIDFANOUT, GRAPH_FANOUT_SIZE,
@@ -2217,14 +2163,114 @@ static int write_commit_graph_file(struct write_commit_graph_context *ctx)
 			  CSUM_HASH_IN_STREAM | CSUM_FSYNC);
 	free_chunkfile(cf);
 
+	return 0;
+}
+
+int commit_graph_write(struct repository *r,
+		       const char *dir,
+		       const struct commit_graph_write_options *opts)
+{
+	struct string_list chain_hashes = STRING_LIST_INIT_DUP;
+	struct string_list kept = STRING_LIST_INIT_DUP;
+	struct tempfile *graph_layer = NULL;
+	struct lock_file lk = LOCK_INIT;
+	struct commit_graph *g, *chain, *base = NULL;
+	char *base_rename_from = NULL, *base_rename_to = NULL;
+	char *graph_name = NULL, *abs_dir = NULL, *new_path = NULL;
+	size_t mergeable_layers = 0, chainable_layers = 0;
+	unsigned char hash[GIT_MAX_RAWSZ];
+	bool mergeable = true;
+	const char *out_path;
+	int out_fd;
+	int ret;
+
+	if (!commit_graph_write_allowed(r))
+		return 0;
+
+	abs_dir = absolute_pathdup(dir);
+
+	g = prepare_commit_graph(r);
+
+	/*
+	 * We only consider merging layers that belong to our own object
+	 * directory. Furthermore, we can only chain on top of either:
+	 *
+	 *   - A split commit graph layer, regardless of whether or not it is
+	 *     local.
+	 *
+	 *   - A local non-split commit graph, in which case we'll convert that
+	 *     layer into a split commit graph layer.
+	 */
+	for (struct commit_graph *layer = g; layer; layer = layer->base_graph) {
+		char *path = get_commit_graph_filename(layer->dir);
+		bool is_split = !!strcmp(layer->filename, path);
+		bool is_local = !strcmp(layer->dir, abs_dir);
+
+		free(path);
+
+		if (!is_local && !is_split)
+			break;
+		if (!is_local)
+			mergeable = false;
+
+		if (mergeable)
+			mergeable_layers++;
+		chainable_layers++;
+	}
+
+	if (opts->flags & COMMIT_GRAPH_WRITE_SPLIT) {
+		graph_name = xstrfmt("%s/info/commit-graphs/tmp_graph_XXXXXX", abs_dir);
+	} else {
+		graph_name = get_commit_graph_filename(abs_dir);
+	}
+
+	if (safe_create_leading_directories(r, graph_name)) {
+		ret = error(_("unable to create leading directories of %s"),
+			    graph_name);
+		goto out;
+	}
+
+	if (opts->flags & COMMIT_GRAPH_WRITE_SPLIT) {
+		char *chain_name = get_commit_graph_chain_filename(abs_dir);
+
+		repo_hold_lock_file_for_update_mode(r, &lk, chain_name,
+						    LOCK_DIE_ON_ERROR, 0444);
+		free(chain_name);
+
+		graph_layer = mks_tempfile_m(graph_name, 0444);
+		if (!graph_layer) {
+			ret = error(_("unable to create temporary graph layer"));
+			goto out;
+		}
+
+		if (adjust_shared_perm(r, get_tempfile_path(graph_layer))) {
+			ret = error(_("unable to adjust shared permissions for '%s'"),
+				    get_tempfile_path(graph_layer));
+			goto out;
+		}
+
+		out_fd = get_tempfile_fd(graph_layer);
+		out_path = get_tempfile_path(graph_layer);
+	} else {
+		repo_hold_lock_file_for_update_mode(r, &lk, graph_name,
+						    LOCK_DIE_ON_ERROR, 0444);
+		out_fd = get_lock_file_fd(&lk);
+		out_path = get_lock_file_path(&lk);
+	}
+
+	ret = commit_graph_write_layer(r, opts, mergeable_layers, chainable_layers,
+				       out_fd, out_path, &base, hash);
+	if (ret <= 0)
+		goto out;
+
 	/*
 	 * Snapshot everything we need from the current chain before closing
 	 * it, as we must not have any layers mapped when replacing them.
 	 */
-	if (ctx->opts->flags & COMMIT_GRAPH_WRITE_SPLIT) {
-		const char *new_hash = hash_to_hex_algop(file_hash, ctx->r->hash_algo);
+	if (opts->flags & COMMIT_GRAPH_WRITE_SPLIT) {
+		const char *new_hash = hash_to_hex_algop(hash, r->hash_algo);
 
-		new_path = get_split_graph_filename(ctx->dir, new_hash);
+		new_path = get_split_graph_filename(abs_dir, new_hash);
 
 		string_list_append(&chain_hashes, new_hash);
 		for (chain = base; chain; chain = chain->base_graph)
@@ -2251,12 +2297,12 @@ static int write_commit_graph_file(struct write_commit_graph_context *ctx)
 		}
 		string_list_append(&kept, new_path);
 
-		mark_commit_graphs(ctx->r->objects->commit_graph, base);
+		mark_commit_graphs(g, base);
 	}
 
-	commit_graph_close(ctx->r->objects);
+	commit_graph_close(r->objects);
 
-	if (ctx->opts->flags & COMMIT_GRAPH_WRITE_SPLIT) {
+	if (opts->flags & COMMIT_GRAPH_WRITE_SPLIT) {
 		FILE *chainf = fdopen_lock_file(&lk, "w");
 
 		if (!chainf) {
@@ -2270,7 +2316,7 @@ static int write_commit_graph_file(struct write_commit_graph_context *ctx)
 				goto out;
 			}
 		} else if (!base) {
-			char *graph_name = get_commit_graph_filename(ctx->dir);
+			char *graph_name = get_commit_graph_filename(abs_dir);
 			unlink(graph_name);
 			free(graph_name);
 		}
@@ -2290,14 +2336,14 @@ static int write_commit_graph_file(struct write_commit_graph_context *ctx)
 
 	commit_lock_file(&lk);
 
-	if (!(ctx->opts->flags & COMMIT_GRAPH_WRITE_SPLIT)) {
-		char *chain_name = get_commit_graph_chain_filename(ctx->dir);
+	if (!(opts->flags & COMMIT_GRAPH_WRITE_SPLIT)) {
+		char *chain_name = get_commit_graph_chain_filename(abs_dir);
 		unlink(chain_name);
 		free(chain_name);
 	}
 
-	expire_commit_graphs(ctx->dir, &kept,
-			     ctx->opts->expire_time ? ctx->opts->expire_time : time(NULL));
+	expire_commit_graphs(abs_dir, &kept,
+			     opts->expire_time ? opts->expire_time : time(NULL));
 
 	ret = 0;
 
@@ -2308,7 +2354,9 @@ out:
 	string_list_clear(&kept, 0);
 	free(base_rename_from);
 	free(base_rename_to);
+	free(graph_name);
 	free(new_path);
+	free(abs_dir);
 	return ret;
 }
 
@@ -2562,13 +2610,19 @@ bool commit_graph_write_allowed(struct repository *r)
 	return true;
 }
 
-int commit_graph_write(struct repository *r,
-		       const char *dir,
-		       const struct commit_graph_write_options *opts)
+int commit_graph_write_layer(struct repository *r,
+			     const struct commit_graph_write_options *opts,
+			     size_t mergeable_layers,
+			     size_t chainable_layers,
+			     int fd, const char *path,
+			     struct commit_graph **base,
+			     unsigned char *hash)
 {
 	struct write_commit_graph_context ctx = {
 		.r = r,
 		.opts = opts,
+		.mergeable_layers = mergeable_layers,
+		.chainable_layers = chainable_layers,
 		.total_bloom_filter_data_size = 0,
 		.write_generation_data = (get_configured_generation_version(r) == 2),
 		.num_generation_data_overflows = 0,
@@ -2580,15 +2634,16 @@ int commit_graph_write(struct repository *r,
 	struct oidset reachable_commits = OIDSET_INIT;
 	struct topo_level_slab topo_levels;
 	struct commit_graph *g;
-	bool mergeable = true;
 
 	if (!!opts->pack_indexes + !!opts->commits + !!(opts->flags & COMMIT_GRAPH_WRITE_REACHABLE) > 1)
 		BUG("attempting to write commit-graph with mutually incompatible options");
+	if (chainable_layers < mergeable_layers)
+		BUG("attempting to write commit-graph with more mergeable than chainable layers");
+
+	*base = NULL;
 
 	if (!commit_graph_write_allowed(r))
 		return 0;
-
-	ctx.dir = absolute_pathdup(dir);
 
 	bloom_settings.hash_version = r->settings.commit_graph_changed_paths_version;
 	bloom_settings.bits_per_entry = git_env_ulong("GIT_TEST_BLOOM_SETTINGS_BITS_PER_ENTRY",
@@ -2605,33 +2660,6 @@ int commit_graph_write(struct repository *r,
 	g = prepare_commit_graph(ctx.r);
 	for (struct commit_graph *chain = g; chain; chain = chain->base_graph)
 		chain->topo_levels = &topo_levels;
-
-	/*
-	 * We only consider merging layers that belong to our own object
-	 * directory. Furthermore, we can only chain on top of either:
-	 *
-	 *   - A split commit graph layer, regardless of whether or not it is
-	 *     local.
-	 *
-	 *   - A local non-split commit graph, in which case we'll convert that
-	 *     layer into a split commit graph layer.
-	 */
-	for (struct commit_graph *layer = g; layer; layer = layer->base_graph) {
-		char *path = get_commit_graph_filename(layer->dir);
-		bool is_split = !!strcmp(layer->filename, path);
-		bool is_local = !strcmp(layer->dir, ctx.dir);
-
-		free(path);
-
-		if (!is_local && !is_split)
-			break;
-		if (!is_local)
-			mergeable = false;
-
-		if (mergeable)
-			ctx.mergeable_layers++;
-		ctx.chainable_layers++;
-	}
 
 	if (opts->flags & COMMIT_GRAPH_WRITE_BLOOM_FILTERS)
 		ctx.changed_paths = 1;
@@ -2717,21 +2745,24 @@ int commit_graph_write(struct repository *r,
 	if (ctx.changed_paths)
 		compute_bloom_filters(&ctx);
 
-	res = write_commit_graph_file(&ctx);
+	res = write_commit_graph_file(&ctx, fd, path, hash);
 
 	if (ctx.changed_paths)
 		deinit_bloom_filters();
 
+	if (!res) {
+		*base = ctx.new_base_graph;
+		res = 1;
+	}
+
 cleanup:
-	free(ctx.graph_name);
-	free(ctx.dir);
 	commit_stack_clear(&ctx.commits);
 	oidset_clear(&reachable_commits);
 	oid_array_clear(&ctx.oids);
 	clear_topo_level_slab(&topo_levels);
 
-	if (ctx.r->objects->commit_graph) {
-		struct commit_graph *g = ctx.r->objects->commit_graph;
+	if (r->objects->commit_graph) {
+		struct commit_graph *g = r->objects->commit_graph;
 
 		while (g) {
 			g->topo_levels = NULL;
