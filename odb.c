@@ -839,3 +839,9 @@ int odb_fsck(struct object_database *odb, struct odb_fsck_options *options)
 {
 	return odb_source_fsck(odb->source, options);
 }
+
+int odb_write_commit_graph(struct object_database *odb,
+			   const struct commit_graph_write_options *opts)
+{
+	return odb_source_write_commit_graph(odb->source, opts);
+}

@@ -42,7 +42,7 @@ void git_test_write_commit_graph_or_die(struct repository *repo)
 	if (git_env_bool(GIT_TEST_COMMIT_GRAPH_CHANGED_PATHS, 0))
 		opts.flags |= COMMIT_GRAPH_WRITE_BLOOM_FILTERS;
 
-	if (commit_graph_write(repo, repo->objects->source->path, &opts))
+	if (odb_write_commit_graph(repo->objects, &opts))
 		die("failed to write commit-graph under GIT_TEST_COMMIT_GRAPH");
 }
 
@@ -747,8 +747,6 @@ struct commit_graph *read_commit_graph_one(struct repository *repo,
  */
 struct commit_graph *prepare_commit_graph(struct repository *r)
 {
-	struct odb_source_files *files;
-
 	/*
 	 * Early return if there is no object database or if the commit graph is
 	 * disabled.
@@ -778,12 +776,9 @@ struct commit_graph *prepare_commit_graph(struct repository *r)
 	if (!commit_graph_compatible(r))
 		return NULL;
 
-	files = odb_source_files_downcast(r->objects->source);
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		r->objects->commit_graph = read_commit_graph_one(r, dir->abspath);
-		if (r->objects->commit_graph)
-			break;
-	}
+	if (odb_source_read_commit_graph(r->objects->source,
+					 &r->objects->commit_graph))
+		return NULL;
 
 	return r->objects->commit_graph;
 }

@@ -85,8 +85,7 @@ int cmd__read_graph(int argc, const char **argv)
 
 	prepare_repo_settings(the_repository);
 
-	graph = read_commit_graph_one(the_repository, source->path);
-	if (!graph) {
+	if (odb_source_read_commit_graph(source, &graph)) {
 		ret = 1;
 		goto done;
 	}

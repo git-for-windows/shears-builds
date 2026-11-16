@@ -277,23 +277,27 @@ static int cmd_commit_graph_write(int argc,
 
 	if (!!(write_opts.flags & COMMIT_GRAPH_WRITE_REACHABLE) + opts.stdin_packs + opts.stdin_commits > 1)
 		die(_("use at most one of --reachable, --stdin-commits, or --stdin-packs"));
-	if (!opts.obj_dir)
-		opts.obj_dir = repo_get_object_directory(repo);
 	if (!opts.enable_changed_paths)
 		write_opts.flags |= COMMIT_GRAPH_NO_WRITE_BLOOM_FILTERS;
 	if (opts.enable_changed_paths == 1 ||
 	    git_env_bool(GIT_TEST_COMMIT_GRAPH_CHANGED_PATHS, 0))
 		write_opts.flags |= COMMIT_GRAPH_WRITE_BLOOM_FILTERS;
 
-	dir = odb_source_files_find_dir(repo->objects, opts.obj_dir);
-	if (!dir)
-		die(_("could not find object directory matching %s"), opts.obj_dir);
+	if (opts.obj_dir) {
+		dir = odb_source_files_find_dir(repo->objects, opts.obj_dir);
+		if (!dir)
+			die(_("could not find object directory matching %s"), opts.obj_dir);
+	}
 
 	if (opts.stdin_packs) {
 		struct strbuf packname = STRBUF_INIT;
 		size_t dirlen;
 
-		strbuf_addf(&packname, "%s/pack/", dir->abspath);
+		if (dir)
+			strbuf_addf(&packname, "%s/pack/", dir->abspath);
+		else
+			strbuf_addf(&packname, "%s/pack/",
+				    repo_get_object_directory(repo));
 		dirlen = packname.len;
 
 		while (strbuf_getline(&buf, stdin) != EOF) {
@@ -323,8 +327,13 @@ static int cmd_commit_graph_write(int argc,
 		stop_progress(&progress);
 	}
 
-	if (commit_graph_write(repo, dir->abspath, &write_opts))
-		result = 1;
+	if (dir) {
+		if (commit_graph_write(repo, dir->abspath, &write_opts))
+			result = 1;
+	} else {
+		if (odb_write_commit_graph(repo->objects, &write_opts))
+			result = 1;
+	}
 
 cleanup:
 	string_list_clear(&pack_indexes, 0);

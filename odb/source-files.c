@@ -2,6 +2,7 @@
 #include "abspath.h"
 #include "blob.h"
 #include "chdir-notify.h"
+#include "commit-graph.h"
 #include "config.h"
 #include "gettext.h"
 #include "hex.h"
@@ -1230,6 +1231,30 @@ static int odb_source_files_generate_pack(struct odb_source *source UNUSED,
 	return 0;
 }
 
+static int odb_source_files_read_commit_graph(struct odb_source *source,
+					      struct commit_graph **out)
+{
+	struct odb_source_files *files = odb_source_files_downcast(source);
+
+	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
+		struct commit_graph *g = read_commit_graph_one(files->base.odb->repo,
+							       dir->abspath);
+		if (!g)
+			continue;
+		*out = g;
+		return 0;
+	}
+
+	return 1;
+}
+
+static int odb_source_files_write_commit_graph(struct odb_source *source,
+					       const struct commit_graph_write_options *opts)
+{
+	struct odb_source_files *files = odb_source_files_downcast(source);
+	return commit_graph_write(source->odb->repo, files->dirs->abspath, opts);
+}
+
 static int fsck_commit_graph(struct odb_source_files *files,
 			     struct odb_files_dir *dir,
 			     struct odb_fsck_options *opts)
@@ -1335,6 +1360,8 @@ struct odb_source_files *odb_source_files_new(struct object_database *odb,
 	files->base.optimize = odb_source_files_optimize;
 	files->base.optimize_required = odb_source_files_optimize_required;
 	files->base.generate_pack = odb_source_files_generate_pack;
+	files->base.read_commit_graph = odb_source_files_read_commit_graph;
+	files->base.write_commit_graph = odb_source_files_write_commit_graph;
 
 	/*
 	 * Ideally, we would only ever store absolute paths in the source. This
