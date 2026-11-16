@@ -741,8 +741,7 @@ int cmd_gc(int argc,
 		if (!opts.quiet && !daemonized)
 			write_opts.flags |= COMMIT_GRAPH_WRITE_PROGRESS;
 
-		commit_graph_write(the_repository, the_repository->objects->source->path,
-				   &write_opts);
+		odb_write_commit_graph(the_repository->objects, &write_opts);
 	}
 
 	if (!daemonized) {
