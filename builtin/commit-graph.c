@@ -59,13 +59,7 @@ static int cmd_commit_graph_verify(int argc,
 {
 	struct opts_commit_graph opts = { 0 };
 	struct commit_graph *graph = NULL;
-	struct odb_files_dir *dir = NULL;
-	char *graph_name;
-	char *chain_name;
-	enum { OPENED_NONE, OPENED_GRAPH, OPENED_CHAIN } opened = OPENED_NONE;
 	enum commit_graph_verify_flags flags = isatty(2) ? COMMIT_GRAPH_VERIFY_PROGRESS : 0;
-	int fd;
-	struct stat st;
 	int ret;
 	struct option options[] = {
 		OPT_BIT(0, "shallow", &flags,
@@ -85,37 +79,27 @@ static int cmd_commit_graph_verify(int argc,
 	if (argc)
 		usage_with_options(builtin_commit_graph_verify_usage, options);
 
-	if (!opts.obj_dir)
-		opts.obj_dir = repo_get_object_directory(repo);
+	if (repo->objects->source->type == ODB_SOURCE_FILES) {
+		struct odb_source_files *files = odb_source_files_downcast(repo->objects->source);
+		struct odb_files_dir *dir = files->dirs;
 
-	dir = odb_source_files_find_dir(repo->objects, opts.obj_dir);
-	if (!dir)
-		die(_("could not find object directory matching %s"), opts.obj_dir);
+		if (opts.obj_dir) {
+			dir = odb_source_files_find_dir(repo->objects, opts.obj_dir);
+			if (!dir)
+				die(_("could not find object directory matching %s"), opts.obj_dir);
+		}
 
-	graph_name = get_commit_graph_filename(dir->abspath);
-	chain_name = get_commit_graph_chain_filename(dir->abspath);
-	if (open_commit_graph(graph_name, &fd, &st))
-		opened = OPENED_GRAPH;
-	else if (errno != ENOENT)
-		die_errno(_("Could not open commit-graph '%s'"), graph_name);
-	else if (open_commit_graph_chain(chain_name, &fd, &st,
-					 repo->hash_algo))
-		opened = OPENED_CHAIN;
-	else if (errno != ENOENT)
-		die_errno(_("could not open commit-graph chain '%s'"), chain_name);
-
-	FREE_AND_NULL(graph_name);
-	FREE_AND_NULL(chain_name);
-
-	if (opened == OPENED_NONE)
-		return 0;
-	else if (opened == OPENED_GRAPH)
-		graph = commit_graph_read(repo, fd, &st);
-	else
-		graph = load_commit_graph_chain_fd_st(repo->objects, fd, &st);
-
-	if (!graph)
+		ret = odb_source_files_read_commit_graph_dir(files, dir, &graph);
+	} else {
+		if (opts.obj_dir)
+			die(_("--object-dir= is not supported with %s backend"),
+			    odb_source_type_to_name(repo->objects->source->type));
+		ret = odb_source_read_commit_graph(repo->objects->source, &graph);
+	}
+	if (ret < 0)
 		return 1;
+	if (ret > 0)
+		return 0;
 
 	ret = commit_graph_verify(graph, flags);
 
@@ -328,7 +312,8 @@ static int cmd_commit_graph_write(int argc,
 	}
 
 	if (dir) {
-		if (commit_graph_write(repo, dir->abspath, &write_opts))
+		struct odb_source_files *files = odb_source_files_downcast(repo->objects->source);
+		if (odb_source_files_write_commit_graph_dir(files, dir, &write_opts))
 			result = 1;
 	} else {
 		if (odb_write_commit_graph(repo->objects, &write_opts))

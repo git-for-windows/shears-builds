@@ -29,12 +29,7 @@ struct repository;
 struct object_database;
 struct string_list;
 
-char *get_commit_graph_filename(const char *dir);
-char *get_commit_graph_chain_filename(const char *dir);
 struct commit_graph *prepare_commit_graph(struct repository *r);
-int open_commit_graph(const char *graph_file, int *fd, struct stat *st);
-int open_commit_graph_chain(const char *chain_file, int *fd, struct stat *st,
-			    const struct git_hash_algo *hash_algo);
 
 /*
  * Given a commit struct, try to fill the commit struct info, including:
@@ -124,8 +119,6 @@ struct commit_graph {
  */
 struct commit_graph *commit_graph_read(struct repository *repo,
 				       int fd, struct stat *st);
-struct commit_graph *load_commit_graph_chain_fd_st(struct object_database *odb,
-						   int fd, struct stat *st);
 
 /*
  * Link the commit graph layer `g` on top of the chain `base`. `base` may be
@@ -225,20 +218,6 @@ int commit_graph_write_layer(struct repository *r,
 			     int fd, const char *path,
 			     struct commit_graph **base,
 			     unsigned char *hash);
-
-/*
- * The commit_graph_write* methods return zero on success
- * and a negative value on failure. Note that if the repository
- * is not compatible with the commit-graph feature, then the
- * methods will return 0 without writing a commit-graph.
- *
- * The object directory `dir` may be given as a relative path; it is
- * canonicalized internally so that it compares equal to the directory of
- * graphs that have already been loaded.
- */
-int commit_graph_write(struct repository *r,
-		       const char *dir,
-		       const struct commit_graph_write_options *opts);
 
 enum commit_graph_verify_flags {
 	COMMIT_GRAPH_VERIFY_SHALLOW = (1 << 0),
