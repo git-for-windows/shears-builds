@@ -141,8 +141,6 @@ int commit_graph_link_base(struct commit_graph *g,
  * filters in case they aren't.
  */
 void commit_graph_validate_chain(struct commit_graph *g);
-struct commit_graph *read_commit_graph_one(struct repository *repo,
-					   const char *dir);
 
 struct repo_settings;
 

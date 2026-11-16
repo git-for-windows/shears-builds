@@ -1,13 +1,11 @@
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
 #include "git-compat-util.h"
-#include "abspath.h"
 #include "config.h"
 #include "csum-file.h"
 #include "environment.h"
 #include "gettext.h"
 #include "hex.h"
-#include "lockfile.h"
 #include "packfile.h"
 #include "commit.h"
 #include "object.h"
@@ -25,7 +23,6 @@
 #include "bloom.h"
 #include "commit-slab.h"
 #include "shallow.h"
-#include "string-list.h"
 #include "json-writer.h"
 #include "trace2.h"
 #include "tree.h"
@@ -201,23 +198,6 @@ static int commit_gen_cmp(const void *va, const void *vb)
 	return 0;
 }
 
-char *get_commit_graph_filename(const char *dir)
-{
-	return xstrfmt("%s/info/commit-graph", dir);
-}
-
-static char *get_split_graph_filename(const char *dir,
-				      const char *oid_hex)
-{
-	return xstrfmt("%s/info/commit-graphs/graph-%s.graph", dir,
-		       oid_hex);
-}
-
-char *get_commit_graph_chain_filename(const char *dir)
-{
-	return xstrfmt("%s/info/commit-graphs/commit-graph-chain", dir);
-}
-
 static struct commit_graph *alloc_commit_graph(void)
 {
 	struct commit_graph *g = xcalloc(1, sizeof(*g));
@@ -243,18 +223,6 @@ static int commit_graph_compatible(struct repository *r)
 	if (is_repository_shallow(r))
 		return 0;
 
-	return 1;
-}
-
-int open_commit_graph(const char *graph_file, int *fd, struct stat *st)
-{
-	*fd = git_open(graph_file);
-	if (*fd < 0)
-		return 0;
-	if (fstat(*fd, st)) {
-		close(*fd);
-		return 0;
-	}
 	return 1;
 }
 
@@ -494,37 +462,6 @@ free_and_return:
 	return NULL;
 }
 
-static struct commit_graph *load_commit_graph_one(struct repository *repo,
-						  const char *dir,
-						  const char *graph_file)
-{
-	struct stat st;
-	int fd;
-	struct commit_graph *g;
-	int open_ok = open_commit_graph(graph_file, &fd, &st);
-
-	if (!open_ok)
-		return NULL;
-
-	g = commit_graph_read(repo, fd, &st);
-	if (g) {
-		g->dir = absolute_pathdup(dir);
-		g->filename = absolute_pathdup(graph_file);
-	}
-
-	return g;
-}
-
-static struct commit_graph *load_commit_graph_v1(struct repository *repo,
-						 const char *dir)
-{
-	char *graph_name = get_commit_graph_filename(dir);
-	struct commit_graph *g = load_commit_graph_one(repo, dir, graph_name);
-	free(graph_name);
-
-	return g;
-}
-
 /*
  * returns 1 if and only if all graphs in the chain have
  * corrected commit dates stored in the generation_data chunk.
@@ -623,120 +560,6 @@ int commit_graph_link_base(struct commit_graph *g,
 	g->base_graph = base;
 
 	return 0;
-}
-
-int open_commit_graph_chain(const char *chain_file,
-			    int *fd, struct stat *st,
-			    const struct git_hash_algo *hash_algo)
-{
-	*fd = git_open(chain_file);
-	if (*fd < 0)
-		return 0;
-	if (fstat(*fd, st)) {
-		close(*fd);
-		return 0;
-	}
-	if (st->st_size < hash_algo->hexsz) {
-		close(*fd);
-		if (!st->st_size) {
-			/* treat empty files the same as missing */
-			errno = ENOENT;
-		} else {
-			warning(_("commit-graph chain file too small"));
-			errno = EINVAL;
-		}
-		return 0;
-	}
-	return 1;
-}
-
-struct commit_graph *load_commit_graph_chain_fd_st(struct object_database *odb,
-						   int fd, struct stat *st)
-{
-	struct commit_graph *graph_chain = NULL;
-	struct strbuf line = STRBUF_INIT;
-	int i = 0, valid = 1, count;
-	FILE *fp = xfdopen(fd, "r");
-
-	count = st->st_size / (odb->repo->hash_algo->hexsz + 1);
-
-	for (i = 0; i < count; i++) {
-		struct odb_source_files *files;
-		struct object_id oid;
-
-		if (strbuf_getline_lf(&line, fp) == EOF)
-			break;
-
-		if (get_oid_hex_algop(line.buf, &oid, odb->repo->hash_algo)) {
-			warning(_("invalid commit-graph chain: line '%s' not a hash"),
-				line.buf);
-			valid = 0;
-			break;
-		}
-
-		valid = 0;
-
-		files = odb_source_files_downcast(odb->source);
-		for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-			char *graph_name = get_split_graph_filename(dir->abspath, line.buf);
-			struct commit_graph *g = load_commit_graph_one(odb->repo, dir->abspath, graph_name);
-
-			free(graph_name);
-
-			if (g) {
-				if (!commit_graph_link_base(g, graph_chain)) {
-					graph_chain = g;
-					valid = 1;
-				} else {
-					commit_graph_free(g);
-				}
-
-				break;
-			}
-		}
-
-		if (!valid) {
-			warning(_("unable to find all commit-graph files"));
-			break;
-		}
-	}
-
-	commit_graph_validate_chain(graph_chain);
-	if (graph_chain)
-		graph_chain->incomplete = !valid;
-
-	fclose(fp);
-	strbuf_release(&line);
-
-	return graph_chain;
-}
-
-static struct commit_graph *load_commit_graph_chain(struct repository *repo,
-						    const char *dir)
-{
-	char *chain_file = get_commit_graph_chain_filename(dir);
-	struct stat st;
-	int fd;
-	struct commit_graph *g = NULL;
-
-	if (open_commit_graph_chain(chain_file, &fd, &st, repo->hash_algo)) {
-		/* ownership of fd is taken over by load function */
-		g = load_commit_graph_chain_fd_st(repo->objects, fd, &st);
-	}
-
-	free(chain_file);
-	return g;
-}
-
-struct commit_graph *read_commit_graph_one(struct repository *repo,
-					   const char *dir)
-{
-	struct commit_graph *g = load_commit_graph_v1(repo, dir);
-
-	if (!g)
-		g = load_commit_graph_chain(repo, dir);
-
-	return g;
 }
 
 /*
@@ -2078,12 +1901,6 @@ static int write_graph_chunk_base(struct hashfile *f,
 	return 0;
 }
 
-static void mark_commit_graphs(struct commit_graph *tip,
-			       struct commit_graph *base);
-static void expire_commit_graphs(const char *dirpath,
-				 struct string_list *kept,
-				 timestamp_t expire_time);
-
 static int write_commit_graph_file(struct write_commit_graph_context *ctx,
 				   int fd, const char *path,
 				   unsigned char *file_hash)
@@ -2158,200 +1975,6 @@ static int write_commit_graph_file(struct write_commit_graph_context *ctx,
 	free_chunkfile(cf);
 
 	return 0;
-}
-
-int commit_graph_write(struct repository *r,
-		       const char *dir,
-		       const struct commit_graph_write_options *opts)
-{
-	struct string_list chain_hashes = STRING_LIST_INIT_DUP;
-	struct string_list kept = STRING_LIST_INIT_DUP;
-	struct tempfile *graph_layer = NULL;
-	struct lock_file lk = LOCK_INIT;
-	struct commit_graph *g, *chain, *base = NULL;
-	char *base_rename_from = NULL, *base_rename_to = NULL;
-	char *graph_name = NULL, *abs_dir = NULL, *new_path = NULL;
-	size_t mergeable_layers = 0, chainable_layers = 0;
-	unsigned char hash[GIT_MAX_RAWSZ];
-	bool mergeable = true;
-	const char *out_path;
-	int out_fd;
-	int ret;
-
-	if (!commit_graph_write_allowed(r))
-		return 0;
-
-	abs_dir = absolute_pathdup(dir);
-
-	g = prepare_commit_graph(r);
-
-	/*
-	 * We only consider merging layers that belong to our own object
-	 * directory. Furthermore, we can only chain on top of either:
-	 *
-	 *   - A split commit graph layer, regardless of whether or not it is
-	 *     local.
-	 *
-	 *   - A local non-split commit graph, in which case we'll convert that
-	 *     layer into a split commit graph layer.
-	 */
-	for (struct commit_graph *layer = g; layer; layer = layer->base_graph) {
-		char *path = get_commit_graph_filename(layer->dir);
-		bool is_split = !!strcmp(layer->filename, path);
-		bool is_local = !strcmp(layer->dir, abs_dir);
-
-		free(path);
-
-		if (!is_local && !is_split)
-			break;
-		if (!is_local)
-			mergeable = false;
-
-		if (mergeable)
-			mergeable_layers++;
-		chainable_layers++;
-	}
-
-	if (opts->flags & COMMIT_GRAPH_WRITE_SPLIT) {
-		graph_name = xstrfmt("%s/info/commit-graphs/tmp_graph_XXXXXX", abs_dir);
-	} else {
-		graph_name = get_commit_graph_filename(abs_dir);
-	}
-
-	if (safe_create_leading_directories(r, graph_name)) {
-		ret = error(_("unable to create leading directories of %s"),
-			    graph_name);
-		goto out;
-	}
-
-	if (opts->flags & COMMIT_GRAPH_WRITE_SPLIT) {
-		char *chain_name = get_commit_graph_chain_filename(abs_dir);
-
-		repo_hold_lock_file_for_update_mode(r, &lk, chain_name,
-						    LOCK_DIE_ON_ERROR, 0444);
-		free(chain_name);
-
-		graph_layer = mks_tempfile_m(graph_name, 0444);
-		if (!graph_layer) {
-			ret = error(_("unable to create temporary graph layer"));
-			goto out;
-		}
-
-		if (adjust_shared_perm(r, get_tempfile_path(graph_layer))) {
-			ret = error(_("unable to adjust shared permissions for '%s'"),
-				    get_tempfile_path(graph_layer));
-			goto out;
-		}
-
-		out_fd = get_tempfile_fd(graph_layer);
-		out_path = get_tempfile_path(graph_layer);
-	} else {
-		repo_hold_lock_file_for_update_mode(r, &lk, graph_name,
-						    LOCK_DIE_ON_ERROR, 0444);
-		out_fd = get_lock_file_fd(&lk);
-		out_path = get_lock_file_path(&lk);
-	}
-
-	ret = commit_graph_write_layer(r, opts, mergeable_layers, chainable_layers,
-				       out_fd, out_path, &base, hash);
-	if (ret <= 0)
-		goto out;
-
-	/*
-	 * Snapshot everything we need from the current chain before closing
-	 * it, as we must not have any layers mapped when replacing them.
-	 */
-	if (opts->flags & COMMIT_GRAPH_WRITE_SPLIT) {
-		const char *new_hash = hash_to_hex_algop(hash, r->hash_algo);
-
-		new_path = get_split_graph_filename(abs_dir, new_hash);
-
-		string_list_append(&chain_hashes, new_hash);
-		for (chain = base; chain; chain = chain->base_graph)
-			string_list_append(&chain_hashes, oid_to_hex(&chain->oid));
-
-		/*
-		 * In case we have a non-split commit graph we need to convert
-		 * it into the base layer of the new split commit graph by
-		 * renaming it.
-		 */
-		if (base) {
-			base_rename_to = get_split_graph_filename(base->dir, oid_to_hex(&base->oid));
-			if (strcmp(base->filename, base_rename_to))
-				base_rename_from = xstrdup(base->filename);
-			else
-				FREE_AND_NULL(base_rename_to);
-		}
-
-		for (chain = base; chain; chain = chain->base_graph) {
-			if (chain == base && base_rename_to)
-				string_list_append(&kept, base_rename_to);
-			else
-				string_list_append(&kept, chain->filename);
-		}
-		string_list_append(&kept, new_path);
-
-		mark_commit_graphs(g, base);
-	}
-
-	commit_graph_close(r->objects);
-
-	if (opts->flags & COMMIT_GRAPH_WRITE_SPLIT) {
-		FILE *chainf = fdopen_lock_file(&lk, "w");
-
-		if (!chainf) {
-			ret = error(_("unable to open commit-graph chain file"));
-			goto out;
-		}
-
-		if (base_rename_from) {
-			if (rename(base_rename_from, base_rename_to)) {
-				ret = error(_("failed to rename base commit-graph file"));
-				goto out;
-			}
-		} else if (!base) {
-			char *graph_name = get_commit_graph_filename(abs_dir);
-			unlink(graph_name);
-			free(graph_name);
-		}
-
-		if (rename_tempfile(&graph_layer, new_path)) {
-			ret = error(_("failed to rename temporary commit-graph file"));
-			goto out;
-		}
-
-		/*
-		 * Chain hashes are ordered newest-first, but the chain file is
-		 * oldest-first so we iterate in reverse.
-		 */
-		for (size_t i = chain_hashes.nr; i; i--)
-			fprintf(chainf, "%s\n", chain_hashes.items[i - 1].string);
-	}
-
-	commit_lock_file(&lk);
-
-	if (!(opts->flags & COMMIT_GRAPH_WRITE_SPLIT)) {
-		char *chain_name = get_commit_graph_chain_filename(abs_dir);
-		unlink(chain_name);
-		free(chain_name);
-	}
-
-	expire_commit_graphs(abs_dir, &kept,
-			     opts->expire_time ? opts->expire_time : time(NULL));
-
-	ret = 0;
-
-out:
-	rollback_lock_file(&lk);
-	delete_tempfile(&graph_layer);
-	string_list_clear(&chain_hashes, 0);
-	string_list_clear(&kept, 0);
-	free(base_rename_from);
-	free(base_rename_to);
-	free(graph_name);
-	free(new_path);
-	free(abs_dir);
-	return ret;
 }
 
 static void split_graph_merge_strategy(struct write_commit_graph_context *ctx,
@@ -2519,66 +2142,6 @@ static void merge_commit_graphs(struct write_commit_graph_context *ctx,
 	}
 
 	sort_and_scan_merged_commits(ctx);
-}
-
-static void mark_commit_graphs(struct commit_graph *tip,
-			       struct commit_graph *base)
-{
-	time_t now = time(NULL);
-
-	for (struct commit_graph *g = tip; g && g != base; g = g->base_graph) {
-		struct stat st;
-		struct utimbuf updated_time;
-
-		if (stat(g->filename, &st) < 0)
-			continue;
-
-		updated_time.actime = st.st_atime;
-		updated_time.modtime = now;
-		utime(g->filename, &updated_time);
-	}
-}
-
-static void expire_commit_graphs(const char *dirpath,
-				 struct string_list *kept,
-				 timestamp_t expire_time)
-{
-	struct strbuf path = STRBUF_INIT;
-	DIR *dir;
-	struct dirent *de;
-	size_t dirnamelen;
-
-	strbuf_addstr(&path, dirpath);
-	strbuf_addstr(&path, "/info/commit-graphs");
-	dir = opendir(path.buf);
-
-	if (!dir)
-		goto out;
-
-	strbuf_addch(&path, '/');
-	dirnamelen = path.len;
-	while ((de = readdir(dir)) != NULL) {
-		struct stat st;
-
-		strbuf_setlen(&path, dirnamelen);
-		strbuf_addstr(&path, de->d_name);
-
-		if (stat(path.buf, &st) < 0)
-			continue;
-
-		if (st.st_mtime > expire_time)
-			continue;
-		if (path.len < 6 || strcmp(path.buf + path.len - 6, ".graph"))
-			continue;
-
-		if (!unsorted_string_list_has_string(kept, path.buf))
-			unlink(path.buf);
-	}
-
-out:
-	if (dir)
-		closedir(dir);
-	strbuf_release(&path);
 }
 
 bool commit_graph_write_allowed(struct repository *r)
