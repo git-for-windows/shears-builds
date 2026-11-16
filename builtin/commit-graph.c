@@ -66,7 +66,6 @@ static int cmd_commit_graph_verify(int argc,
 	enum commit_graph_verify_flags flags = isatty(2) ? COMMIT_GRAPH_VERIFY_PROGRESS : 0;
 	int fd;
 	struct stat st;
-	int incomplete_chain = 0;
 	int ret;
 	struct option options[] = {
 		OPT_BIT(0, "shallow", &flags,
@@ -113,19 +112,19 @@ static int cmd_commit_graph_verify(int argc,
 	else if (opened == OPENED_GRAPH)
 		graph = commit_graph_read(repo, fd, &st);
 	else
-		graph = load_commit_graph_chain_fd_st(repo->objects, fd, &st,
-						      &incomplete_chain);
+		graph = load_commit_graph_chain_fd_st(repo->objects, fd, &st);
 
 	if (!graph)
 		return 1;
 
 	ret = commit_graph_verify(graph, flags);
-	commit_graph_free(graph);
 
-	if (incomplete_chain) {
+	if (graph->incomplete) {
 		error("one or more commit-graph chain files could not be loaded");
 		ret |= 1;
 	}
+
+	commit_graph_free(graph);
 
 	return ret;
 }

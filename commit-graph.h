@@ -93,6 +93,7 @@ struct commit_graph {
 	struct object_id oid;
 	char *dir;
 	char *filename;
+	bool incomplete;
 
 	uint32_t num_commits_in_base;
 	unsigned int read_generation_data;
@@ -124,8 +125,7 @@ struct commit_graph {
 struct commit_graph *commit_graph_read(struct repository *repo,
 				       int fd, struct stat *st);
 struct commit_graph *load_commit_graph_chain_fd_st(struct object_database *odb,
-						   int fd, struct stat *st,
-						   int *incomplete_chain);
+						   int fd, struct stat *st);
 
 /*
  * Link the commit graph layer `g` on top of the chain `base`. `base` may be

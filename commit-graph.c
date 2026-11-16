@@ -651,8 +651,7 @@ int open_commit_graph_chain(const char *chain_file,
 }
 
 struct commit_graph *load_commit_graph_chain_fd_st(struct object_database *odb,
-						   int fd, struct stat *st,
-						   int *incomplete_chain)
+						   int fd, struct stat *st)
 {
 	struct commit_graph *graph_chain = NULL;
 	struct strbuf line = STRBUF_INIT;
@@ -703,11 +702,12 @@ struct commit_graph *load_commit_graph_chain_fd_st(struct object_database *odb,
 	}
 
 	commit_graph_validate_chain(graph_chain);
+	if (graph_chain)
+		graph_chain->incomplete = !valid;
 
 	fclose(fp);
 	strbuf_release(&line);
 
-	*incomplete_chain = !valid;
 	return graph_chain;
 }
 
@@ -720,9 +720,8 @@ static struct commit_graph *load_commit_graph_chain(struct repository *repo,
 	struct commit_graph *g = NULL;
 
 	if (open_commit_graph_chain(chain_file, &fd, &st, repo->hash_algo)) {
-		int incomplete;
 		/* ownership of fd is taken over by load function */
-		g = load_commit_graph_chain_fd_st(repo->objects, fd, &st, &incomplete);
+		g = load_commit_graph_chain_fd_st(repo->objects, fd, &st);
 	}
 
 	free(chain_file);
