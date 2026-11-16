@@ -2539,6 +2539,29 @@ out:
 	strbuf_release(&path);
 }
 
+bool commit_graph_write_allowed(struct repository *r)
+{
+	prepare_repo_settings(r);
+
+	if (!r->settings.core_commit_graph) {
+		warning(_("attempting to write a commit-graph, but 'core.commitGraph' is disabled"));
+		return false;
+	}
+
+	if (!commit_graph_compatible(r))
+		return false;
+
+	if (r->settings.commit_graph_changed_paths_version < -1 ||
+	    r->settings.commit_graph_changed_paths_version > 2) {
+		warning(_("attempting to write a commit-graph, but "
+			  "'commitGraph.changedPathsVersion' (%d) is not supported"),
+			r->settings.commit_graph_changed_paths_version);
+		return false;
+	}
+
+	return true;
+}
+
 int commit_graph_write(struct repository *r,
 		       const char *dir,
 		       const struct commit_graph_write_options *opts)
@@ -2562,20 +2585,8 @@ int commit_graph_write(struct repository *r,
 	if (!!opts->pack_indexes + !!opts->commits + !!(opts->flags & COMMIT_GRAPH_WRITE_REACHABLE) > 1)
 		BUG("attempting to write commit-graph with mutually incompatible options");
 
-	prepare_repo_settings(r);
-	if (!r->settings.core_commit_graph) {
-		warning(_("attempting to write a commit-graph, but 'core.commitGraph' is disabled"));
+	if (!commit_graph_write_allowed(r))
 		return 0;
-	}
-	if (!commit_graph_compatible(r))
-		return 0;
-	if (r->settings.commit_graph_changed_paths_version < -1
-	    || r->settings.commit_graph_changed_paths_version > 2) {
-		warning(_("attempting to write a commit-graph, but "
-			  "'commitGraph.changedPathsVersion' (%d) is not supported"),
-			r->settings.commit_graph_changed_paths_version);
-		return 0;
-	}
 
 	ctx.dir = absolute_pathdup(dir);
 

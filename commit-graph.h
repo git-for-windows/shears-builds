@@ -198,6 +198,9 @@ struct commit_graph_write_options {
 	.max_new_filters = -1, \
 }
 
+/* Check whether the repository's configuration allows writing commit graphs. */
+bool commit_graph_write_allowed(struct repository *r);
+
 /*
  * The commit_graph_write* methods return zero on success
  * and a negative value on failure. Note that if the repository
