@@ -212,14 +212,14 @@ void *unpack_loose_rest(git_zstream *stream,
 			void *buffer, unsigned long size,
 			const struct object_id *oid)
 {
-	size_t bytes = strlen(buffer) + 1, n;
+	size_t hdrlen = strlen(buffer) + 1, bytes, n;
 	unsigned char *buf = xmallocz(size);
 	int status = Z_OK;
 
-	n = stream->total_out - bytes;
+	n = stream->total_out - hdrlen;
 	if (n > size)
 		n = size;
-	memcpy(buf, (char *) buffer + bytes, n);
+	memcpy(buf, (char *) buffer + hdrlen, n);
 	bytes = n;
 	if (bytes <= size) {
 		/*
@@ -244,7 +244,14 @@ void *unpack_loose_rest(git_zstream *stream,
 		}
 	}
 
-	if (status != Z_STREAM_END) {
+	/*
+	 * Make sure that the stream produced exactly as many bytes as the
+	 * header claims. Otherwise we would hand back a buffer whose tail
+	 * was never written (if the stream is short), or silently drop data
+	 * (if the stream is long but ended before we noticed).
+	 */
+	if (status != Z_STREAM_END ||
+	    stream->total_out - hdrlen != size) {
 		error(_("corrupt loose object '%s'"), oid_to_hex(oid));
 		FREE_AND_NULL(buf);
 	} else if (stream->avail_in) {
