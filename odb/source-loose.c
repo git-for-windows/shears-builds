@@ -289,6 +289,8 @@ struct odb_loose_read_stream {
 	char hdr[32];
 	int hdr_avail;
 	int hdr_used;
+	size_t total_read;
+	struct object_id oid;
 };
 
 static ssize_t read_istream_loose(struct odb_stream *_st, char *buf, size_t sz)
@@ -326,6 +328,16 @@ static ssize_t read_istream_loose(struct odb_stream *_st, char *buf, size_t sz)
 
 		if (status == Z_STREAM_END) {
 			git_inflate_end(&st->z);
+			/*
+			 * The object must be exactly as large as its
+			 * header claims.
+			 */
+			if (st->total_read + total_read != st->base.size) {
+				error(_("corrupt loose object '%s'"),
+				      oid_to_hex(&st->oid));
+				st->z_state = ODB_LOOSE_READ_STREAM_ERROR;
+				return -1;
+			}
 			st->z_state = ODB_LOOSE_READ_STREAM_DONE;
 			break;
 		}
@@ -335,6 +347,7 @@ static ssize_t read_istream_loose(struct odb_stream *_st, char *buf, size_t sz)
 			return -1;
 		}
 	}
+	st->total_read += total_read;
 	return total_read;
 }
 
@@ -388,6 +401,7 @@ static int odb_source_loose_read_object_stream(struct odb_stream **out,
 
 	st->mapped = mapped;
 	st->mapsize = mapsize;
+	oidcpy(&st->oid, oid);
 	st->hdr_used = strlen(st->hdr) + 1;
 	st->hdr_avail = st->z.total_out;
 	st->z_state = ODB_LOOSE_READ_STREAM_INUSE;
