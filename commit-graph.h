@@ -29,12 +29,7 @@ struct repository;
 struct object_database;
 struct string_list;
 
-char *get_commit_graph_filename(const char *dir);
-char *get_commit_graph_chain_filename(const char *dir);
 struct commit_graph *prepare_commit_graph(struct repository *r);
-int open_commit_graph(const char *graph_file, int *fd, struct stat *st);
-int open_commit_graph_chain(const char *chain_file, int *fd, struct stat *st,
-			    const struct git_hash_algo *hash_algo);
 
 /*
  * Given a commit struct, try to fill the commit struct info, including:
@@ -93,6 +88,7 @@ struct commit_graph {
 	struct object_id oid;
 	char *dir;
 	char *filename;
+	bool incomplete;
 
 	uint32_t num_commits_in_base;
 	unsigned int read_generation_data;
@@ -117,19 +113,27 @@ struct commit_graph {
 };
 
 /*
- * Load commit graphs from the given object directory `dir`. The directory may
- * be given as a relative path; it is canonicalized internally so that graphs
- * loaded from the same directory compare equal regardless of how the caller
- * spelled the path.
+ * Read a single commit graph layer from the given file descriptor. The file
+ * descriptor will be closed regardless of whether loading succeeds. Returns
+ * NULL on error.
  */
-struct commit_graph *load_commit_graph_one_fd_st(struct repository *repo,
-						 const char *dir,
-						 int fd, struct stat *st);
-struct commit_graph *load_commit_graph_chain_fd_st(struct object_database *odb,
-						   int fd, struct stat *st,
-						   int *incomplete_chain);
-struct commit_graph *read_commit_graph_one(struct repository *repo,
-					   const char *dir);
+struct commit_graph *commit_graph_read(struct repository *repo,
+				       int fd, struct stat *st);
+
+/*
+ * Link the commit graph layer `g` on top of the chain `base`. `base` may be
+ * NULL if `g` is the root of a new chain. Returns 0 on success, a negative
+ * error code otherwise.
+ */
+int commit_graph_link_base(struct commit_graph *g,
+			   struct commit_graph *base);
+
+/*
+ * Validate the chain of commit graph layers to ensure that all layers are
+ * compatible with one another. This may disable generation data and Bloom
+ * filters in case they aren't.
+ */
+void commit_graph_validate_chain(struct commit_graph *g);
 
 struct repo_settings;
 
@@ -185,19 +189,35 @@ struct commit_graph_write_options {
 	.max_new_filters = -1, \
 }
 
+/* Check whether the repository's configuration allows writing commit graphs. */
+bool commit_graph_write_allowed(struct repository *r);
+
 /*
- * The commit_graph_write* methods return zero on success
- * and a negative value on failure. Note that if the repository
- * is not compatible with the commit-graph feature, then the
- * methods will return 0 without writing a commit-graph.
+ * Write a single commit-graph layer to the given file descriptor. When writing
+ * a split commit graph then the repository's loaded commit graph will be used
+ * as the base. This can be tweaked:
  *
- * The object directory `dir` may be given as a relative path; it is
- * canonicalized internally so that it compares equal to the directory of
- * graphs that have already been loaded.
+ *   - `mergeable_layers` controls how many of the topmost layers may be merged
+ *     together.
+ *
+ *   - `chainable_layers` controls how many of the topmost layers may be used
+ *     as base. In case the picked base is not chainable, then it and all of
+ *     its bases are merged.
+ *
+ * On success, `*base` is set to the layer of the currently-loaded chain that
+ * the new layer builds upon, or NULL if the new layer is standalone. `hash`
+ * receives the trailing checksum of the new layer.
+ *
+ * Returns 1 in case a new layer has been written, 0 in case there was nothing
+ * to write, a negative error code otherwise.
  */
-int commit_graph_write(struct repository *r,
-		       const char *dir,
-		       const struct commit_graph_write_options *opts);
+int commit_graph_write_layer(struct repository *r,
+			     const struct commit_graph_write_options *opts,
+			     size_t mergeable_layers,
+			     size_t chainable_layers,
+			     int fd, const char *path,
+			     struct commit_graph **base,
+			     unsigned char *hash);
 
 enum commit_graph_verify_flags {
 	COMMIT_GRAPH_VERIFY_SHALLOW = (1 << 0),
