@@ -106,4 +106,16 @@ static inline struct odb_source_files *odb_source_files_downcast(struct odb_sour
  */
 struct odb_files_dir *odb_source_files_find_dir(struct object_database *odb, const char *obj_dir);
 
+/*
+ * Read and write a commit graph via a specific object directory. These
+ * functions should not be used, but we have to provide this ability to support
+ * the "--object-dir=" option for git-commit-graph(1).
+ */
+int odb_source_files_read_commit_graph_dir(struct odb_source_files *files,
+					   struct odb_files_dir *dir,
+					   struct commit_graph **out);
+int odb_source_files_write_commit_graph_dir(struct odb_source_files *files,
+					    struct odb_files_dir *dir,
+					    const struct commit_graph_write_options *opts);
+
 #endif

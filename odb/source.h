@@ -1,6 +1,7 @@
 #ifndef ODB_SOURCE_H
 #define ODB_SOURCE_H
 
+#include "gettext.h"
 #include "hashmap.h"
 #include "object.h"
 #include "odb.h"
@@ -32,6 +33,8 @@ enum odb_source_type {
  */
 const char *odb_source_type_to_name(enum odb_source_type type);
 
+struct commit_graph;
+struct commit_graph_write_options;
 struct object_id;
 struct odb_stream;
 struct strbuf;
@@ -321,6 +324,29 @@ struct odb_source {
 	int (*write_oid_map)(struct odb_source *source, const struct object_id *oid,
 			     const struct object_id *compat_oid,
 			     enum odb_write_oid_map_flags flags);
+
+	/*
+	 * This callback is expected to read the commit graph of the source,
+	 * if any. This callback is optional. Sources that do not support
+	 * commit graphs shall leave it unset.
+	 *
+	 * The callback is expected to return 0 on success, 1 in case no commit
+	 * graph exists and a negative error code otherwise. On success, `out`
+	 * must be set to the commit graph.
+	 */
+	int (*read_commit_graph)(struct odb_source *source,
+				 struct commit_graph **out);
+
+	/*
+	 * This callback is expected to write a new commit graph layer with
+	 * the given options. This callback is optional. Sources that do not
+	 * support commit graphs shall leave it unset.
+	 *
+	 * The callback is expected to return 0 on success, a negative error
+	 * code otherwise.
+	 */
+	int (*write_commit_graph)(struct odb_source *source,
+				  const struct commit_graph_write_options *opts);
 };
 
 /*
@@ -603,6 +629,32 @@ static inline int odb_source_write_oid_map(struct odb_source *source,
 					   int flags)
 {
 	return source->write_oid_map(source, oid, compat_oid, flags);
+}
+
+/*
+ * Read the commit graph of the given source. Returns 0 on success, 1 in case
+ * no commit graph exists, and a negative error code otherwise.
+ */
+static inline int odb_source_read_commit_graph(struct odb_source *source,
+					       struct commit_graph **out)
+{
+	if (!source->read_commit_graph)
+		return 1;
+	return source->read_commit_graph(source, out);
+}
+
+/*
+ * Write a new commit graph layer into the given source. Returns 0 on success,
+ * a negative error code otherwise. Sources that do not support commit graphs
+ * cause an error.
+ */
+static inline int odb_source_write_commit_graph(struct odb_source *source,
+						const struct commit_graph_write_options *opts)
+{
+	if (!source->write_commit_graph)
+		return error(_("object source '%s' does not support commit graphs"),
+			     odb_source_type_to_name(source->type));
+	return source->write_commit_graph(source, opts);
 }
 
 #endif
