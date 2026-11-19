@@ -222,6 +222,16 @@ struct odb_fsck_options {
  */
 int odb_fsck(struct object_database *odb, struct odb_fsck_options *opts);
 
+struct commit_graph_write_options;
+
+/*
+ * Write a new commit graph layer into the primary object source. The source
+ * is in control of where and how the layer is stored. Returns 0 on success, a
+ * negative error code otherwise.
+ */
+int odb_write_commit_graph(struct object_database *odb,
+			   const struct commit_graph_write_options *opts);
+
 /*
  * Iterate through all alternates of the database and execute the provided
  * callback function for each of them. Stop iterating once the callback
