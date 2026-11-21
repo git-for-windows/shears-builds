@@ -48,6 +48,7 @@
 # include <io.h>
 # include <stdio.h>
 # include <conio.h>
+# include "compat/win32/lazyload.h"
 #else
 # include <sys/time.h>
 # include <sys/socket.h>
@@ -303,6 +304,43 @@ compute_revents (int fd, int sought, fd_set *rfds, fd_set *wfds, fd_set *efds)
 }
 #endif /* !MinGW */
 
+#ifdef WIN32_NATIVE
+/* POLL_MAX_DESCRIPTORS descriptors, plus hEvent and the QS_ALLINPUT message
+   queue, must fit in one MsgWaitForMultipleObjects call, and the collected
+   handles plus the NULL sentinel must fit in handle_array.  */
+#if POLL_MAX_DESCRIPTORS + 2 > MAXIMUM_WAIT_OBJECTS
+#error POLL_MAX_DESCRIPTORS exceeds MAXIMUM_WAIT_OBJECTS
+#endif
+#if POLL_MAX_DESCRIPTORS + 2 > FD_SETSIZE + 2
+#error POLL_MAX_DESCRIPTORS does not fit in handle_array
+#endif
+
+/* Undo the WSAEventSelect() calls made for the first NFD descriptors.  */
+static void
+reset_socket_events (struct pollfd *pfd, nfds_t nfd)
+{
+  nfds_t i;
+
+  for (i = 0; i < nfd; i++)
+    {
+      HANDLE h;
+
+      if (pfd[i].fd < 0)
+	continue;
+      if (!(pfd[i].events & (POLLIN | POLLRDNORM | POLLOUT | POLLWRNORM |
+			     POLLWRBAND | POLLPRI | POLLRDBAND)))
+	continue;
+
+      h = (HANDLE) _get_osfhandle (pfd[i].fd);
+      if (h == NULL || h == INVALID_HANDLE_VALUE)
+	continue;
+
+      if (IsSocketHandle (h))
+	WSAEventSelect ((SOCKET) h, NULL, 0);
+    }
+}
+#endif
+
 int
 poll (struct pollfd *pfd, nfds_t nfd, int timeout)
 {
@@ -436,6 +474,21 @@ poll (struct pollfd *pfd, nfds_t nfd, int timeout)
   MSG msg;
   int rc = 0;
   nfds_t i;
+  /*
+   * Load the message-loop functions from user32 only when poll() runs, so
+   * that Git commands that never poll do not load user32 (and gdi32,
+   * win32u and imm32 with it) at start-up.
+   */
+  DECLARE_PROC_ADDR(user32.dll, DWORD, WINAPI, MsgWaitForMultipleObjects,
+		    DWORD, const HANDLE *, BOOL, DWORD, DWORD);
+  DECLARE_PROC_ADDR(user32.dll, BOOL, WINAPI, PeekMessageA,
+		    LPMSG, HWND, UINT, UINT, UINT);
+  DECLARE_PROC_ADDR(user32.dll, BOOL, WINAPI, TranslateMessage, const MSG *);
+  DECLARE_PROC_ADDR(user32.dll, LRESULT, WINAPI, DispatchMessageA, const MSG *);
+  int have_user32 = INIT_PROC_ADDR(MsgWaitForMultipleObjects) &&
+		    INIT_PROC_ADDR(PeekMessageA) &&
+		    INIT_PROC_ADDR(TranslateMessage) &&
+		    INIT_PROC_ADDR(DispatchMessageA);
 
   if (nfd < 0 || timeout < -1)
     {
@@ -504,7 +557,16 @@ restart:
 	     bits for the "wrong" direction. */
 	  pfd[i].revents = win32_compute_revents (h, &sought);
 	  if (sought)
-	    handle_array[nhandles++] = h;
+	    {
+	      /* hEvent occupies handle_array[0].  See POLL_MAX_DESCRIPTORS.  */
+	      if (nhandles > POLL_MAX_DESCRIPTORS)
+		{
+		  reset_socket_events (pfd, i);
+		  errno = EINVAL;
+		  return -1;
+		}
+	      handle_array[nhandles++] = h;
+	    }
 	  if (pfd[i].revents)
 	    timeout = 0;
 	}
@@ -528,6 +590,12 @@ restart:
 
   for (;;)
     {
+      if (!have_user32)
+	{
+	  ret = WaitForMultipleObjects (nhandles, handle_array, FALSE,
+					wait_timeout);
+	  break;
+	}
       ret = MsgWaitForMultipleObjects (nhandles, handle_array, FALSE,
 				       wait_timeout, QS_ALLINPUT);
 
