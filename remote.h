@@ -508,6 +508,14 @@ char *relative_url(const char *remote_url, const char *url,
 		   const char *up_path);
 
 /*
+ * Like relative_url(), but if `url` cannot be resolved against
+ * `remote_url`, return NULL and add the reason to `err` instead of
+ * dying. `err` must not be NULL.
+ */
+char *relative_url_gently(const char *remote_url, const char *url,
+			  const char *up_path, struct strbuf *err);
+
+/*
  * The `url` argument starts with "^/" and names a repository relative to
  * the root of the server that `remote_url` points to: the path of
  * `remote_url` is replaced with the rest of `url`, keeping its scheme, user,
