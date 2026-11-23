@@ -638,6 +638,7 @@ test_expect_success 'init refuses to reinitialize with different hash' '
 
 test_expect_success 're-init does not modify hash from config' '
 	test_when_finished "rm -rf repo" &&
+	test_when_finished "test_unconfig --global init.defaultObjectFormat" &&
 	(
 		sane_unset GIT_DEFAULT_HASH &&
 		for algo in sha1 sha256
@@ -649,7 +650,7 @@ test_expect_success 're-init does not modify hash from config' '
 				other=sha1
 			fi &&
 			git init --object-format="$algo" repo &&
-			test_config_global init.defaultObjectFormat "$other" &&
+			git config --global init.defaultObjectFormat "$other" &&
 			git init repo &&
 			echo "$algo" >expect &&
 			git -C repo rev-parse --show-object-format >actual &&
