@@ -30,6 +30,7 @@ clar_test_suites = [
   'unit-tests/u-urlmatch-normalization.c',
   'unit-tests/u-utf8-ansi.c',
   'unit-tests/u-utf8-width.c',
+  'unit-tests/u-win32-process.c',
   'unit-tests/u-wrapper.c',
 ]
 
@@ -297,6 +298,7 @@ integration_tests = [
   't2030-unresolve-info.sh',
   't2031-checkout-long-paths.sh',
   't2040-checkout-symlink-attr.sh',
+  't2041-existing-junction.sh',
   't2050-git-dir-relative.sh',
   't2060-switch.sh',
   't2070-restore.sh',
