@@ -56,7 +56,6 @@ static int difftool_config(const char *var, const char *value,
 	}
 	if (!strcmp(var, "core.symlinks")) {
 		dt_options->has_symlinks = git_config_bool(var, value);
-		return 0;
 	}
 
 	return git_default_config(var, value, ctx, cb);
@@ -336,6 +335,8 @@ static int checkout_path(unsigned mode, struct object_id *oid,
 	int ret;
 
 	ce = make_transient_cache_entry(mode, oid, path, 0, NULL);
+	if (!ce)
+		return -1;
 	ret = checkout_entry(ce, state, NULL, NULL);
 
 	discard_cache_entry(ce);
@@ -544,7 +545,7 @@ static int run_dir_diff(struct repository *repo,
 				}
 				add_path(&wtdir, wtdir_len, dst_path);
 				if (dt_options->symlinks) {
-					if (symlink(wtdir.buf, rdir.buf)) {
+					if (create_symlink(lstate.istate, wtdir.buf, rdir.buf)) {
 						ret = error_errno("could not symlink '%s' to '%s'", wtdir.buf, rdir.buf);
 						goto finish;
 					}
@@ -675,8 +676,17 @@ static int run_dir_diff(struct repository *repo,
 	}
 
 finish:
-	if (fp)
+	if (fp) {
 		fclose(fp);
+		/*
+		 * The child process was started, but there was an error before
+		 * it finished; After closing the output pipe, we need to wait
+		 * for the process to finish, otherwise the  atexit handler
+		 * `cleanup_children()` would try to access the stack-allocated
+		 * `child`.
+		*/
+		finish_command(child); /* best effort; ignore result */
+	}
 
 	hashmap_clear_and_free(&working_tree_dups, struct working_tree_entry, entry);
 	hashmap_clear_and_free(&wt_modified, struct path_entry, entry);
@@ -694,6 +704,7 @@ finish:
 	strbuf_release(&wtdir);
 	strbuf_release(&buf);
 	strbuf_release(&tmpdir);
+	child_process_clear(child);
 
 	return (ret < 0) ? 1 : ret;
 }
@@ -722,7 +733,7 @@ int cmd_difftool(int argc,
 	int use_gui_tool = -1, dir_diff = 0, prompt = -1, tool_help = 0, no_index = 0;
 	static char *difftool_cmd = NULL, *extcmd = NULL;
 	struct difftool_options dt_options = {
-		.has_symlinks = 1,
+		.has_symlinks = platform_has_symlinks(),
 		.symlinks = 1,
 		.trust_exit_code = 0
 	};
