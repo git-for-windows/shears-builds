@@ -645,6 +645,20 @@ test_expect_success SYMLINKS 'difftool --dir-diff --symlinks without unstaged ch
 	test_cmp expect actual
 '
 
+test_expect_success MINGW,SYMLINKS 'difftool honors core.symlinks on Windows' '
+	test_config difftool.test-tool.cmd "test -L \"\$REMOTE/file\"" &&
+	MSYS= git -c core.symlinks=true difftool --dir-diff \
+		--tool=test-tool --trust-exit-code branch HEAD
+'
+
+test_expect_success MINGW 'difftool defaults to copies on Windows' '
+	test_unconfig core.symlinks &&
+	test_config difftool.test-tool.cmd \
+		"test -f \"\$REMOTE/file\" && test ! -L \"\$REMOTE/file\"" &&
+	MSYS= git difftool --dir-diff --tool=test-tool --trust-exit-code \
+		branch HEAD
+'
+
 write_script modify-right-file <<\EOF
 echo "modified content" >"$2/file"
 EOF
@@ -666,6 +680,15 @@ run_dir_diff_test 'difftool --dir-diff syncs worktree without unstaged change' '
 
 run_dir_diff_test 'difftool --dir-diff with no diff' '
 	git difftool -d main main
+'
+
+test_expect_success 'difftool --dir-diff errors out on an invalid path' '
+	blob=$(echo content | git hash-object -w --stdin) &&
+	tree=$(printf "100644 blob %s\t.git\n" "$blob" | git mktree) &&
+	commit=$(git commit-tree -m "tree with a .git entry" "$tree") &&
+	test_must_fail git difftool --dir-diff --no-symlinks \
+		--extcmd true "$commit" HEAD 2>err &&
+	test_grep "invalid path" err
 '
 
 write_script modify-file <<\EOF
