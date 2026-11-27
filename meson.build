@@ -713,6 +713,7 @@ builtin_sources = [
   'builtin/stash.c',
   'builtin/stripspace.c',
   'builtin/submodule--helper.c',
+  'builtin/survey.c',
   'builtin/symbolic-ref.c',
   'builtin/tag.c',
   'builtin/unpack-file.c',
@@ -1311,9 +1312,11 @@ elif host_machine.system() == 'windows'
     'compat/winansi.c',
     'compat/win32/dirent.c',
     'compat/win32/flush.c',
+    'compat/win32/fscache.c',
     'compat/win32/path-utils.c',
     'compat/win32/pthread.c',
     'compat/win32/syslog.c',
+    'compat/win32/wsl.c',
     'compat/win32mmap.c',
   ]
 
@@ -1632,6 +1635,10 @@ if sha1_backend == 'sha1dc'
     'sha1dc_git.c',
     'sha1dc/sha1.c',
     'sha1dc/ubc_check.c',
+    'sha1dc-accel/arm.c',
+    'sha1dc-accel/sha1.c',
+    'sha1dc-accel/ubc_check.c',
+    'sha1dc-accel/x86.c',
   ]
 endif
 if sha1_backend == 'CommonCrypto' or sha1_unsafe_backend == 'CommonCrypto'
